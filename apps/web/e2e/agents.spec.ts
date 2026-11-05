@@ -69,3 +69,63 @@ test('delegate_tasks runs sub-agents and the card ends collapsed', async ({ page
   await expect(thread.getByText('Prices of laptop A')).toBeVisible();
   await expect(thread.getByText('Prices of laptop B')).toBeVisible();
 });
+
+test('an agent with a knowledge file gets the search tool and shows the lookup', async ({
+  page,
+  request,
+}) => {
+  const id = await createAgent(request, 'Asisten-Kalkulus', 'You answer from the course notes.');
+  try {
+    const upload = await request.post(`/api/agents/${id}/files`, {
+      multipart: {
+        file: {
+          name: 'catatan.md',
+          mimeType: 'text/markdown',
+          buffer: Buffer.from(
+            '# Pegas\n\nPersamaan karakteristik pegas tanpa redaman: r^2 = -k/m.',
+          ),
+        },
+      },
+    });
+    expect(upload.status()).toBe(201);
+    expect(((await upload.json()) as { status: string }).status).toBe('ready');
+
+    await enqueue(
+      request,
+      {
+        chunks: [],
+        toolCalls: [
+          {
+            id: 'call_k',
+            name: 'search_knowledge',
+            arguments: JSON.stringify({ query: 'persamaan karakteristik pegas' }),
+          },
+        ],
+      },
+      { chunks: ['Menurut catatan, r^2 = -k/m.'] },
+    );
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Agent', exact: true }).click();
+    await page.getByRole('menuitem', { name: /Asisten-Kalkulus/ }).click();
+    await message(page).fill('Apa persamaan karakteristik pegas?');
+    await message(page).press('Enter');
+
+    const thread = page.getByRole('main');
+    await expect(thread.getByText('Menurut catatan, r^2 = -k/m.')).toBeVisible();
+    await expect(
+      thread.locator('details', { hasText: 'Searched the knowledge base' }),
+    ).toBeVisible();
+
+    const bodies = await chatRequestBodies(request);
+    const first = bodies[0] as unknown as {
+      tools?: { function: { name: string } }[];
+      messages: { content: string }[];
+    };
+    expect(first.tools?.some((t) => t.function.name === 'search_knowledge')).toBe(true);
+    expect(String(first.messages[0]?.content)).toContain('catatan.md');
+    // The second request carries the tool result with the matched passage.
+    expect(JSON.stringify(bodies[1])).toContain('r^2 = -k/m');
+  } finally {
+    await request.delete(`/api/agents/${id}`);
+  }
+});

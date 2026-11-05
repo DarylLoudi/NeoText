@@ -5,8 +5,14 @@ import type {
   ModelRef,
   UserSettings,
 } from '@neotext/shared';
+import type { KnowledgeService } from '../agents/knowledge/service';
 import type { AuthContext } from '../http/env';
 import type { ProviderService } from '../providers/service';
+import {
+  createSearchKnowledgeTool,
+  KNOWLEDGE_TOOL,
+  knowledgeGuidance,
+} from '../tools/builtin/search-knowledge';
 import { assembleToolSet } from '../tools/registry';
 import type { ToolContext, ToolDefinition, ToolSet } from '../tools/types';
 import type { WebSearchPlan } from './generation/web-search';
@@ -64,6 +70,32 @@ export function filterAgentTools(
   return available.filter(
     (t) => !((t.name === 'web_search' && !webSearch) || (t.name === 'fetch_url' && !fetchUrl)),
   );
+}
+
+/** What a turn needs of the knowledge base. */
+export type KnowledgeLookup = Pick<KnowledgeService, 'hasReady' | 'fileNames' | 'search'>;
+
+/**
+ * An agent's `search_knowledge` tool and the system line naming its files: offered whenever the
+ * agent has ready files and the user did not turn the tool off, whatever its other switches say.
+ * Null for an agent without ready files, or when the files cannot be read.
+ */
+export function agentKnowledge(
+  knowledge: KnowledgeLookup,
+  auth: AuthContext,
+  agent: AgentPublic,
+  policies: UserSettings['tools']['policies'],
+): { tool: ToolDefinition; guidance: string } | null {
+  if ((policies[KNOWLEDGE_TOOL] ?? 'auto') === 'off') return null;
+  try {
+    if (!knowledge.hasReady(auth, agent.id)) return null;
+    return {
+      tool: createSearchKnowledgeTool((q) => knowledge.search(auth, agent.id, q)),
+      guidance: knowledgeGuidance(knowledge.fileNames(auth, agent.id)),
+    };
+  } catch {
+    return null;
+  }
 }
 
 /** The text the turn answers: the new message, or the user message being regenerated. */

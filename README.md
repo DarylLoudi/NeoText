@@ -21,7 +21,7 @@ If you already use ChatGPT, Claude or DeepSeek on their websites, this is what w
 | Your data, your key | Messages, titles, settings and API keys are encrypted on the server with a key that only your password (or your recovery key) can unlock. There is no telemetry and the browser contacts no third-party sites. |
 | Your layout | Sections in the sidebar that you order, hide or create (smart folders that fill themselves), the sidebar on either side, density, fonts, accent colour, keyboard shortcuts, and presets (saved system prompts and settings). English and Bahasa Indonesia. |
 | Real tools | Web search with numbered citations and source cards, reading web pages, MCP servers for your own tools, and an approval prompt before anything risky runs. |
-| Agents | Sub-agents that work on parts of a big job in parallel, and your own agents with Markdown instructions that you call with `@Name` or let the model use. |
+| Agents | Sub-agents that work on parts of a big job in parallel, and your own agents with Markdown instructions that you call with `@Name` or let the model use, and a knowledge base of PDF, Word and text files each agent can search. |
 | Room for a group | One server can serve a study group or a lab: invites, a provider key the admin shares without showing it, and a spending limit per person. |
 | Moving in and out | Import your chats from ChatGPT and Claude. Export your own data as an encrypted NeoText file, Markdown or JSON. |
 

@@ -7,7 +7,7 @@ import { useT } from '../../../lib/i18n';
 import { qk } from '../../../lib/query';
 import { flushSettings, updateSettings, useSettings } from '../../../state/settings';
 import { Button, Select, Spinner } from '../../../ui';
-import { toolName } from '../../chat/tools/tool-names';
+import { APP_TOOLS, toolName } from '../../chat/tools/tool-names';
 import { NumberField } from '../NumberField';
 import { Group, Row, SectionHeader } from '../SettingsParts';
 import { providersQuery } from '../use-providers';
@@ -193,7 +193,7 @@ function ToolRow({ tool, policy }: { tool: ToolInfo; policy: ToolPolicy }) {
   const t = useT();
   const title = toolName(tool.name, tool.mcp);
   const description =
-    tool.source === 'app' && (tool.name === 'fetch_url' || tool.name === 'web_search')
+    tool.source === 'app' && (APP_TOOLS as readonly string[]).includes(tool.name)
       ? t(`settings.tools.descriptions.${tool.name}`)
       : tool.description;
   return (

@@ -16,7 +16,7 @@ afterEach(async () => {
 test('GET /api/health', async () => {
   const res = await t.app.request('/api/health');
   expect(res.status).toBe(200);
-  expect(await res.json()).toEqual({ ok: true, version: '0.2.0', db: 'ok' });
+  expect(await res.json()).toEqual({ ok: true, version: '0.3.0', db: 'ok' });
 });
 test('GET /api/health reports a database error with 503', async () => {
   t.c.db.raw.close();

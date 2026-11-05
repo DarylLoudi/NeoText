@@ -81,6 +81,14 @@ export interface DelegateDeps {
   model(agentModel: ModelRef | null): SubagentModel | null;
   /** The tools of a sub-agent on `model`, with the agent's switches applied. */
   tools(model: SubagentModel, switches: AgentTools, search: SubagentSearch): SubagentTools;
+  /**
+   * An agent's `search_knowledge` tool and system line on `model`, or null when it has no ready
+   * files, the model cannot use tools, or the user turned the tool off. Generic tasks get none.
+   */
+  knowledge?(
+    agent: AgentPublic,
+    model: SubagentModel,
+  ): { tool: ToolDefinition; guidance: string } | null;
   recordUsage(e: { providerId: string; modelId: string; usage: ProviderUsage }): void;
   clock: Clock;
   endUserId?: string;
@@ -171,13 +179,18 @@ export function createDelegateTool(deps: DelegateDeps): ToolDefinition {
       const model = deps.model(agent?.data.model ?? null);
       if (!model) return { report: NO_MODEL, ok: false };
       const toolset = deps.tools(model, agent?.data.tools ?? ALL_TOOLS, search);
+      const knowledge = agent && deps.knowledge ? deps.knowledge(agent, model) : null;
+      const prompt = agent ? agent.data.instructions : GENERIC_SUBAGENT_PROMPT;
       return run({
         adapter: model.adapter,
         provider: model.provider,
         modelId: model.modelId,
-        system: `${agent ? agent.data.instructions : GENERIC_SUBAGENT_PROMPT}\n\n${footer}`,
+        system: [prompt, knowledge?.guidance, footer].filter(Boolean).join('\n\n'),
         task: task.instructions,
-        tools: toolset.tools.filter((t) => t.name !== DELEGATE_TOOL),
+        tools: [
+          ...toolset.tools.filter((t) => t.name !== DELEGATE_TOOL),
+          ...(knowledge ? [knowledge.tool] : []),
+        ],
         ctx,
         onUsage: (usage) => {
           costs[i] = addCost(costs[i], usage);

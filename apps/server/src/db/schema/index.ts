@@ -1,3 +1,4 @@
+export * from './agent-knowledge';
 export * from './agents';
 export * from './attachments';
 export * from './auth';

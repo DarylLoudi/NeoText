@@ -1,5 +1,5 @@
 import type { ToolCallPart } from '@neotext/shared';
-import { CaretRight, FileText, Globe, Wrench } from '@phosphor-icons/react';
+import { BookOpenText, CaretRight, FileText, Globe, Wrench } from '@phosphor-icons/react';
 import { useMemo } from 'react';
 import { formatDuration } from '../../../lib/format';
 import { useT } from '../../../lib/i18n';
@@ -24,6 +24,7 @@ export interface ToolCallBlockProps {
 function ToolIcon({ name }: { name: string }) {
   if (name === 'web_search') return <Globe aria-hidden className={styles.icon} />;
   if (name === 'fetch_url') return <FileText aria-hidden className={styles.icon} />;
+  if (name === 'search_knowledge') return <BookOpenText aria-hidden className={styles.icon} />;
   return <Wrench aria-hidden className={styles.icon} />;
 }
 

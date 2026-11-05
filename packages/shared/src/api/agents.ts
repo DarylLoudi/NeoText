@@ -46,3 +46,25 @@ export type AgentUpdate = z.infer<typeof AgentUpdateSchema>;
 
 export const AgentsListSchema = z.object({ agents: z.array(AgentPublicSchema) });
 export type AgentsList = z.infer<typeof AgentsListSchema>;
+
+/** Most bytes one knowledge file upload may have. */
+export const AGENT_FILE_MAX_BYTES = 10 * 1024 * 1024;
+/** Most knowledge files one agent may hold. */
+export const AGENT_FILES_MAX = 20;
+
+/** A file in an agent's knowledge base: only its extracted text is kept, in sealed chunks. */
+export const AgentFileSchema = z.object({
+  id: z.string(),
+  agentId: z.string(),
+  name: z.string(),
+  size: z.number(),
+  pages: z.number().nullable(),
+  chunks: z.number(),
+  status: z.enum(['ready', 'failed']),
+  error: z.string().nullable(),
+  createdAt: z.number(),
+});
+export type AgentFile = z.infer<typeof AgentFileSchema>;
+
+export const AgentFilesListSchema = z.object({ files: z.array(AgentFileSchema) });
+export type AgentFilesList = z.infer<typeof AgentFilesListSchema>;

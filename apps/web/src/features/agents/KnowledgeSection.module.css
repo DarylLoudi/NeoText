@@ -1,0 +1,118 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 650;
+}
+.hint,
+.footer {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+.footer {
+  font-variant-numeric: tabular-nums;
+}
+.drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius-panel);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+.drop[data-over] {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.drop[data-disabled] {
+  opacity: 0.6;
+}
+.accepted {
+  color: var(--ink-faint);
+}
+.hidden {
+  display: none;
+}
+.list,
+.problems {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.list {
+  border-top: 1px solid var(--rule);
+}
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+.icon {
+  display: inline-flex;
+  color: var(--ink-muted);
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.detail {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+.pill {
+  padding: 2px var(--space-2);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-chip);
+  font-size: var(--text-sm);
+}
+.pill:focus-visible,
+.dismiss:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.ready {
+  color: var(--success);
+}
+.failed {
+  color: var(--danger);
+}
+.progress {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--ink);
+}
+.problems,
+.error {
+  color: var(--danger, var(--ink));
+  font-size: var(--text-sm);
+}
+.error {
+  margin: 0;
+}
+.dismiss {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

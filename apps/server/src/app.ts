@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { compress } from 'hono/compress';
 import { adminRoutes } from './admin/routes';
+import { knowledgeRoutes } from './agents/knowledge/routes';
 import { agentRoutes } from './agents/routes';
 import { attachmentRoutes } from './attachments/routes';
 import { auditRoutes } from './audit/routes';
@@ -62,6 +63,7 @@ export function createApp(c: Container): Hono<AppEnv> {
   app.route('/api', conversationRoutes(c));
   app.route('/api', folderRoutes(c));
   app.route('/api', presetRoutes(c));
+  app.route('/api', knowledgeRoutes(c));
   app.route('/api', agentRoutes(c));
   app.route('/api', toolRoutes(c));
   app.route('/api', mcpRoutes(c));

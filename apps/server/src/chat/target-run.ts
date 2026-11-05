@@ -24,7 +24,14 @@ import { createMessageWriter } from './generation/writer';
 import type { MessagesRepo } from './messages-repo';
 import { type DelegationDeps, delegateToolFor, offersDelegation } from './turn-delegate';
 import { buildTurnRequest } from './turn-request';
-import { filterAgentTools, toolsForTarget, turnToolFields } from './turn-tools';
+import {
+  agentKnowledge,
+  filterAgentTools,
+  type KnowledgeLookup,
+  toolsForTarget,
+  toolsPossible,
+  turnToolFields,
+} from './turn-tools';
 
 export interface TargetRunDeps {
   messages: MessagesRepo;
@@ -36,6 +43,8 @@ export interface TargetRunDeps {
   toolsHttp: HttpClient;
   /** Offers `delegate_tasks`; without it no target is offered the tool. */
   delegation?: DelegationDeps;
+  /** Offers an agent with ready files `search_knowledge`. */
+  knowledge?: KnowledgeLookup;
   /** The generation runner; replaced in tests. */
   run?: (spec: RunSpec, deps: RunDeps) => Promise<void>;
 }
@@ -89,6 +98,10 @@ export function startTargetRun(
           }),
         ]
       : [];
+  const knowledge =
+    input.agent && deps.knowledge && toolsPossible(target.model)
+      ? agentKnowledge(deps.knowledge, auth, input.agent, input.toolSettings.policies)
+      : null;
   const turn = buildTurnRequest({
     path: input.path,
     chat: input.chat,
@@ -100,6 +113,7 @@ export function startTargetRun(
     now: input.now,
     ...(input.agent ? { systemPrompt: input.agent.data.instructions } : {}),
     ...(delegate.length > 0 ? { delegation: true } : {}),
+    ...(knowledge ? { knowledgeGuidance: knowledge.guidance } : {}),
     ...(input.loadAttachment ? { loadAttachment: input.loadAttachment } : {}),
   });
   const generation = createGeneration({
@@ -140,6 +154,7 @@ export function startTargetRun(
               plan,
             ),
             ...delegate,
+            ...(knowledge ? [knowledge.tool] : []),
           ],
           settings: input.toolSettings,
           model: target.model,

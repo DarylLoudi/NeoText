@@ -5,7 +5,7 @@ import { translate } from '../../../lib/i18n';
 import { qk } from '../../../lib/query';
 
 /** The app's own tools, which have names in every language; other tools show their own name. */
-const APP_TOOLS = ['fetch_url', 'web_search'] as const;
+export const APP_TOOLS = ['fetch_url', 'web_search', 'delegate_tasks', 'search_knowledge'] as const;
 type AppTool = (typeof APP_TOOLS)[number];
 
 const isAppTool = (name: string): name is AppTool =>
@@ -108,7 +108,7 @@ export function shownArgs(args: string, max: number = ARGS_SHOWN_MAX): ShownArgs
 
 /** A short hint of what the call was about: the page's host, or the search words. */
 export function callDetail(name: string, args: string): string | null {
-  if (name !== 'web_search' && name !== 'fetch_url') return null;
+  if (name !== 'web_search' && name !== 'fetch_url' && name !== 'search_knowledge') return null;
   let parsed: unknown;
   try {
     parsed = JSON.parse(args);
@@ -116,9 +116,9 @@ export function callDetail(name: string, args: string): string | null {
     return null;
   }
   if (typeof parsed !== 'object' || parsed === null) return null;
-  const value = (parsed as Record<string, unknown>)[name === 'web_search' ? 'query' : 'url'];
+  const value = (parsed as Record<string, unknown>)[name === 'fetch_url' ? 'url' : 'query'];
   if (typeof value !== 'string' || value.trim() === '') return null;
-  if (name === 'web_search') return visibleText(value.trim().slice(0, 120));
+  if (name !== 'fetch_url') return visibleText(value.trim().slice(0, 120));
   try {
     return visibleText(new URL(value).hostname.replace(/^www\./, ''));
   } catch {

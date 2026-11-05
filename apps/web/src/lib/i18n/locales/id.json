@@ -314,7 +314,8 @@
       "names": {
         "fetch_url": "Pembaca halaman web",
         "web_search": "Pencarian web",
-        "delegate_tasks": "Sub-agen"
+        "delegate_tasks": "Sub-agen",
+        "search_knowledge": "Basis pengetahuan"
       },
       "labels": {
         "fetch_url": {
@@ -332,6 +333,10 @@
         "delegate_tasks": {
           "running": "Menjalankan sub-agen",
           "done": "Sub-agen selesai"
+        },
+        "search_knowledge": {
+          "running": "Mencari di basis pengetahuan",
+          "done": "Sudah mencari di basis pengetahuan"
         }
       },
       "failed": "Gagal",
@@ -851,7 +856,8 @@
       "descriptions": {
         "fetch_url": "Membuka tautan dan membaca teks halamannya.",
         "web_search": "Mencari di web lewat backend pencarianmu.",
-        "delegate_tasks": "Model chat bisa memecah pekerjaan besar jadi tugas paralel."
+        "delegate_tasks": "Model chat bisa memecah pekerjaan besar jadi tugas paralel.",
+        "search_knowledge": "Agen khusus bisa mencari di file yang kamu tambahkan."
       },
       "fromServer": "Dari server alat",
       "empty": "Belum ada alat yang tersedia.",
@@ -1160,7 +1166,36 @@
         "webSearch": "Boleh mencari di web",
         "fetchUrl": "Boleh membaca halaman web",
         "autoDelegate": "Biarkan model chat memanggil agen ini sendiri",
-        "invalid": "Ada isi agen yang tidak valid. Periksa isian lalu coba lagi."
+        "invalid": "Ada isi agen yang tidak valid. Periksa isian lalu coba lagi.",
+        "knowledge": {
+          "title": "Pengetahuan",
+          "intro": "File yang bisa dicari agen saat menjawab.",
+          "saveFirst": "Simpan agen dulu untuk menambah file.",
+          "drop": "Taruh file di sini atau pilih file",
+          "accepted": "Didukung: {{types}}, maksimal 10 MB per file",
+          "add": "Tambah file",
+          "input": "File pengetahuan",
+          "uploading": "Mengunggah {{name}}",
+          "ready": "Siap",
+          "failed": "Gagal",
+          "failedFallback": "Teks tidak bisa dibaca dari file ini.",
+          "pages_one": "{{count}} halaman",
+          "pages_other": "{{count}} halaman",
+          "parts_one": "{{count}} bagian",
+          "parts_other": "{{count}} bagian",
+          "count": "{{count}} dari {{max}} file",
+          "dismiss": "Tutup",
+          "loadFailed": "File tidak bisa dimuat. Periksa koneksimu lalu coba lagi.",
+          "deleteNamed": "Hapus {{name}}",
+          "deleteTitle": "Hapus {{name}}?",
+          "deleteBody": "Agen tidak akan lagi mencari di file ini. Ini tidak bisa dibatalkan.",
+          "delete": "Hapus",
+          "errors": {
+            "type": "Jenis file ini tidak didukung. Pakai PDF, DOCX, TXT, MD, CSV, atau HTML.",
+            "tooBig": "File ini lebih dari 10 MB. Pecah atau pilih file yang lebih kecil.",
+            "limit": "Satu agen bisa menyimpan {{max}} file. Hapus satu untuk menambah yang lain."
+          }
+        }
       }
     }
   },

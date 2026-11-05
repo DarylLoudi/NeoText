@@ -22,6 +22,9 @@ export const ERROR_CODES = [
   'agent_single_target',
   'agent_model_unavailable',
   'agent_name_taken',
+  'knowledge_type',
+  'knowledge_limit',
+  'knowledge_too_large',
   'internal',
 ] as const;
 

@@ -18,16 +18,17 @@ function errorFrom(xhr: XMLHttpRequest): ApiError {
 }
 
 /**
- * Uploads one file. XHR rather than fetch: only XHR reports upload progress (0 to 1).
- * Rejects with ApiError, or with an AbortError when `signal` aborts.
+ * Uploads one file as multipart field `file` to `url`. XHR rather than fetch: only XHR reports
+ * upload progress (0 to 1). Rejects with ApiError, or with an AbortError when `signal` aborts.
  */
-export function uploadAttachment(
+export function uploadForm(
+  url: string,
   file: File,
   opts: { onProgress?: (fraction: number) => void; signal?: AbortSignal } = {},
-): Promise<AttachmentPublic> {
+): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/attachments');
+    xhr.open('POST', url);
     xhr.withCredentials = true;
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.upload.onprogress = (e) => {
@@ -36,7 +37,7 @@ export function uploadAttachment(
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
-          resolve(JSON.parse(xhr.responseText) as AttachmentPublic);
+          resolve(JSON.parse(xhr.responseText));
         } catch {
           reject(new ApiError('internal', 'The server sent an answer we could not read.', 0));
         }
@@ -57,3 +58,10 @@ export function uploadAttachment(
     xhr.send(form);
   });
 }
+
+/** Uploads one chat attachment. */
+export const uploadAttachment = (
+  file: File,
+  opts: { onProgress?: (fraction: number) => void; signal?: AbortSignal } = {},
+): Promise<AttachmentPublic> =>
+  uploadForm('/api/attachments', file, opts) as Promise<AttachmentPublic>;

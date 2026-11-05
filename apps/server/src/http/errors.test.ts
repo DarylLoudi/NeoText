@@ -37,6 +37,7 @@ function build(env: 'production' | 'test') {
     search: {} as Container['search'],
     presets: {} as Container['presets'],
     agents: {} as Container['agents'],
+    knowledge: {} as Container['knowledge'],
     exporter: {} as Container['exporter'],
     attachments: {} as Container['attachments'],
     importer: {} as Container['importer'],

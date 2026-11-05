@@ -6,6 +6,18 @@ All notable changes to NeoText are written here. The format follows [Keep a Chan
 
 Nothing yet.
 
+## 0.3.0
+
+### Added
+
+- **Agent knowledge base.** In Settings → Agents, an agent can hold up to 20 files (PDF, Word, TXT, Markdown, CSV or HTML, 10 MB each). When that agent answers, called directly or as a sub-agent, it searches its files and cites them as `[file name, p. N]`. NeoText keeps only the extracted text, split into pieces and encrypted with your key, and searches it on your own server with no embeddings model. Scanned PDFs without text are refused.
+- **Tool.** "Knowledge base" appears in Settings → Tools, where it can be turned off or set to ask first.
+
+### Not included yet
+
+- Knowledge files are not part of exports.
+- No OCR for scanned PDFs.
+
 ## 0.2.0
 
 ### Changed

@@ -145,3 +145,58 @@ live('a custom agent called directly follows its instructions', async () => {
   expect(r.message.parts[0]).toMatchObject({ type: 'agent', name: 'Agent-Frontend' });
   expect(text(r.message).trim().startsWith('FRONTEND:')).toBe(true);
 });
+
+live('an agent answers from its knowledge file and cites it', async () => {
+  const t = await createTestApp({ env: { OPENROUTER_API_KEY: key as string } });
+  try {
+    const owner = await setupOwner(t, { useEnvProvider: true });
+    const api = authed(t, owner.cookie);
+    await api('/api/settings', {
+      method: 'PATCH',
+      body: JSON.stringify({ patch: { chat: { autoTitle: false } } }),
+    });
+    const list = (await (await api('/api/providers')).json()) as { providers: { id: string }[] };
+    const providerId = list.providers[0]?.id as string;
+    const made = await api('/api/agents', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Asisten',
+        data: { instructions: 'Answer only from the knowledge base when it covers the question.' },
+      }),
+    });
+    const agentId = ((await made.json()) as { id: string }).id;
+    const form = new FormData();
+    form.append(
+      'file',
+      new Blob(['Catatan lab: kode rahasia ruang server kampus adalah ZEBRA-4417-LIMA.'], {
+        type: 'text/plain',
+      }),
+      'catatan-lab.txt',
+    );
+    // Multipart: no JSON content type, so the form sets its own boundary.
+    const up = await t.app.request(`/api/agents/${agentId}/files`, {
+      method: 'POST',
+      body: form,
+      headers: { cookie: owner.cookie, origin: 'http://localhost:3420' },
+    });
+    expect(up.status).toBe(201);
+    const res = await api('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({
+        conversationId: null,
+        parentId: null,
+        userMessage: { text: 'Apa kode rahasia ruang server kampus menurut catatan lab saya?' },
+        targets: [{ providerId, modelId: DEEPSEEK }],
+        options: { maxOutputTokens: 400, webSearch: false, agentId },
+      }),
+    });
+    const evs: StreamEvent[] = await readEvents(res);
+    const fin = evs.find((e): e is Finished => e.type === 'generation.finished');
+    if (!fin) throw new Error('The turn did not finish.');
+    console.info(`live knowledge: tools [${toolNames(fin.message).join(',')}]`);
+    expect(toolNames(fin.message)).toContain('search_knowledge');
+    expect(text(fin.message)).toContain('ZEBRA-4417-LIMA');
+  } finally {
+    await t.close();
+  }
+});

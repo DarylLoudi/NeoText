@@ -19,7 +19,7 @@ import type { ToolDefinition } from '../tools/types';
 import type { UsageRepo } from '../usage/repo';
 import type { WebSearchPlan } from './generation/web-search';
 import { assertSharedQuota } from './turn-quota';
-import { toolsPossible } from './turn-tools';
+import { agentKnowledge, type KnowledgeLookup, toolsPossible } from './turn-tools';
 
 export interface DelegationDeps {
   agents: Pick<AgentsService, 'list'>;
@@ -30,6 +30,8 @@ export interface DelegationDeps {
   /** The admin's shared-provider limit, checked as the turn checks it. */
   quotas: Pick<QuotaService, 'assertWithin'>;
   usage: UsageRepo;
+  /** Gives agent-backed tasks their agent's `search_knowledge`. */
+  knowledge?: KnowledgeLookup;
   clock: Clock;
   log: Logger;
 }
@@ -138,6 +140,10 @@ export function delegateDepsFor(deps: DelegationDeps, input: DelegateToolInput):
     searchesPerTask: input.searchesPerTask,
     model: (agentModel) => resolve(agentModel) ?? resolve(toolSettings.subagentModel) ?? main,
     tools,
+    knowledge: (agent, model) =>
+      deps.knowledge && toolsPossible(deps.providers.cachedModel(model.providerId, model.modelId))
+        ? agentKnowledge(deps.knowledge, auth, agent, toolSettings.policies)
+        : null,
     recordUsage: ({ providerId, modelId, usage }) => {
       try {
         deps.usage.insert({

@@ -314,7 +314,8 @@
       "names": {
         "fetch_url": "Web page reader",
         "web_search": "Web search",
-        "delegate_tasks": "Sub-agents"
+        "delegate_tasks": "Sub-agents",
+        "search_knowledge": "Knowledge base"
       },
       "labels": {
         "fetch_url": {
@@ -332,6 +333,10 @@
         "delegate_tasks": {
           "running": "Running sub-agents",
           "done": "Ran sub-agents"
+        },
+        "search_knowledge": {
+          "running": "Searching the knowledge base",
+          "done": "Searched the knowledge base"
         }
       },
       "failed": "Failed",
@@ -851,7 +856,8 @@
       "descriptions": {
         "fetch_url": "Opens a link and reads the page’s text.",
         "web_search": "Searches the web with your search backend.",
-        "delegate_tasks": "Lets the chat model split a big job into parallel tasks."
+        "delegate_tasks": "Lets the chat model split a big job into parallel tasks.",
+        "search_knowledge": "Lets a custom agent search the files you added to it."
       },
       "fromServer": "From a tool server",
       "empty": "No tools are available yet.",
@@ -1160,7 +1166,36 @@
         "webSearch": "Can search the web",
         "fetchUrl": "Can read web pages",
         "autoDelegate": "Let the chat model call this agent on its own",
-        "invalid": "Something in this agent is not valid. Check the fields and try again."
+        "invalid": "Something in this agent is not valid. Check the fields and try again.",
+        "knowledge": {
+          "title": "Knowledge",
+          "intro": "Files the agent can search when it answers.",
+          "saveFirst": "Save the agent first to add files.",
+          "drop": "Drop files here or choose files",
+          "accepted": "Accepted: {{types}}, up to 10 MB each",
+          "add": "Add files",
+          "input": "Knowledge files",
+          "uploading": "Uploading {{name}}",
+          "ready": "Ready",
+          "failed": "Failed",
+          "failedFallback": "The text could not be read from this file.",
+          "pages_one": "{{count}} page",
+          "pages_other": "{{count}} pages",
+          "parts_one": "{{count}} part",
+          "parts_other": "{{count}} parts",
+          "count": "{{count}} of {{max}} files",
+          "dismiss": "Dismiss",
+          "loadFailed": "The files could not load. Check your connection and try again.",
+          "deleteNamed": "Delete {{name}}",
+          "deleteTitle": "Delete {{name}}?",
+          "deleteBody": "The agent will no longer search this file. This cannot be undone.",
+          "delete": "Delete",
+          "errors": {
+            "type": "This type is not supported. Use PDF, DOCX, TXT, MD, CSV or HTML.",
+            "tooBig": "This file is larger than 10 MB. Split it or pick a smaller one.",
+            "limit": "An agent can hold {{max}} files. Delete one to add another."
+          }
+        }
       }
     }
   },

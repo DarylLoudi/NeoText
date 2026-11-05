@@ -143,7 +143,7 @@ export async function connectMcp(
     requestInit: { headers },
   });
   const client = new Client(
-    { name: 'neotext', version: '0.2.0' },
+    { name: 'neotext', version: '0.3.0' },
     { capabilities: {}, jsonSchemaValidator: NO_SCHEMA_VALIDATION },
   );
   // Errors also reject the request that hit them; the stream-level ones are not actionable.

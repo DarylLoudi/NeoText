@@ -5,6 +5,7 @@ import {
   newId,
   pathToLeaf,
 } from '@neotext/shared';
+import type { KnowledgeService } from '../agents/knowledge/service';
 import type { AgentsService } from '../agents/service';
 import type { AttachmentsService } from '../attachments/service';
 import type { DbHandle } from '../db/client';
@@ -62,6 +63,8 @@ export interface ChatServiceDeps {
   presets: PresetsService;
   /** The user's agents: direct calls (`get`) and the `delegate_tasks` list (`list`). */
   agents: Pick<AgentsService, 'get' | 'list'>;
+  /** Agents' own files, searched with `search_knowledge` on direct calls and in sub-agents. */
+  knowledge?: Pick<KnowledgeService, 'hasReady' | 'fileNames' | 'search'>;
   /** Links uploads to the user message and opens them for the model. */
   attachments: Pick<AttachmentsService, 'attach' | 'prepareReuse' | 'loadForTurn' | 'discard'>;
   messages: MessagesRepo;
@@ -96,6 +99,7 @@ export function createChatService(deps: ChatServiceDeps): ChatService {
     clock,
     log,
     toolsHttp: deps.toolsHttp,
+    ...(deps.knowledge ? { knowledge: deps.knowledge } : {}),
     ...(deps.agents
       ? {
           delegation: {
@@ -103,6 +107,7 @@ export function createChatService(deps: ChatServiceDeps): ChatService {
             providers,
             quotas: deps.quotas,
             usage: deps.usage,
+            ...(deps.knowledge ? { knowledge: deps.knowledge } : {}),
             clock,
             log,
           },

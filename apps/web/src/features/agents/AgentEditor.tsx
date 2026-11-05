@@ -9,6 +9,7 @@ import { useT } from '../../lib/i18n';
 import { Button, Dialog, Switch, TextArea, TextField } from '../../ui';
 import { ModelChoice } from '../settings/ModelChoice';
 import styles from './AgentEditor.module.css';
+import { KnowledgeSection } from './KnowledgeSection';
 import { useAgentMutations } from './use-agents';
 
 export const MAX_INSTRUCTIONS = 50_000;
@@ -209,6 +210,7 @@ function AgentForm({ agent, onClose }: { agent: AgentPublic | null; onClose: () 
         checked={draft.autoDelegate}
         onChange={(v) => set('autoDelegate', v)}
       />
+      <KnowledgeSection agentId={agent?.id ?? null} />
       <div className={styles.footer}>
         <Button type="button" variant="ghost" onClick={onClose}>
           {t('common.cancel')}

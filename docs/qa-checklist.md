@@ -112,6 +112,14 @@ Use NVDA on Windows, VoiceOver on macOS or iOS, or Orca on Linux.
 - [ ] Settings → Tools → Sub-agents set to Off: big jobs are answered without delegation.
 - [ ] Usage shows the sub-agent calls in the day's total.
 
+## 10c. Agent knowledge base
+
+- [ ] Edit an agent, open Knowledge, and add a small PDF, a Word file and a `.md`. Each shows its pages and parts and the status Ready. A file over 10 MB, or of another type, is refused with a message.
+- [ ] A scanned PDF with no text shows Failed with a reason, and does not block the others.
+- [ ] Call that agent and ask something only the files answer. The answer cites `[file name, p. N]`, and a "Searched the knowledge base" row opens to show the matches.
+- [ ] Delete a file: the agent no longer knows it. Delete the agent: its files go too.
+- [ ] Settings → Tools → Knowledge base set to Off: the agent answers without searching.
+
 ## 11. Dark mode and motion
 
 - [ ] Dark is the default for a new account. Choose Light, then Dark again. Walk through chat, sources, compare, settings, the admin pages and dialogs. Text is easy to read everywhere and nothing is white on white or dark on dark.

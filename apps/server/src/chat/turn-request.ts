@@ -44,6 +44,8 @@ export interface TurnRequestInput {
   systemPrompt?: string;
   /** True when this target is offered `delegate_tasks`: adds `DELEGATE_GUIDANCE`. */
   delegation?: boolean;
+  /** The system line of an agent offered `search_knowledge` (`knowledgeGuidance`). */
+  knowledgeGuidance?: string;
 }
 
 export interface TurnRequest {
@@ -63,6 +65,7 @@ export function buildTurnRequest(input: TurnRequestInput): TurnRequest {
   const extraSystem = [
     plan.kind === 'server' || plan.kind === 'tool' ? WEB_SEARCH_GUIDANCE : '',
     input.delegation ? DELEGATE_GUIDANCE : '',
+    input.knowledgeGuidance ?? '',
   ]
     .filter((s) => s !== '')
     .join('\n\n');

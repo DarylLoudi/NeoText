@@ -6,10 +6,12 @@ import { AppError } from './errors';
 const MiB = 1024 * 1024;
 
 /** Routes allowed a body above the default; each needs a session to send one. */
-export const BODY_LIMITS = [
+export const BODY_LIMITS: { prefix: string; maxBytes: number; pattern?: RegExp }[] = [
   { prefix: '/api/chat', maxBytes: 4 * MiB },
   { prefix: '/api/attachments', maxBytes: 25 * MiB },
   { prefix: '/api/import', maxBytes: 200 * MiB },
+  // A 10 MB knowledge file plus its multipart framing; other agent routes keep the default.
+  { prefix: '/api/agents', pattern: /^\/api\/agents\/[^/]+\/files$/, maxBytes: 11 * MiB },
 ];
 const DEFAULT_MAX_BYTES = 1 * MiB;
 
@@ -39,7 +41,9 @@ function limiterFor(maxBytes: number): MiddlewareHandler {
 export function bodyLimits(): MiddlewareHandler<AppEnv> {
   return (c, next) => {
     const path = c.req.path;
-    const match = BODY_LIMITS.find((l) => path === l.prefix || path.startsWith(`${l.prefix}/`));
+    const match = BODY_LIMITS.find((l) =>
+      l.pattern ? l.pattern.test(path) : path === l.prefix || path.startsWith(`${l.prefix}/`),
+    );
     if (match && c.req.raw.body) {
       if (!c.get('auth')) throw new AppError('unauthorized', 'Sign in to continue.', 401);
       if (c.req.raw.headers.has('transfer-encoding')) {
