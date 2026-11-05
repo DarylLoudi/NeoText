@@ -1,4 +1,4 @@
-import type { ToolPolicy as SharedToolPolicy } from '@neotext/shared';
+import type { ToolPolicy as SharedToolPolicy, SubagentRun } from '@neotext/shared';
 import type { Logger } from '../lib/logger';
 import type { Semaphore } from '../lib/semaphore';
 import type { HttpClient } from '../net/http-client';
@@ -15,6 +15,8 @@ export interface ToolContext {
   log: Logger;
   /** Shared by one generation's `fetch_url` calls, so only a few pages load at once. */
   fetchSlots: Semaphore;
+  /** Live sub-agent rows of this call (`delegate_tasks`); shown on the tool call part. */
+  progress?: (agents: SubagentRun[]) => void;
 }
 
 export type ToolResult =

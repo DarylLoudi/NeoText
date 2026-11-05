@@ -8,8 +8,9 @@ import type {
 } from '@neotext/shared';
 import type { AttachmentLookup } from '../attachments/model-file';
 import type { ChatRequest } from '../providers/types';
+import { DELEGATE_GUIDANCE } from '../tools/builtin/delegate';
 import { buildContext, modelInputFor } from './context';
-import type { WebSearchPlan } from './generation/web-search';
+import { WEB_SEARCH_GUIDANCE, type WebSearchPlan } from './generation/web-search';
 
 /** A stable per-user id for providers' abuse tracking; never the raw user id. */
 export function endUserIdFor(userId: string): string {
@@ -39,6 +40,10 @@ export interface TurnRequestInput {
   endUserId: string;
   now: number;
   loadAttachment?: AttachmentLookup;
+  /** Replaces the user's default system prompt (a custom agent's instructions). */
+  systemPrompt?: string;
+  /** True when this target is offered `delegate_tasks`: adds `DELEGATE_GUIDANCE`. */
+  delegation?: boolean;
 }
 
 export interface TurnRequest {
@@ -54,9 +59,17 @@ export function buildTurnRequest(input: TurnRequestInput): TurnRequest {
   const { chat, options, model } = input;
   const temperature = options.temperature ?? chat.temperature;
   const maxTokens = options.maxOutputTokens ?? chat.maxOutputTokens;
+  const { plan } = input;
+  const extraSystem = [
+    plan.kind === 'server' || plan.kind === 'tool' ? WEB_SEARCH_GUIDANCE : '',
+    input.delegation ? DELEGATE_GUIDANCE : '',
+  ]
+    .filter((s) => s !== '')
+    .join('\n\n');
   const context = buildContext({
     path: input.path,
-    systemPrompt: chat.defaultSystemPrompt,
+    systemPrompt: input.systemPrompt ?? chat.defaultSystemPrompt,
+    ...(extraSystem !== '' ? { extraSystem } : {}),
     includeDate: chat.includeDate,
     timeZone: options.timeZone,
     now: input.now,
@@ -67,7 +80,6 @@ export function buildTurnRequest(input: TurnRequestInput): TurnRequest {
     modelInput: modelInputFor(model),
   });
   const effort = resolveReasoningEffort(options.reasoningEffort, chat.reasoningEffort, model);
-  const { plan } = input;
   const webSearch = plan.kind === 'server';
   const request: ChatRequest = {
     model: input.modelId,

@@ -1,16 +1,15 @@
-import type { ChatRequestBody, MessagePublic } from '@neotext/shared';
+import type { ChatRequestBody } from '@neotext/shared';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { HttpResponse, http } from 'msw';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { createQueryClient } from '../../../lib/query';
+import { createQueryClient, qk } from '../../../lib/query';
 import { resetGenerations } from '../../../state/generations';
 import { eventsFor, msg, sseStream, summary } from '../../../test/chat-fixtures';
-import { resetFakeSettings, setFakeSettings } from '../../../test/fake-settings';
+import { resetFakeSettings } from '../../../test/fake-settings';
 import { server } from '../../../test/msw';
 import { useChatStream } from './use-chat-stream';
-import { webChoiceFor } from './web-choice';
 
 vi.mock('@tanstack/react-router', () => ({ useNavigate: () => vi.fn() }));
 vi.mock('../../../state/settings', () => import('../../../test/fake-settings'));
@@ -62,6 +61,8 @@ beforeEach(() => {
 
 async function ready() {
   const queryClient = createQueryClient();
+  // The agent list the page already holds: a regenerate only asks agents still in it.
+  queryClient.setQueryData(qk.agents, [{ id: 'agt_1', data: { enabled: true } }]);
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -74,22 +75,13 @@ afterEach(() => {
   resetGenerations();
 });
 
-test('retrying an answer that cited the web searches again, even with the default off', async () => {
+test('retrying an answer always allows web search, the model decides', async () => {
   const stream = await ready();
   await act(async () => {
     await stream.current.regenerate('u1');
   });
   expect(lastWebSearch()).toBe(true);
-});
-
-test('an answer with no web sources follows the default', async () => {
-  const stream = await ready();
-  await act(async () => {
-    await stream.current.regenerate('u2');
-  });
-  expect(lastWebSearch()).toBe(false);
   await waitFor(() => expect(stream.current.generating).toBe(false));
-  setFakeSettings({ settings: { webSearch: { defaultOn: true } } });
   await act(async () => {
     await stream.current.regenerate('u2');
   });
@@ -97,18 +89,12 @@ test('an answer with no web sources follows the default', async () => {
   expect(posted).toHaveLength(2);
 });
 
-test('edit and resend keeps the web choice of the edited message', async () => {
+test('edit and resend allows web search', async () => {
   const stream = await ready();
   await act(async () => {
     await stream.current.editAndResend(u1, 'harga btc hari ini?');
   });
   expect(lastWebSearch()).toBe(true);
-  await waitFor(() => expect(stream.current.generating).toBe(false));
-  await act(async () => {
-    await stream.current.editAndResend(u2, 'lagi');
-  });
-  expect(lastWebSearch()).toBe(false);
-  expect(posted).toHaveLength(2);
 });
 
 test('edit and resend keeps the files of the edited message', async () => {
@@ -139,11 +125,35 @@ test('edit and resend keeps the files of the edited message', async () => {
   expect(posted.at(-1)?.userMessage?.attachmentIds).toEqual(['att_1']);
 });
 
-test('the latest answer decides', () => {
-  const again = msg({ id: 'a1b', parentId: 'u1', createdAt: 5 });
-  const messages: MessagePublic[] = [u1, webAnswer, again];
-  expect(webChoiceFor(messages, 'u1', false)).toBe(false);
-  const laterWeb = { ...webAnswer, id: 'a1c', createdAt: 6 };
-  expect(webChoiceFor([...messages, laterWeb], 'u1', false)).toBe(true);
-  expect(webChoiceFor([u1], 'u1', true)).toBe(true);
+test('a new answer to an agent answer asks the same agent again', async () => {
+  const agentAnswer = {
+    ...plainAnswer,
+    parts: [
+      { type: 'agent' as const, agentId: 'agt_1', name: 'Agent-Frontend' },
+      { type: 'text' as const, text: 'ok' },
+    ],
+  };
+  server.use(
+    http.get('/api/conversations/cnv_1', () =>
+      HttpResponse.json({
+        conversation: summary({ activeLeafId: 'a2', messageCount: 4 }),
+        messages: [u1, webAnswer, u2, agentAnswer],
+      }),
+    ),
+  );
+  const stream = await ready();
+  await act(async () => {
+    await stream.current.regenerate('u2');
+  });
+  expect(posted.at(-1)?.options.agentId).toBe('agt_1');
+  await waitFor(() => expect(stream.current.generating).toBe(false));
+  await act(async () => {
+    await stream.current.editAndResend(u2, 'again, shorter');
+  });
+  expect(posted.at(-1)?.options.agentId).toBe('agt_1');
+  await waitFor(() => expect(stream.current.generating).toBe(false));
+  await act(async () => {
+    await stream.current.regenerate('u1');
+  });
+  expect(posted.at(-1)?.options.agentId).toBeNull();
 });

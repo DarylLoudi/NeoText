@@ -110,6 +110,7 @@ function exporter(extra: Partial<ExportServiceDeps>, seen: number[], turns: { tu
     messages,
     folders: t.c.repos.folders,
     presets: t.c.presets,
+    agents: t.c.agents,
     settings: t.c.settings,
     providers: t.c.providers,
     audit: t.c.audit,

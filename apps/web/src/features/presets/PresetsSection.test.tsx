@@ -39,7 +39,7 @@ const preset = (over: Partial<Preset> = {}): Preset => ({
 
 test('click starts a new chat with the preset', async () => {
   server.use(http.get('/api/presets', () => HttpResponse.json({ presets: [preset()] })));
-  const { user, router } = renderApp('/settings');
+  const { user, router } = renderApp('/usage');
   await user.click(await screen.findByRole('button', { name: 'Tutor' }, { timeout: 5000 }));
   expect(getPendingPreset()?.id).toBe('pst_1');
   await waitFor(() => expect(router.state.location.pathname).toBe('/'));
@@ -64,7 +64,7 @@ test('the new-chat shortcut and palette drop a pending preset', async () => {
 test('the presets quick action lists presets and starts a chat with one', async () => {
   server.use(http.get('/api/presets', () => HttpResponse.json({ presets: [preset()] })));
   setFakeSettings({ settings: { sidebar: { quickActions: ['new-chat', 'presets'] } } });
-  const { user, router } = renderApp('/settings');
+  const { user, router } = renderApp('/usage');
   await screen.findByRole('button', { name: 'Tutor' }, { timeout: 5000 });
   const trigger = screen
     .getAllByRole('button', { name: 'Presets' })

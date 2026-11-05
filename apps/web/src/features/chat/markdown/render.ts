@@ -97,7 +97,9 @@ md.renderer.rules.fence = (tokens, idx, _options, env) => {
   const cls = lang ? ` class="language-${label}"` : '';
   return (
     `<div class="md-code" dir="auto" data-lang="${label}"><div class="md-code-bar"><span>${label}</span>` +
-    `<button type="button" data-copy>${escapeHtml(opts.copyLabel)}</button></div>` +
+    // An icon button: the icon is drawn in CSS, the hidden text names it and says when it copied.
+    `<button type="button" data-copy title="${escapeHtml(opts.copyLabel)}">` +
+    `<span class="md-sr" aria-live="polite">${escapeHtml(opts.copyLabel)}</span></button></div>` +
     `<pre><code${cls}>${escapeHtml(token.content)}</code></pre></div>`
   );
 };

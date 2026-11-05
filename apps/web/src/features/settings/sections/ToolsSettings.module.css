@@ -69,8 +69,8 @@
 .link {
   color: var(--ink);
   text-decoration: underline;
-  text-decoration-color: var(--marker);
-  text-decoration-thickness: 2px;
+  text-decoration-color: var(--ink-faint);
+  text-decoration-thickness: 1px;
   text-underline-offset: 3px;
   border-radius: var(--radius-chip);
 }

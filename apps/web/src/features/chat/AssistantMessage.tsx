@@ -38,30 +38,45 @@ export function noteKey(m: MessagePublic, reconnecting: boolean, lost: boolean):
   return null;
 }
 
-function Speaker({ message, showCost }: { message: MessagePublic; showCost: boolean }) {
+function Details({
+  message,
+  showCost,
+  streaming = false,
+}: {
+  message: MessagePublic;
+  showCost: boolean;
+  streaming?: boolean;
+}) {
   const t = useT();
   const locale = getLocale();
   const { usage } = message;
   const name = message.model ? shortModelName(message.model.modelId) : t('chat.assistant');
   const cost = showCost && usage ? formatCost(usage.costUsd, locale) : '';
+  const first = message.parts[0];
+  const agent = first?.type === 'agent' ? first.name : null;
   return (
     <>
-      <span className={styles.model} title={message.model?.modelId}>
-        {name}
-      </span>
-      <span>
-        <time dateTime={new Date(message.createdAt).toISOString()}>
-          {formatTime(message.createdAt, locale)}
-        </time>
-      </span>
-      {usage?.durationMs != null || cost ? (
-        <span className={styles.figures}>
+      {agent ? (
+        <span className={styles.agent} dir="auto">
+          {agent}
+        </span>
+      ) : null}
+      {streaming ? null : (
+        <>
+          <span className={styles.model} title={message.model?.modelId}>
+            {name}
+          </span>
+          <span>
+            <time dateTime={new Date(message.createdAt).toISOString()}>
+              {formatTime(message.createdAt, locale)}
+            </time>
+          </span>
           {usage?.durationMs != null ? (
             <span>{formatDuration(usage.durationMs, locale)}</span>
           ) : null}
           {cost ? <span>{cost}</span> : null}
-        </span>
-      ) : null}
+        </>
+      )}
     </>
   );
 }
@@ -130,7 +145,11 @@ export const AssistantMessage = memo(
       <MessageItem
         kind="assistant"
         label={label}
-        speaker={<Speaker message={message} showCost={showCost} />}
+        meta={
+          streaming && message.parts[0]?.type !== 'agent' ? null : (
+            <Details message={message} showCost={showCost} streaming={streaming} />
+          )
+        }
       >
         <div
           ref={bodyRef}

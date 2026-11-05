@@ -44,11 +44,12 @@ async function sentBody(text: string, options: Record<string, unknown> = {}) {
   return sent?.body as { tools?: { function: { name: string } }[] };
 }
 
-test('plain messages send no tools; links offer fetch_url', async () => {
-  expect((await sentBody('halo')).tools).toBeUndefined();
+test('plain messages send only delegate_tasks; links offer fetch_url', async () => {
+  const names = (b: Awaited<ReturnType<typeof sentBody>>) => b.tools?.map((x) => x.function.name);
+  expect(names(await sentBody('halo'))).toEqual(['delegate_tasks']);
   mock.reset();
   const withLink = await sentBody('baca https://x.org');
-  expect(withLink.tools?.[0]?.function.name).toBe('fetch_url');
+  expect(names(withLink)).toEqual(['fetch_url', 'delegate_tasks']);
 });
 
 test('web search alone offers fetch_url', async () => {

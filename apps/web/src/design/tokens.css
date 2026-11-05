@@ -1,4 +1,6 @@
 :root {
+  color-scheme: light;
+  --check-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='%23fbfbfa' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --paper: #fbfbfa;
   --shelf: #f1f2ef;
   --shelf-hover: #e5e7e2;
@@ -8,20 +10,20 @@
   --ink-faint: #8a919c;
   --rule: #dee0dc;
   --control-edge: #7d848f;
-  --marker: #fce45c;
+  --marker: #d3d6db;
   --marker-soft: color-mix(in srgb, var(--marker) 40%, transparent);
   --on-marker: #23272e;
   --danger: #b42318;
   --success: #1e7a46;
   /* Chart marks: one series, validated against --paper (dataviz validator, light). */
   --chart-1: #2a78d6;
-  /* Folder color dots (stored on the folder as the light hex; marker yellow is reserved). */
+  /* Folder color dots (stored on the folder as the light hex; the neutral marker is reserved). */
   --folder-mint: #9ee6c4;
   --folder-sky: #a7d3f5;
   --folder-rose: #f5b3c2;
   --folder-graphite: #c9cdd3;
   /* Accent choices in Settings, shown as they are whatever accent is active. */
-  --swatch-marker: #fce45c;
+  --swatch-marker: #d3d6db;
   --swatch-mint: #9ee6c4;
   --swatch-sky: #a7d3f5;
   --swatch-rose: #f5b3c2;
@@ -56,11 +58,12 @@
   --dur-fast: 120ms;
   --dur: 200ms;
   --measure: 68ch;
-  --gutter: 120px;
   --sidebar-width: 288px;
 }
 
 :root[data-theme="dark"] {
+  color-scheme: dark;
+  --check-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='%231c1f23' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --paper: #1c1f23;
   --shelf: #16191c;
   --shelf-hover: #23272c;
@@ -69,8 +72,8 @@
   --ink-muted: #a3a9b1;
   --ink-faint: #737a84;
   --rule: #30353b;
-  --marker: #e3c94a;
-  --swatch-marker: #e3c94a;
+  --marker: #c9cdd3;
+  --swatch-marker: #c9cdd3;
   --danger: #f2736b;
   --success: #5bc88a;
   --chart-1: #3987e5;
@@ -83,6 +86,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --check-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='%231c1f23' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     --paper: #1c1f23;
     --shelf: #16191c;
     --shelf-hover: #23272c;
@@ -91,8 +96,8 @@
     --ink-muted: #a3a9b1;
     --ink-faint: #737a84;
     --rule: #30353b;
-    --marker: #e3c94a;
-    --swatch-marker: #e3c94a;
+    --marker: #c9cdd3;
+    --swatch-marker: #c9cdd3;
     --danger: #f2736b;
     --success: #5bc88a;
     --chart-1: #3987e5;

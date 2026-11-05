@@ -1,5 +1,5 @@
 import type { MessagePart, MessagePublic } from '@neotext/shared';
-import { type ComponentType, memo } from 'react';
+import { type ComponentType, lazy, memo, Suspense } from 'react';
 import { useT } from '../../lib/i18n';
 import { Button } from '../../ui';
 import { AttachmentView } from './AttachmentView';
@@ -52,9 +52,24 @@ const SourcesPart = memo(
   (a, b) => a.part.sources === b.part.sources,
 );
 
+// Loaded the first time an answer delegates, so plain chats do not pay for it.
+const SubagentCard = lazy(() =>
+  import('./tools/SubagentCard').then((m) => ({ default: m.SubagentCard })),
+);
+
 /** The generation id comes from the live store, so a prompt can answer after a resume too. */
 function ToolPart({ part, message }: PartProps<'tool_call'>) {
   const { generationId, ended, stuck, retry } = useCallLife(part, message);
+  // Delegated work gets its own card; without runs to show, the generic row stands in.
+  if (part.name === 'delegate_tasks') {
+    // A refused second delegation has no runs and nothing worth showing.
+    if (!part.agents || part.agents.length === 0) return null;
+    return (
+      <Suspense fallback={null}>
+        <SubagentCard part={{ ...part, agents: part.agents }} ended={ended} />
+      </Suspense>
+    );
+  }
   return (
     <ToolCallBlock
       part={part}
@@ -97,6 +112,7 @@ export const partRenderers: { [K in PartType]: ComponentType<PartProps<K>> } = {
   text: TextPart,
   reasoning: ReasoningPart,
   tool_call: ToolPart,
+  agent: () => null,
   sources: SourcesPart,
   attachment: AttachmentPart,
   error: ErrorPart,

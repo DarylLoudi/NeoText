@@ -88,12 +88,12 @@ export const UserMessage = memo(
     const t = useT();
     const [editing, setEditing] = useState(false);
     return (
-      <MessageItem kind="user" label={t('chat.you')} speaker={<span>{t('chat.you')}</span>}>
+      <MessageItem kind="user" label={t('chat.you')}>
         {editing ? (
           <Editor message={item.message} onDone={() => setEditing(false)} />
         ) : (
           <>
-            <div className={styles.ruled}>
+            <div className={styles.bubble}>
               <AttachmentView parts={attachmentParts(item.message.parts)} />
               <p className={styles.text} dir="auto">
                 {messageText(item.message)}

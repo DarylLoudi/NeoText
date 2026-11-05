@@ -6,6 +6,33 @@ All notable changes to NeoText are written here. The format follows [Keep a Chan
 
 Nothing yet.
 
+## 0.2.0
+
+### Changed
+
+- **Web search.** The model decides when to search. Turn search off with the web search tool's policy in Settings → Tools. The "Web" toggle and the "search by default" setting are gone.
+- **Bundle size.** The bundle ceiling rose from 330 KiB to 335 KiB. Most of the growth is English text for the new features.
+
+### Fixed (audit of 0.2 changes)
+
+- **Sub-agent limits.** Sub-agents share one search budget per delegation (at most 12 searches) and honour the shared-provider quota. Their own searches and page reads are listed in the card.
+- **Agent switches.** An agent's "web search off" switch is respected. An agent's own model no longer changes the chat's model. Regenerating an answer from a deleted agent works.
+- **Context meter.** It reads the last model call instead of adding up every tool step.
+- **Accessibility.** The selected row in the palette and search is clearly visible in dark mode, and the copy button announces "Copied".
+
+### Added
+
+- **Sub-agents.** For a big job that splits into independent parts, the chat model can run up to 6 sub-agents in parallel and merge their reports into one answer. A card in the answer shows each task live. Small questions are answered directly.
+- **Custom agents.** Settings → Agents lets you write your own agents: a name, when to use them, Markdown instructions (typed or imported from a `.md` file), a model and allowed tools. Call one with the Agent button or by starting a message with `@Name`. You can also let the chat model hand tasks to it.
+- **Interface.**
+  - Single-column chat with an icon send button.
+  - Dark theme by default and a neutral accent.
+  - A context window meter.
+  - Automatic web search.
+  - Math in `\(…\)` and `\[…\]`. Prose that contains those characters literally now renders as math.
+  - Themed form controls.
+  - A copy icon on code blocks that turns into a check.
+
 ## 0.1.0
 
 The first release.

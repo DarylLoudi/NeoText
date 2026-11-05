@@ -110,7 +110,7 @@
       "smart": "Smart section",
       "presets": "Presets"
     },
-    "pinnedEmpty": "Drag a chat here, or choose Pin from its menu.",
+    "pinnedEmpty": "Drag chats here to pin them.",
     "archivedEmpty": "No archived chats.",
     "folderEmpty": "No chats in this folder.",
     "loadFailed": "Chats could not load. Check your connection and try again.",
@@ -196,7 +196,7 @@
       "previewFailed": "Matches could not be counted. Check your connection and try again."
     },
     "presets": {
-      "empty": "No presets yet. A preset saves a system prompt, model and settings you use often.",
+      "empty": "Save a prompt and model you use often.",
       "new": "New preset",
       "edit": "Edit",
       "delete": "Delete",
@@ -226,7 +226,6 @@
         "optionalHint": "Optional.",
         "temperatureInvalid": "Use a number from 0 to 2.",
         "maxTokensInvalid": "Use a whole number from 1 to 200,000.",
-        "webSearch": "Search the web",
         "invalid": "Check the preset settings and try again."
       },
       "gone": "That preset was deleted. Your message was not sent; send it again to chat without it.",
@@ -250,8 +249,39 @@
       "show": "Show comparison",
       "continuesHere": "Continues from here"
     },
+    "agents": {
+      "button": "Agent",
+      "menu": "Agents",
+      "none": "No agents yet. Add one in Settings, Agents.",
+      "remove": "Remove {{agent}}",
+      "chip": "Answering as {{agent}}",
+      "placeholder": "Ask {{agent}}",
+      "compareOff": "Agents answer alone",
+      "suggestions": "Agents"
+    },
+    "subagents": {
+      "title": "Sub-agents",
+      "tasks_one": "{{count}} task",
+      "tasks_other": "{{count}} tasks",
+      "progress": "{{done}} of {{total}} done",
+      "finished_one": "{{count}} sub-agent finished",
+      "finished_other": "{{count}} sub-agents finished",
+      "failed": "{{count}} failed",
+      "stopped": "{{count}} stopped",
+      "status": {
+        "running": "Running",
+        "ok": "Done",
+        "error": "Failed",
+        "stopped": "Stopped"
+      },
+      "working": "Still working.",
+      "noReport": "No report.",
+      "report": "Report from {{title}}"
+    },
     "messagePlaceholder": "Message NeoText",
     "send": "Send message",
+    "sendHintEnter": "Send (Enter)",
+    "sendHintMod": "Send (Ctrl+Enter)",
     "stop": "Stop generating",
     "regenerate": "Regenerate",
     "edit": "Edit message",
@@ -274,15 +304,6 @@
       "search": "Search sources",
       "noMatch": "No sources match “{{query}}”."
     },
-    "webToggle": {
-      "label": "Web",
-      "tooltip": "Search the web for this message",
-      "via": "Uses {{engine}}: {{price}}",
-      "engineMode": "{{engine}} ({{mode}})",
-      "viaBackend": "Uses your search provider",
-      "viaNative": "Uses the model provider’s own search, at its price",
-      "viaAuto": "Uses the model’s own search when it has one, else Exa"
-    },
     "activity": {
       "searching": "Searching the web…",
       "working": "Working…",
@@ -292,7 +313,8 @@
     "tools": {
       "names": {
         "fetch_url": "Web page reader",
-        "web_search": "Web search"
+        "web_search": "Web search",
+        "delegate_tasks": "Sub-agents"
       },
       "labels": {
         "fetch_url": {
@@ -306,6 +328,10 @@
         "other": {
           "running": "Using {{tool}}",
           "done": "Used {{tool}}"
+        },
+        "delegate_tasks": {
+          "running": "Running sub-agents",
+          "done": "Ran sub-agents"
         }
       },
       "failed": "Failed",
@@ -435,7 +461,8 @@
       "connect": "Connect a model provider to start.",
       "connectButton": "Open provider settings",
       "noModels": "None of your providers has a model to offer yet. Check the provider in settings.",
-      "unknown": "Not listed"
+      "unknown": "Not listed",
+      "greeting": "What can I help with?"
     },
     "errors": {
       "thinkingBudget": "The model used its whole answer budget on thinking. Try again, or raise the answer length or lower the reasoning effort.",
@@ -483,6 +510,7 @@
       "mcp": "Tool servers",
       "models": "Models",
       "tools": "Tools",
+      "agents": "Agents",
       "data": "Data",
       "security": "Security",
       "about": "About"
@@ -544,7 +572,7 @@
       "themeSystem": "Match system",
       "accent": "Accent color",
       "accents": {
-        "marker": "Marker yellow",
+        "marker": "Neutral",
         "mint": "Mint",
         "sky": "Sky",
         "rose": "Rose",
@@ -774,9 +802,7 @@
     "tools": {
       "intro": "What the assistant can do besides writing: search the web, read pages and use tools from tool servers.",
       "webSearch": "Web search",
-      "webSearchIntro": "Engine, mode and context size apply to models on OpenRouter. Other models search through your search backend.",
-      "defaultOn": "Search the web by default",
-      "defaultOnHint": "The Web button starts on for each new message. You can still turn it off for one message.",
+      "webSearchIntro": "The model decides when to search. Engine, mode and context size apply to models on OpenRouter. Other models search through your search backend.",
       "engine": "Search engine",
       "mode": "Search mode",
       "engines": {
@@ -824,7 +850,8 @@
       },
       "descriptions": {
         "fetch_url": "Opens a link and reads the page’s text.",
-        "web_search": "Searches the web with your search backend."
+        "web_search": "Searches the web with your search backend.",
+        "delegate_tasks": "Lets the chat model split a big job into parallel tasks."
       },
       "fromServer": "From a tool server",
       "empty": "No tools are available yet.",
@@ -1089,9 +1116,57 @@
         "month": "This month: {{spent}} of {{limit}}, {{left}} left",
         "exhausted": "You've used your budget on shared models. Your own providers still work."
       }
+    },
+    "agents": {
+      "intro": "Agents are saved instructions the chat model can hand work to.",
+      "subagents": "Sub-agents",
+      "subagentModel": "Sub-agent model",
+      "clearSubagentModel": "Use the chat model for sub-agents",
+      "sameModel": "Same as the chat",
+      "maxSubagents": "Most sub-agents per task",
+      "maxSubagentsInvalid": "Use a whole number from 2 to 6.",
+      "subagentsHelp": "The chat model splits big jobs into parallel tasks only when it helps.",
+      "yours": "Your agents",
+      "list": "Your agents",
+      "empty": "No agents yet. Create one for work you repeat, like reviewing frontend code.",
+      "loadFailed": "Agents could not load. Check your connection and try again.",
+      "new": "New agent",
+      "edit": "Edit",
+      "delete": "Delete",
+      "editNamed": "Edit {{name}}",
+      "deleteNamed": "Delete {{name}}",
+      "enabled": "Enable {{name}}",
+      "deleteTitle": "Delete {{name}}?",
+      "deleteBody": "The agent is removed. Chats that already used it keep their answers.",
+      "editor": {
+        "newTitle": "New agent",
+        "editTitle": "Edit agent",
+        "name": "Name",
+        "nameRequired": "Give the agent a name.",
+        "nameTooLong": "Use 60 characters or fewer for the name.",
+        "description": "When to use it",
+        "descriptionHint": "One line that tells the chat model when this agent fits.",
+        "instructions": "Instructions",
+        "instructionsRequired": "Write the instructions the agent should follow.",
+        "instructionsTooLong": "Instructions can be up to 50,000 characters. Shorten them and try again.",
+        "count": "{{count}} / {{max}} characters",
+        "import": "Import .md",
+        "importFile": "Instructions file",
+        "importTooBig": "That file is larger than 200 KB. Pick a smaller .md or .txt file.",
+        "importFailed": "The file could not be read. Try another file.",
+        "importCut": "The file was longer than {{max}} characters, so the end was cut off.",
+        "model": "Model",
+        "clearModel": "Use the chat model for this agent",
+        "webSearch": "Can search the web",
+        "fetchUrl": "Can read web pages",
+        "autoDelegate": "Let the chat model call this agent on its own",
+        "invalid": "Something in this agent is not valid. Check the fields and try again."
+      }
     }
   },
   "shell": {
+    "contextMeter": "Context window: {{used}} of {{limit}} tokens used ({{left}} left)",
+    "contextChanged": "New chat started: this model has a different context window",
     "search": {
       "title": "Search chats",
       "description": "Search the titles and messages of all your chats.",
@@ -1138,7 +1213,8 @@
     },
     "moreActions": "More actions",
     "exportChat": "Export this chat",
-    "exportedChat": "Chat exported as Markdown"
+    "exportedChat": "Chat exported as Markdown",
+    "backToChats": "Back to chats"
   },
   "admin": {
     "title": "Admin",

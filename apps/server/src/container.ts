@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { type AdminService, createAdminService } from './admin/service';
+import { createAgentsRepo } from './agents/repo';
+import { type AgentsService, createAgentsService } from './agents/service';
 import { createAttachmentsRepo } from './attachments/repo';
 import { type AttachmentsService, createAttachmentsService } from './attachments/service';
 import { createAttachmentStore } from './attachments/store';
@@ -43,6 +45,7 @@ import { createQuotaService, type QuotaService } from './quotas/service';
 import { type ConversationSearch, createConversationSearch } from './search-conversations/service';
 import { createSettingsRepo } from './settings/repo';
 import { createSettingsService, type SettingsService } from './settings/service';
+import { delegateListingSource } from './tools/builtin/delegate';
 import { fetchUrlSource } from './tools/builtin/fetch-url';
 import { createWebSearchSource } from './tools/builtin/web-search';
 import { createToolCatalog, type ToolCatalog } from './tools/registry';
@@ -79,6 +82,7 @@ export interface Container {
   /** Full-text search over the user's own chats. */
   search: ConversationSearch;
   presets: PresetsService;
+  agents: AgentsService;
   /** Downloads of the user's own data. */
   exporter: ExportService;
   /** Uploaded files, sealed on disk; cleaned up with their chats. */
@@ -221,11 +225,13 @@ export async function createContainer(
     messages: repos.messages,
   });
   const presets = createPresetsService({ repo: createPresetsRepo(db, log), clock });
+  const agents = createAgentsService({ repo: createAgentsRepo(db, log), clock });
   const exporter = createExportService({
     conversations: repos.conversations,
     messages: repos.messages,
     folders: repos.folders,
     presets,
+    agents,
     settings,
     providers,
     audit,
@@ -238,6 +244,7 @@ export async function createContainer(
     messages: repos.messages,
     folders: repos.folders,
     presets,
+    agents,
     settings,
     providers,
     audit,
@@ -267,6 +274,7 @@ export async function createContainer(
   const tools = createToolCatalog({ log });
   tools.add(fetchUrlSource);
   tools.add(createWebSearchSource({ settings, providers }));
+  tools.add(delegateListingSource);
   const mcp = createMcpManager({ repo: createMcpRepo(db, clock), http, clock, log });
   tools.add((auth) => mcp.toolsFor(auth));
   const chat = createChatService({
@@ -278,6 +286,7 @@ export async function createContainer(
     messages: repos.messages,
     usage: repos.usage,
     presets,
+    agents,
     attachments,
     generations,
     tools,
@@ -306,6 +315,7 @@ export async function createContainer(
     conversations,
     search,
     presets,
+    agents,
     exporter,
     attachments,
     importer,

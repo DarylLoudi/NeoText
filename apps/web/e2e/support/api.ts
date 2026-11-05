@@ -13,7 +13,7 @@ const sections = [
 export async function resetState(request: APIRequestContext): Promise<void> {
   await resetMock(request);
   await patchSettings(request, {
-    appearance: { theme: 'light', reduceMotion: 'system' },
+    appearance: { theme: 'system', reduceMotion: 'system' },
     // Titles come from a second model call that would take a script meant for the next test.
     chat: { autoTitle: false, sendKey: 'enter' },
     sidebar: { position: 'left', collapsed: false, sections },

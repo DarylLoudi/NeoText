@@ -119,18 +119,12 @@ function touchScreen(): void {
 test('on a touch screen Enter makes a newline and only the Send button sends', async () => {
   touchScreen();
   const { s, user, box } = setup();
-  expect(screen.getByText('Enter starts a new line, tap Send to send')).toBeInTheDocument();
   await user.type(box(), 'halo{Enter}dunia');
   expect(s.send).not.toHaveBeenCalled();
   expect(box()).toHaveValue('halo\ndunia');
   await user.click(screen.getByRole('button', { name: 'Send message' }));
   expect(s.send).toHaveBeenCalledWith('halo\ndunia', expect.anything());
   vi.mocked(window.matchMedia).mockRestore();
-});
-
-test('with a mouse the hint says Enter sends', () => {
-  setup();
-  expect(screen.getByText('Enter sends, Shift+Enter starts a new line')).toBeInTheDocument();
 });
 
 test('mod-enter mode: Enter makes a newline, Ctrl+Enter sends', async () => {
@@ -172,6 +166,7 @@ test('does not send during IME composition in mod-enter mode either', async () =
 test('blank text cannot be sent', async () => {
   const { s, user, box } = setup();
   const send = screen.getByRole('button', { name: 'Send message' });
+  expect(send).toHaveAttribute('title', 'Send (Enter)');
   expect(send).toBeDisabled();
   await user.type(box(), '   {Enter}');
   await user.keyboard('{Shift>}{Enter}{/Shift}{Enter}');

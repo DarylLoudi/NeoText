@@ -67,6 +67,19 @@ describe('accumulator', () => {
     });
   });
 
+  test("the context is the last model call's prompt and output, not the sum", () => {
+    const acc = createAccumulator({ clock: createFakeClock(), webSearch: false });
+    expect(acc.contextTokens()).toBeNull();
+    acc.apply({ type: 'usage', usage: usage(40_000, 50, null) });
+    acc.beginStep();
+    const out = acc.apply({ type: 'usage', usage: usage(41_000, 900, null) });
+    expect(acc.contextTokens()).toBe(41_900);
+    expect(out[0]).toMatchObject({ type: 'usage', usage: { contextTokens: 41_900 } });
+    // A step that reports nothing keeps the last known figure.
+    acc.beginStep();
+    expect(acc.contextTokens()).toBe(41_900);
+  });
+
   test('cost stays null when no step reports one', () => {
     const acc = createAccumulator({ clock: createFakeClock(), webSearch: false });
     acc.apply({ type: 'usage', usage: usage(1, 1, null) });

@@ -97,6 +97,7 @@ test('tool calls go before sources and update in place; usage is set', () => {
     ttftMs: null,
     durationMs: null,
     upstreamProvider: null,
+    contextTokens: null,
   };
   m = applyStreamEvent(m, { type: 'usage', generationId: 'g', seq: 4, usage });
   expect(m.usage).toEqual(usage);

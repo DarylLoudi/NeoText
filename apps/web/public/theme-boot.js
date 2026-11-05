@@ -2,10 +2,14 @@
 // Keep in step with applyAppearance in src/design/theme.ts (a test compares the two).
 (() => {
   try {
-    const raw = localStorage.getItem('neotext:appearance');
-    if (!raw) return;
-    const a = JSON.parse(raw);
     const root = document.documentElement;
+    const raw = localStorage.getItem('neotext:appearance');
+    // Dark is the default theme until the saved settings say otherwise.
+    if (!raw) {
+      root.setAttribute('data-theme', 'dark');
+      return;
+    }
+    const a = JSON.parse(raw);
     const set = (attr, value, skip) => {
       if (typeof value === 'string' && value !== skip) root.setAttribute(attr, value);
       else root.removeAttribute(attr);

@@ -5,7 +5,7 @@ import { createSearchBudget } from '../search/budget';
 import type { ToolDefinition } from '../tools/types';
 import type { Generation } from './generation/generation';
 import type { RunDeps, RunSpec } from './generation/runner';
-import type { WebSearchPlan } from './generation/web-search';
+import { WEB_SEARCH_GUIDANCE, type WebSearchPlan } from './generation/web-search';
 import { startTargetRun, type TargetRunInput } from './target-run';
 
 const log = { error: vi.fn(), warn: vi.fn(), info: vi.fn() } as never;
@@ -68,6 +68,7 @@ function setup(plan: WebSearchPlan, over: Partial<TargetRunInput> = {}) {
     userText: 'harga btc?',
     endUserId: 'u-hash',
     now: 5,
+    searchesPerTask: 3,
     ...over,
   };
   const out = startTargetRun(deps, input);
@@ -114,4 +115,38 @@ test('afterFinish is wired to the generation it belongs to', async () => {
   const { spec, started } = setup({ kind: 'none' }, { afterFinish });
   await spec.afterFinish?.({} as MessagePublic);
   expect(afterFinish).toHaveBeenCalledWith(started(), {});
+});
+
+test('an agent with web search off gets no search on any plan', () => {
+  const agent = {
+    id: 'agt_1',
+    name: 'Offline',
+    data: {
+      description: '',
+      instructions: 'Review.',
+      model: null,
+      tools: { webSearch: false, fetchUrl: true },
+      autoDelegate: false,
+      enabled: true,
+    },
+    position: '0',
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  const server: WebSearchPlan = {
+    kind: 'server',
+    serverTools: [{ type: 'openrouter:web_search', parameters: {} }],
+    maxServerToolCalls: 3,
+    budget: createSearchBudget(3),
+  };
+  const tool = { ...echo, name: 'web_search' };
+  const toolPlan: WebSearchPlan = { kind: 'tool', tool, budget: createSearchBudget(3) };
+  for (const plan of [server, toolPlan]) {
+    const { spec } = setup(plan, { agent, available: [echo, tool] });
+    expect(spec.request.serverTools).toBeUndefined();
+    expect(spec.webSearch).toBe(false);
+    expect(spec.searchBudget).toBeUndefined();
+    expect(spec.tools?.defs.map((d) => d.name)).toEqual(['echo']);
+    expect(JSON.stringify(spec.request.messages)).not.toContain(WEB_SEARCH_GUIDANCE);
+  }
 });

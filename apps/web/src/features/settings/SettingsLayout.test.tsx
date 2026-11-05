@@ -39,6 +39,7 @@ test('the nav lists every section and marks the current one', async () => {
     'Tool servers',
     'Models',
     'Tools',
+    'Agents',
     'Data',
     'Security',
     'About',

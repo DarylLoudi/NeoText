@@ -12,6 +12,23 @@ export const SourceSchema = z.object({
 });
 export type Source = z.infer<typeof SourceSchema>;
 
+export const SubagentRunSchema = z.object({
+  id: z.string(),
+  title: z.string().max(120),
+  agentName: z.string().max(60).nullable(),
+  status: z.enum(['running', 'ok', 'error', 'stopped']),
+  startedAt: z.number(),
+  finishedAt: z.number().nullable(),
+  report: z.string().max(4_000).nullable(),
+  costUsd: z.number().nullable(),
+  /** The sub-agent's tool calls: the tool and a short detail (the query or the URL). */
+  toolCalls: z
+    .array(z.object({ name: z.string().max(64), detail: z.string().max(200) }))
+    .max(20)
+    .optional(),
+});
+export type SubagentRun = z.infer<typeof SubagentRunSchema>;
+
 export const ToolCallPartSchema = z.object({
   type: z.literal('tool_call'),
   id: z.string(),
@@ -22,6 +39,7 @@ export const ToolCallPartSchema = z.object({
   result: z.string().nullable(),
   startedAt: z.number(),
   finishedAt: z.number().nullable(),
+  agents: z.array(SubagentRunSchema).max(6).optional(),
 });
 export type ToolCallPart = z.infer<typeof ToolCallPartSchema>;
 
@@ -41,6 +59,7 @@ export const MessagePartSchema = z.discriminatedUnion('type', [
     mime: z.string(),
     size: z.number(),
   }),
+  z.object({ type: z.literal('agent'), agentId: z.string(), name: z.string().max(60) }),
   z.object({ type: z.literal('error'), code: z.string(), message: z.string() }),
 ]);
 export type MessagePart = z.infer<typeof MessagePartSchema>;
@@ -74,6 +93,8 @@ export const UsageSchema = z.object({
   ttftMs: z.number().nullable(),
   durationMs: z.number().nullable(),
   upstreamProvider: z.string().nullable(),
+  /** Prompt plus completion tokens of the answer's last model call: what the context holds. */
+  contextTokens: z.number().nullable().default(null),
 });
 export type Usage = z.infer<typeof UsageSchema>;
 
@@ -209,6 +230,7 @@ export const ChatRequestBodySchema = z.object({
       temperature: z.number().min(0).max(2).nullable().default(null),
       maxOutputTokens: z.number().int().min(1).max(200_000).nullable().default(null),
       presetId: z.string().nullable().default(null),
+      agentId: z.string().nullable().default(null),
       folderId: z.string().nullable().default(null),
       timeZone: TimeZoneSchema.default('UTC'),
     })

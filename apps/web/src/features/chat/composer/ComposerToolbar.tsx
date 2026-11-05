@@ -1,74 +1,72 @@
 import type { ModelInfo } from '@neotext/shared';
+import { ArrowUp, Stop } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { useT } from '../../../lib/i18n';
-import { Button } from '../../../ui';
+import { IconButton } from '../../../ui';
 import { CompareToggle } from '../../compare/CompareToggle';
 import styles from './ComposerToolbar.module.css';
 import { type EffortChoice, ReasoningSelect } from './ReasoningSelect';
-import { type WebSearchChoice, WebSearchToggle } from './WebSearchToggle';
 
 export interface ComposerToolbarProps {
   model: ModelInfo | null;
   effort: EffortChoice;
   onEffort: (effort: EffortChoice) => void;
-  webSearch: WebSearchChoice;
   /** Whether the next message goes to several models side by side. */
   compare: boolean;
   onCompare: () => void;
-  hint: string;
   generating: boolean;
   canSend: boolean;
+  /** Whether Enter itself sends (else Ctrl or Cmd with Enter): only the send button's hint. */
+  enterSends?: boolean;
   onStop: () => void;
   /** The attach button, first in the row. */
   attach?: ReactNode;
+  /** The agent button, after attach. */
+  agent?: ReactNode;
+  /** Why compare is off and cannot be turned on, if it cannot. */
+  compareBlockedBy?: string | null;
 }
 
 /**
- * Under the text: web search (when something can search), compare, the reasoning choice, the
- * key hint, and one button that sends or stops.
+ * Under the text: attach, agent, compare, the reasoning choice, and one round button that sends or stops.
  */
 export function ComposerToolbar({
   model,
   effort,
   onEffort,
-  webSearch,
   compare,
   onCompare,
-  hint,
   generating,
   canSend,
+  enterSends = true,
   onStop,
   attach,
+  agent,
+  compareBlockedBy = null,
 }: ComposerToolbarProps) {
   const t = useT();
   return (
     <div className={styles.toolbar}>
       {attach}
-      {webSearch.available ? (
-        <WebSearchToggle on={webSearch.on} native={webSearch.native} onToggle={webSearch.toggle} />
-      ) : null}
-      <CompareToggle on={compare} onToggle={onCompare} />
+      {agent}
+      <CompareToggle on={compare} onToggle={onCompare} blockedBy={compareBlockedBy} />
       <ReasoningSelect reasoning={model?.reasoning ?? null} value={effort} onChange={onEffort} />
-      <p className={styles.hint}>{hint}</p>
       {generating ? (
-        <Button
-          variant="primary"
+        <IconButton
           className={styles.action}
-          aria-label={t('chat.stop')}
+          label={t('chat.stop')}
+          icon={<Stop weight="fill" />}
           onClick={onStop}
-        >
-          {t('chat.composer.stop')}
-        </Button>
+        />
       ) : (
-        <Button
+        <IconButton
           type="submit"
-          variant="primary"
           className={styles.action}
-          aria-label={t('chat.send')}
+          label={t('chat.send')}
+          icon={<ArrowUp weight="bold" />}
+          title={enterSends ? t('chat.sendHintEnter') : t('chat.sendHintMod')}
           disabled={!canSend}
-        >
-          {t('chat.composer.send')}
-        </Button>
+        />
       )}
     </div>
   );

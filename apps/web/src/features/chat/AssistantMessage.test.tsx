@@ -22,6 +22,7 @@ const usage = {
   ttftMs: 300,
   durationMs: 2100,
   upstreamProvider: null,
+  contextTokens: null,
 };
 
 interface SetupOptions {
@@ -78,6 +79,21 @@ test('shows the short model name, duration and cost when enabled', () => {
   expect(screen.getByText('2.1 s')).toBeInTheDocument();
   expect(screen.getByText('$0.0004')).toBeInTheDocument();
   expect(screen.getByText('Here is a structure.')).toBeInTheDocument();
+});
+
+test('an agent answer names the agent before the model, and the agent part shows nothing', () => {
+  setup(
+    answer({
+      parts: [
+        { type: 'agent', agentId: 'agt_1', name: 'Agent-Frontend' },
+        { type: 'text', text: 'Here is a structure.' },
+      ],
+    }),
+  );
+  const agent = screen.getByText('Agent-Frontend');
+  const model = screen.getByText('deepseek v4.1 flash');
+  expect(agent.compareDocumentPosition(model) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(screen.getAllByText('Agent-Frontend')).toHaveLength(1);
 });
 
 test('shows cost only when enabled', () => {
@@ -191,4 +207,19 @@ test('the answer is not busy while a tool waits for you, so its buttons stay rea
     }),
   );
   expect(document.querySelector('[aria-busy="true"]')).toBeNull();
+});
+
+test('an agent answer is named while it still streams', () => {
+  setup(
+    answer({
+      status: 'streaming',
+      finishReason: null,
+      usage: null,
+      parts: [
+        { type: 'agent', agentId: 'agt_1', name: 'Agent-Frontend' },
+        { type: 'text', text: 'Working' },
+      ],
+    }),
+  );
+  expect(screen.getByText('Agent-Frontend')).toBeInTheDocument();
 });

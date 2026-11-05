@@ -24,6 +24,7 @@ export const qk = {
   conversation: (id: string) => ['conversation', id] as const,
   folders: ['folders'] as const,
   presets: ['presets'] as const,
+  agents: ['agents'] as const,
   providers: ['providers'] as const,
   models: ['models'] as const,
   providerPresets: ['provider-presets'] as const,

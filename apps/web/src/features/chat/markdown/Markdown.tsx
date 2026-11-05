@@ -233,10 +233,13 @@ function RichMarkdown({
         if (code === undefined || !navigator.clipboard) return;
         navigator.clipboard.writeText(code).then(
           () => {
-            copy.textContent = t('common.copied');
+            const name = copy.querySelector('.md-sr') ?? copy;
+            name.textContent = t('common.copied');
+            copy.title = t('common.copied');
             copy.dataset.copied = '';
             const timer = setTimeout(() => {
-              copy.textContent = opts.copyLabel;
+              name.textContent = opts.copyLabel;
+              copy.title = opts.copyLabel;
               delete copy.dataset.copied;
               timers.current.delete(timer);
             }, COPIED_MS);

@@ -23,8 +23,8 @@
   color: var(--ink);
   font-weight: 500;
   text-decoration: underline;
-  text-decoration-color: var(--marker);
-  text-decoration-thickness: 3px;
+  text-decoration-color: var(--ink-faint);
+  text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
 .link:focus-visible {

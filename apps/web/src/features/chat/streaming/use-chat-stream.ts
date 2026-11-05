@@ -1,13 +1,12 @@
-import {
-  ATTACHMENT_UNAVAILABLE_ID,
-  type ChatRequestBody,
-  type ConversationDetail,
-  type ConversationSummary,
-  childrenOf,
-  type MessagePublic,
-  type ModelRef,
-  type ReasoningEffort,
-  type StreamEvent,
+import type {
+  AgentPublic,
+  ChatRequestBody,
+  ConversationDetail,
+  ConversationSummary,
+  MessagePublic,
+  ModelRef,
+  ReasoningEffort,
+  StreamEvent,
 } from '@neotext/shared';
 import { type QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
@@ -22,9 +21,9 @@ import {
   liveMessageFor,
   useGenerations,
 } from '../../../state/generations';
-import { getSettingsState } from '../../../state/settings';
 import { findConversation, upsertConversation } from '../../sidebar/use-conversations';
 import { visibleLeaf } from '../thread';
+import { agentFor, attachmentIdsOf, modelFor } from './resend';
 import {
   conversationDetailQuery,
   newIdempotencyKey,
@@ -33,7 +32,6 @@ import {
   startTurn,
   stopGeneration,
 } from './stream-client';
-import { webChoiceFor } from './web-choice';
 
 export { conversationDetailQuery };
 
@@ -45,6 +43,8 @@ export interface SendOptions {
   maxOutputTokens?: number | null;
   presetId?: string | null;
   folderId?: string | null;
+  /** The agent that answers this one message, instead of the model's usual setup. */
+  agentId?: string | null;
   /** Finished uploads that go with the message. */
   attachmentIds?: string[];
 }
@@ -56,6 +56,7 @@ function requestOptions(o: Partial<SendOptions>): ChatRequestBody['options'] {
     temperature: o.temperature ?? null,
     maxOutputTokens: o.maxOutputTokens ?? null,
     presetId: o.presetId ?? null,
+    agentId: o.agentId ?? null,
     folderId: o.folderId ?? null,
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
@@ -181,21 +182,6 @@ function streamingIn(s: GenerationsState, conversationId: string | null): string
     )
     .map((g) => g.generationId)
     .join(' ');
-}
-
-/** Whether redoing the answer to this user message searches the web (see `webChoiceFor`). */
-const attachmentIdsOf = (m: MessagePublic) =>
-  m.parts.flatMap((p) =>
-    p.type === 'attachment' && p.attachmentId !== ATTACHMENT_UNAVAILABLE_ID ? [p.attachmentId] : [],
-  );
-
-const redoesWeb = (messages: MessagePublic[], userMessageId: string) =>
-  webChoiceFor(messages, userMessageId, getSettingsState().settings.webSearch.defaultOn);
-
-/** The answer that follows a user message in the active branch, else its newest answer. */
-function modelFor(messages: MessagePublic[], userMessageId: string): ModelRef | null {
-  const answers = childrenOf(messages, userMessageId).filter((m) => m.role === 'assistant');
-  return answers.at(-1)?.model ?? null;
 }
 
 /**
@@ -356,23 +342,27 @@ export function useChatStream(conversationId: string | null) {
 
   const regenerate = useCallback(
     (userMessageId: string, target?: ModelRef) => {
-      const model =
-        target ?? modelFor(messages(), userMessageId) ?? detail.data?.conversation.modelRef;
+      const all = messages();
+      const model = target ?? modelFor(all, userMessageId) ?? detail.data?.conversation.modelRef;
       if (!model || conversationId === null) return Promise.resolve(false);
       return run({
         conversationId,
         parentId: userMessageId,
         userMessage: null,
         targets: [model],
-        options: requestOptions({ webSearch: redoesWeb(messages(), userMessageId) }),
+        options: requestOptions({
+          webSearch: true,
+          agentId: agentFor(all, userMessageId, qc.getQueryData<AgentPublic[]>(qk.agents)),
+        }),
       });
     },
-    [run, messages, conversationId, detail.data],
+    [run, qc, messages, conversationId, detail.data],
   );
 
   const editAndResend = useCallback(
     (message: MessagePublic, text: string) => {
-      const model = modelFor(messages(), message.id) ?? detail.data?.conversation.modelRef;
+      const all = messages();
+      const model = modelFor(all, message.id) ?? detail.data?.conversation.modelRef;
       if (!model || conversationId === null) return Promise.resolve(false);
       return run({
         conversationId,
@@ -380,10 +370,13 @@ export function useChatStream(conversationId: string | null) {
         // The edit keeps the message's files; the server copies them for the new version.
         userMessage: { text, attachmentIds: attachmentIdsOf(message) },
         targets: [model],
-        options: requestOptions({ webSearch: redoesWeb(messages(), message.id) }),
+        options: requestOptions({
+          webSearch: true,
+          agentId: agentFor(all, message.id, qc.getQueryData<AgentPublic[]>(qk.agents)),
+        }),
       });
     },
-    [run, messages, conversationId, detail.data],
+    [run, qc, messages, conversationId, detail.data],
   );
 
   const stop = useCallback(() => {

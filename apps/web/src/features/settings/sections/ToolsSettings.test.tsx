@@ -119,9 +119,6 @@ test('a stored mode the engine does not offer shows the engine’s first mode', 
 
 test('web search defaults save', async () => {
   const { user } = await open();
-  await user.click(screen.getByRole('switch', { name: 'Search the web by default' }));
-  expect(updateSettings).toHaveBeenLastCalledWith({ webSearch: { defaultOn: true } });
-
   const results = screen.getByLabelText('Results per search');
   await user.clear(results);
   await user.type(results, '8');

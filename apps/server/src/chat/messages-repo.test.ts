@@ -63,6 +63,7 @@ test('parts round trip and are sealed', () => {
         ttftMs: 5,
         durationMs: 9,
         upstreamProvider: null,
+        contextTokens: null,
       },
     },
     2000,

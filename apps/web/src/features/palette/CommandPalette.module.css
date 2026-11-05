@@ -58,11 +58,13 @@
 .input::placeholder {
   color: var(--ink-faint);
 }
-/* The input draws no ring of its own; the row it sits in is the one clear field. */
+/* The input draws no ring of its own: the dialog is the field, and the caret shows focus. */
 .input:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 4px;
-  border-radius: var(--radius-chip);
+  outline: none;
+}
+/* Focus stays light: the row's rule darkens instead of a ring around the input. */
+.inputRow:focus-within {
+  border-bottom-color: var(--ink-muted);
 }
 .list {
   flex: 1;
@@ -92,9 +94,8 @@
 }
 .item[data-selected="true"] {
   background: var(--shelf-hover);
-  /* A fill alone is too faint on paper; the inset ring shows the row in any theme. */
-  outline: 2px solid var(--ink);
-  outline-offset: -2px;
+  /* --ink-muted against the panel is above 3:1 in both themes (WCAG 1.4.11). */
+  box-shadow: inset 0 0 0 2px var(--ink-muted);
 }
 .icon {
   display: inline-flex;

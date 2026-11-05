@@ -154,6 +154,9 @@ describe('structure', () => {
     const button = card?.querySelector('.md-code-bar button[data-copy]');
     expect(button?.getAttribute('type')).toBe('button');
     expect(button?.textContent).toBe('Copy');
+    expect(button?.getAttribute('title')).toBe('Copy');
+    expect(button?.querySelector('.md-sr')?.textContent).toBe('Copy');
+    expect(button?.querySelector('.md-sr')?.getAttribute('aria-live')).toBe('polite');
     const code = card?.querySelector('pre > code.language-ts');
     expect(code?.textContent).toBe('const a = "<b>";\n');
     expect(card?.querySelector('b')).toBeNull();

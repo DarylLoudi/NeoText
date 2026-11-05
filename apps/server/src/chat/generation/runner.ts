@@ -296,7 +296,11 @@ function outcome(
 export async function runGeneration(spec: RunSpec, deps: RunDeps): Promise<void> {
   const { generation, writer } = spec;
   const { clock, log } = deps;
-  const acc = createAccumulator({ clock, webSearch: spec.webSearch });
+  const acc = createAccumulator({
+    clock,
+    webSearch: spec.webSearch,
+    lead: generation.snapshot().parts.filter((p) => p.type === 'agent'),
+  });
   let providerError: ErrorInfo | null = null;
   try {
     const err = await runSteps(spec, deps, acc);
@@ -327,6 +331,7 @@ export async function runGeneration(spec: RunSpec, deps: RunDeps): Promise<void>
     ttftMs: first === null ? null : first - generation.startedAt,
     durationMs: now - generation.startedAt,
     upstreamProvider: acc.meta().upstreamProvider,
+    contextTokens: acc.contextTokens(),
   };
   const generationRef = acc.meta().generationRef;
   const final: MessagePublic = {

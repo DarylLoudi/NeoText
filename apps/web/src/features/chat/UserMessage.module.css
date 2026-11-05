@@ -1,12 +1,12 @@
-/* The marker rule runs along the text only, at the inset's outer edge (MessageItem .body). */
-.ruled {
-  margin-inline-start: calc(-1 * (var(--space-4) + 3px));
-  padding-inline-start: var(--space-4);
-  border-inline-start: 3px solid var(--marker);
+/* Your message: a quiet bubble on the right, like most chat apps. */
+.bubble {
+  max-width: min(100%, 85%);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-dialog);
+  background: var(--shelf-hover);
 }
 
 .text {
-  max-width: var(--measure);
   color: var(--ink);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  max-width: var(--measure);
+  width: 100%;
   font-family: var(--font-ui);
   font-size: var(--text-md);
 }

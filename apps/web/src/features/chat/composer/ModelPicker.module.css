@@ -62,10 +62,8 @@
   color: var(--ink-muted);
 }
 .search:focus-visible {
-  /* The box is always focused while open: a heavy underline says so without a frame. */
+  /* The box is always focused while open: the caret says so, no extra frame needed. */
   outline: none;
-  padding-bottom: calc(var(--space-3) - 1px);
-  border-bottom: 2px solid var(--ink);
 }
 
 .list {

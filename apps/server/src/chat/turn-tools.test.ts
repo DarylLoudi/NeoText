@@ -61,7 +61,12 @@ describe('turnToolFields', () => {
   });
 
   test('no tools left after policies means no tools field', () => {
-    const settings = { policies: { echo: 'off' as const }, maxSteps: 8 };
+    const settings = {
+      policies: { echo: 'off' as const },
+      maxSteps: 8,
+      subagentModel: null,
+      maxSubagents: 4,
+    };
     expect(
       turnToolFields({
         available: [tool],

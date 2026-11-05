@@ -1,4 +1,5 @@
 import { type Folder, type ImportFailure, type ImportResult, newId } from '@neotext/shared';
+import type { AgentsService } from '../agents/service';
 import { MAX_FOLDER_DEPTH } from '../chat/conversations-service';
 import type { FoldersRepo } from '../chat/folders-repo';
 import type { AuthContext } from '../http/env';
@@ -17,6 +18,7 @@ import { type NeoTextImport, readNeoText } from './parsers/neotext';
 export interface ImportNeoTextDeps extends ImportWriteDeps {
   folders: FoldersRepo;
   presets: PresetsService;
+  agents: Pick<AgentsService, 'list' | 'create'>;
   settings: SettingsService;
   providers: ProviderService;
 }
@@ -94,6 +96,37 @@ function importPresets(
   return map;
 }
 
+/**
+ * Agents through the agents service, which seals them under the user's key. One whose name the
+ * user already has (ignoring case) is skipped; a model on a provider the user does not have is
+ * cleared, so the agent uses the chat's model. Runs after providers, so imported ones resolve.
+ */
+function importAgents(
+  deps: ImportNeoTextDeps,
+  auth: AuthContext,
+  rows: NeoTextImport['agents'],
+  failed: ImportFailure[],
+): void {
+  const taken = new Set(deps.agents.list(auth).map((a) => a.name.trim().toLowerCase()));
+  for (const row of rows) {
+    const key = row.name.trim().toLowerCase();
+    if (taken.has(key)) continue;
+    const model =
+      row.data.model && deps.providers.isEnabled(auth, row.data.model.providerId)
+        ? row.data.model
+        : null;
+    try {
+      deps.agents.create(auth, { name: row.name, data: { ...row.data, model } });
+      taken.add(key);
+    } catch (err) {
+      failed.push({
+        title: row.name,
+        reason: err instanceof AppError ? err.message : 'This agent could not be saved.',
+      });
+    }
+  }
+}
+
 /** Each provider goes through the providers service, which checks the endpoint address. */
 async function importProviders(
   deps: ImportNeoTextDeps,
@@ -165,6 +198,7 @@ export async function importBundle(
   const folderIds = importFolders(deps, auth, bundle.folders);
   const presetIds = importPresets(deps, auth, bundle.presets);
   await importProviders(deps, auth, bundle.providers, result.failed);
+  importAgents(deps, auth, bundle.agents, result.failed);
   await writeAll(
     deps,
     auth,

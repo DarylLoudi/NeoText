@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ChatRequestBodySchema, ListQuerySchema } from './chat';
+import { ChatRequestBodySchema, ListQuerySchema, MessagePartSchema } from './chat';
 import { CreateProviderBodySchema } from './providers';
 import { formatSSEData, StreamEventSchema } from './stream';
 
@@ -19,6 +19,7 @@ describe('chat contracts', () => {
       temperature: null,
       maxOutputTokens: null,
       presetId: null,
+      agentId: null,
       folderId: null,
       timeZone: 'UTC',
     });
@@ -80,5 +81,42 @@ describe('chat contracts', () => {
       parse({ kind: 'openai-compatible', name: 'x', baseUrl: 'http://localhost:1234/v1' }),
     ).toBe(true);
     expect(parse({ kind: 'openrouter', name: 'x' })).toBe(true);
+  });
+  test('agent part parses and options.agentId defaults to null', () => {
+    const part = { type: 'agent', agentId: 'agt_1', name: 'Researcher' };
+    expect(MessagePartSchema.parse(part)).toEqual(part);
+    const body = ChatRequestBodySchema.parse({
+      conversationId: null,
+      parentId: null,
+      userMessage: { text: 'hi' },
+      targets: [target],
+    });
+    expect(body.options.agentId).toBeNull();
+  });
+  test('a tool call part with sub-agent runs round-trips', () => {
+    const part = {
+      type: 'tool_call',
+      id: 'c1',
+      name: 'delegate_tasks',
+      source: 'app',
+      args: '{}',
+      status: 'running',
+      result: null,
+      startedAt: 1,
+      finishedAt: null,
+      agents: [
+        {
+          id: 's1',
+          title: 'Look it up',
+          agentName: null,
+          status: 'ok',
+          startedAt: 1,
+          finishedAt: 2,
+          report: 'done',
+          costUsd: 0.01,
+        },
+      ],
+    };
+    expect(MessagePartSchema.parse(part)).toEqual(part);
   });
 });

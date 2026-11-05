@@ -9,9 +9,17 @@ interface MathModules {
 let modules: MathModules | null = null;
 let loading: Promise<void> | null = null;
 
-/** Cheap check for `$…$` or `$$…$$`, so KaTeX is only downloaded for messages that use it. */
+/**
+ * Cheap check for `$…$`, `$$…$$`, `\(…\)` or `\[…\]`, so KaTeX is only downloaded for messages
+ * that use it.
+ */
 export function hasMath(text: string): boolean {
-  return text.includes('$$') || /\$[^\s$][^$\n]*\$/.test(text);
+  return (
+    text.includes('$$') ||
+    /\$[^\s$][^$\n]*\$/.test(text) ||
+    /\\\(.+?\\\)/s.test(text) ||
+    /\\\[.+?\\\]/s.test(text)
+  );
 }
 
 export function isMathReady(): boolean {
@@ -38,14 +46,14 @@ export function ensureMath(): Promise<void> {
 }
 
 /**
- * Adds `$…$` / `$$…$$` support to a markdown-it instance once KaTeX has loaded. Returns whether
+ * Adds `$…$` / `$$…$$` and `\(…\)` / `\[…\]` support to a markdown-it instance once KaTeX has loaded. Returns whether
  * the plugin is now active, so callers can retry on a later render.
  */
 export function applyMath(md: MarkdownIt): boolean {
   if (!modules) return false;
   md.use(modules.plugin, {
     engine: modules.katex,
-    delimiters: 'dollars',
+    delimiters: ['dollars', 'brackets'],
     katexOptions: {
       output: 'html',
       trust: false,

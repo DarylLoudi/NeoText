@@ -71,6 +71,13 @@
       "when": 1793857300831,
       "tag": "0009_quotas",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1793888617811,
+      "tag": "0010_agents",
+      "breakpoints": true
     }
   ]
 }

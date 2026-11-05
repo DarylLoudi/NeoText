@@ -46,8 +46,8 @@
   line-height: 1.35;
   overflow-wrap: anywhere;
   text-decoration-line: underline;
-  text-decoration-color: var(--marker);
-  text-decoration-thickness: 0.15em;
+  text-decoration-color: var(--ink-faint);
+  text-decoration-thickness: 1px;
   text-underline-offset: 0.15em;
 }
 .title:focus-visible {

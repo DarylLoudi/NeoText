@@ -1,6 +1,7 @@
 import { promisify } from 'node:util';
 import { gunzip, gzip } from 'node:zlib';
 import type {
+  AgentPublic,
   ConversationSummary,
   Folder,
   MessagePublic,
@@ -35,6 +36,8 @@ export interface BundleV1 {
   conversations: ConversationSummary[];
   messages: MessagePublic[];
   presets: Preset[];
+  /** The user's custom agents; files from before agents existed have none. */
+  agents?: AgentPublic[];
   providers?: BundleProvider[];
 }
 
@@ -110,7 +113,8 @@ function isBundleV1(v: unknown): v is BundleV1 {
     typeof b.exportedAt === 'number' &&
     typeof b.app === 'string' &&
     ['folders', 'conversations', 'messages', 'presets'].every((k) => Array.isArray(b[k])) &&
-    (b.providers === undefined || Array.isArray(b.providers))
+    (b.providers === undefined || Array.isArray(b.providers)) &&
+    (b.agents === undefined || Array.isArray(b.agents))
   );
 }
 

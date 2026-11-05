@@ -17,8 +17,9 @@
   background: var(--shelf-hover);
 }
 .row[data-active] {
-  background: var(--marker);
-  color: var(--on-marker);
+  background: var(--shelf-hover);
+  color: var(--ink);
+  font-weight: 500;
 }
 .row[data-dragging] {
   opacity: 0.4;

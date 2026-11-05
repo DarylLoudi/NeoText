@@ -1,13 +1,19 @@
-/* Muted like "You": the gutter names the speaker without competing with the text. */
+/* The model's name leads the details line, a step stronger than the figures after it. */
 .model {
   color: var(--ink-muted);
 }
 
-.figures {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  column-gap: var(--space-2);
+/* The agent that answered, ahead of its model: "Agent-Frontend · deepseek v4.1 flash". */
+.agent {
+  color: var(--ink);
+  font-weight: 500;
+  unicode-bidi: isolate;
+}
+.agent::after {
+  content: "·";
+  margin-inline-start: var(--space-3);
+  color: var(--ink-faint);
+  font-weight: 400;
 }
 
 /* Keeps room for the caret when nothing has arrived yet. */
@@ -31,10 +37,4 @@
   color: var(--danger);
   font-family: var(--font-ui);
   font-size: var(--text-md);
-}
-
-@media (max-width: 767px) {
-  .figures {
-    justify-content: flex-start;
-  }
 }

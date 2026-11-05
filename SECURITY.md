@@ -26,7 +26,7 @@ Never send real API keys, passwords or chat contents in a report. Fake ones are 
 | Password guessing | Argon2id, rate limits per IP and per username, and the same timing for unknown users. |
 | Server-side request forgery (custom endpoints, the fetch tool, favicons, MCP) | Only http(s); DNS is resolved and checked at connect time, so rebinding does not help; private ranges are blocked for tools always and for endpoints unless the admin's policy allows them; cloud metadata addresses are blocked always. |
 | Key leakage | API keys never go back to the browser (only a short hint, and members do not get that for shared providers). Keys are redacted in logs and never committed (`.env` is ignored; `npm run lint` scans tracked files for key-shaped strings). |
-| Malicious tool use through prompt injection | Per-tool policies (`auto`, `ask`, `off`), an approval prompt for MCP and write-capable tools, truncated tool results, and fetch tools that cannot reach private networks. |
+| Malicious tool use through prompt injection | Per-tool policies (`auto`, `ask`, `off`), an approval prompt for MCP and write-capable tools, truncated tool results, and fetch tools that cannot reach private networks. Sub-agents run only `auto` tools, and their calls are listed on their row (see [Sub-agents](#sub-agents)). |
 | One user exhausting the server | Body size limits, per-user rate limits on the costly endpoints, a per-user storage cap for attached files, bounded import unpacking, and a cap on imports running at once (see below). |
 
 ## Keys and envelopes, in plain words
@@ -86,6 +86,28 @@ usernames, and the audit log (which records events and counts, never content).
 
 The 4, 25 and 200 MiB routes take a body only from a signed-in user, and only with a
 `Content-Length` header: a chunked upload is refused (411) before it is read.
+
+## Sub-agents
+
+The `delegate_tasks` tool lets a model split a big job into parallel tasks for sub-agents.
+
+- **Limits.** One delegation per answer, 2 to 6 tasks (Settings → Agents), 6 model calls per
+  sub-agent, 2,000 output tokens per call, 16 tool calls per step, and 120 seconds per
+  sub-agent. A stop ends every sub-agent. Sub-agents cannot delegate again.
+- **Search budget.** A delegation has one search budget: the per-message search limit times
+  the number of tasks, at most 12 searches in all, separate from the answer's own. Each
+  sub-agent on OpenRouter's search gets its fair share of it.
+- **Shared-provider quota.** A sub-agent model on an admin-shared provider runs only while the
+  member's shared quota has room, as for the chat itself; otherwise the main model runs the
+  task when it may, and else the task fails with a message.
+- **Tools.** Sub-agents get only `web_search` and `fetch_url`, only when their policy is `auto`
+  (they cannot ask for approval), and only when the agent allows them. `fetch_url` refuses
+  private networks, as for the chat. Turning `web_search` off in Settings → Tools turns off
+  every web search, the provider's own included.
+- **Reports are untrusted.** A sub-agent reads web pages that can carry injected orders. Its
+  prompt says tool results are data, not instructions, and its report reaches the main model as
+  a tool result. Each sub-agent's searches and fetched URLs are listed on its row, and fetched
+  URLs are logged (the URL only, never the page).
 
 ## Operator checklist
 

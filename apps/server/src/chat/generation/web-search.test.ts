@@ -47,13 +47,13 @@ test.each<[string, Scenario, string]>([
   [
     'openrouter no tools, backend',
     { enabled: true, kind: or, tools: false, backend: true },
-    'pre-search',
+    'none',
   ],
   ['custom with backend', { enabled: true, kind: custom, tools: null, backend: true }, 'tool'],
   [
     'custom no tools, backend',
     { enabled: true, kind: custom, tools: false, backend: true },
-    'pre-search',
+    'none',
   ],
   ['custom no backend', { enabled: true, kind: custom, tools: true, backend: false }, 'none'],
 ])('%s', (_, input, expected) => {
@@ -138,7 +138,7 @@ test('settings saved with an engine that has no modes send none', () => {
   expect(plan.serverTools[0]).not.toHaveProperty('parameters.mode');
 });
 
-test('the tool plan carries web_search and the pre-search plan runs the backend', async () => {
+test('the tool plan carries web_search; a model without tools gets no search', () => {
   const search = vi.fn(async () => [{ url: 'https://a.test/', title: 'A', snippet: 'a' }]);
   const backend = {
     backend: { kind: 'searxng', search } as SearchBackend,
@@ -149,16 +149,9 @@ test('the tool plan carries web_search and the pre-search plan runs the backend'
   expect(tool.kind === 'tool' && tool.tool.name).toBe('web_search');
   expect(tool.kind === 'tool' && tool.budget.remaining()).toBe(base.settings.maxSearchesPerTurn);
 
-  const pre = planWebSearch({
-    ...base,
-    model: withTools(false),
-    backend,
-    settings: { ...base.settings, maxResults: 7 },
-  });
-  if (pre.kind !== 'pre-search') throw new Error('expected pre-search');
-  const signal = new AbortController().signal;
-  await expect(pre.run('btc', signal)).resolves.toHaveLength(1);
-  expect(search).toHaveBeenCalledWith(searchProvider, 'btc', { count: 7, signal });
+  const none = planWebSearch({ ...base, model: withTools(false), backend });
+  expect(none.kind).toBe('none');
+  expect(search).not.toHaveBeenCalled();
 });
 
 test('pre-search context marks results as untrusted reference data', () => {

@@ -409,4 +409,60 @@ describe('import a NeoText bundle', () => {
     ]);
     expect(t.c.providers.list(auth).filter((p) => !p.shared)).toEqual([]);
   });
+
+  test('agents travel in the bundle; a name the user has is skipped', async () => {
+    t.c.agents.create(auth, {
+      name: 'Scout',
+      data: {
+        description: 'Finds things',
+        instructions: 'Search well.',
+        model: { providerId: 'prv_elsewhere', modelId: 'm' },
+        tools: { webSearch: false, fetchUrl: true },
+        autoDelegate: true,
+        enabled: true,
+      },
+    });
+    t.c.agents.create(auth, {
+      name: 'Critic',
+      data: {
+        description: '',
+        instructions: 'Be harsh.',
+        model: null,
+        tools: { webSearch: true, fetchUrl: true },
+        autoDelegate: false,
+        enabled: true,
+      },
+    });
+    const file = (await t.c.exporter.exportData(auth, { format: 'neotext', passphrase: PW })).data;
+    const other = await addUser(t, 'tamu');
+    t.c.agents.create(other.auth, {
+      name: 'critic',
+      data: {
+        description: '',
+        instructions: 'Mine.',
+        model: null,
+        tools: { webSearch: true, fetchUrl: true },
+        autoDelegate: false,
+        enabled: true,
+      },
+    });
+    const result = await importer().importData(other.auth, {
+      source: 'neotext',
+      file,
+      passphrase: PW,
+    });
+    expect(result.failed).toEqual([]);
+    const list = t.c.agents.list(other.auth);
+    expect(list.map((a) => a.name).sort()).toEqual(['Scout', 'critic']);
+    const scout = list.find((a) => a.name === 'Scout');
+    // Sealed under the new owner's key with a new id; the unknown model is cleared.
+    expect(t.c.agents.get(other.auth, scout?.id ?? '')?.data).toMatchObject({
+      instructions: 'Search well.',
+      model: null,
+      tools: { webSearch: false, fetchUrl: true },
+      autoDelegate: true,
+    });
+    expect(list.find((a) => a.name === 'critic')?.data.instructions).toBe('Mine.');
+    expect(t.c.agents.list(auth).map((a) => a.id)).not.toContain(scout?.id);
+  });
 });

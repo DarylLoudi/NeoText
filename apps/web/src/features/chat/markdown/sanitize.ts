@@ -32,7 +32,7 @@ const TAGS = [
   'sup',
   'sub',
 ];
-const ATTRS = ['href', 'title', 'class', 'target', 'rel', 'dir', 'type'];
+const ATTRS = ['href', 'title', 'class', 'target', 'rel', 'dir', 'type', 'aria-live'];
 const LINK_REL = 'noopener noreferrer nofollow';
 
 /** Inline styles can fetch resources or cover the page; these never belong in a safe style. */

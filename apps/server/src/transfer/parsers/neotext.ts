@@ -1,4 +1,6 @@
 import {
+  type AgentCreate,
+  AgentCreateSchema,
   type ConversationSummary,
   ConversationSummarySchema,
   type CreatePresetBody,
@@ -21,6 +23,8 @@ import { cleanName, type Failure, failure, isObject, str, TITLE_MAX } from './ty
 export interface NeoTextImport {
   folders: Folder[];
   presets: (CreatePresetBody & { id: string })[];
+  /** Agents that validated; names already made one line by the schema. */
+  agents: AgentCreate[];
   /** In file order, so failures read in the order the user sees their providers. */
   providers: ({ ok: true; name: string; body: CreateProviderBody } | Failure)[];
   settings: unknown;
@@ -142,6 +146,19 @@ export function readNeoText(bundle: BundleV1): NeoTextImport {
     presets.push({ ...parsed.data, name, id });
   }
 
+  const agents: AgentCreate[] = [];
+  for (const row of (bundle.agents ?? []) as unknown[]) {
+    const parsed = AgentCreateSchema.safeParse(row);
+    if (!parsed.success) {
+      failed.push({
+        title: nameOf(row, 'name'),
+        reason: 'An agent in the file is not valid, so it was skipped.',
+      });
+      continue;
+    }
+    agents.push(parsed.data);
+  }
+
   const providers: NeoTextImport['providers'] = [];
   for (const row of (bundle.providers ?? []) as unknown[]) {
     const raw = BundleProviderSchema.safeParse(row);
@@ -234,6 +251,7 @@ export function readNeoText(bundle: BundleV1): NeoTextImport {
   return {
     folders,
     presets,
+    agents,
     providers,
     settings: bundle.settings,
     settingsSchemaVersion,

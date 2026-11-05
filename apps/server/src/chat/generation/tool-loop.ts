@@ -1,4 +1,9 @@
-import { CALL_ID_MAX, type StreamEventPayload, type ToolCallPart } from '@neotext/shared';
+import {
+  CALL_ID_MAX,
+  type StreamEventPayload,
+  type SubagentRun,
+  type ToolCallPart,
+} from '@neotext/shared';
 import type { Clock } from '../../lib/clock';
 import type { ToolCallRequest } from '../../providers/types';
 import type { ToolContext, ToolDefinition, ToolSet } from '../../tools/types';
@@ -123,6 +128,7 @@ async function execute(
   def: ToolDefinition,
   args: unknown,
   input: RunToolCallsInput,
+  progress: (agents: SubagentRun[]) => void,
 ): Promise<Outcome & { sources?: SourceInput[] }> {
   const { generation } = input;
   const timeoutMs = def.timeoutMs ?? TOOL_TIMEOUT_MS;
@@ -146,7 +152,8 @@ async function execute(
   try {
     const result = await Promise.race([
       Promise.resolve().then(
-        (): Promise<unknown> => def.execute(args, { ...input.ctx, signal: controller.signal }),
+        (): Promise<unknown> =>
+          def.execute(args, { ...input.ctx, signal: controller.signal, progress }),
       ),
       stopped,
     ]);
@@ -212,6 +219,14 @@ async function runGuarded(call: ToolCallRequest, input: RunToolCallsInput): Prom
 
   // The tool's time starts at the answer: the wait for the user is not part of it.
   let answeredAt: number | null = null;
+  // Sub-agent rows (`delegate_tasks`); updates after the call settled are dropped.
+  let agents: SubagentRun[] | null = null;
+  let settled = false;
+  const progress = (rows: SubagentRun[]) => {
+    if (settled) return;
+    agents = rows.map((r) => ({ ...r }));
+    send(acc.updateToolCall(call.id, { agents }));
+  };
   const decide = async (): Promise<Outcome> => {
     if (!def) return { status: 'error', text: `Unknown tool: ${call.name}` };
     if (!args.ok) {
@@ -225,7 +240,7 @@ async function runGuarded(call: ToolCallRequest, input: RunToolCallsInput): Prom
       if (decision === 'timeout') return { status: 'no_answer', text: NO_ANSWER };
       send(acc.updateToolCall(call.id, { status: 'running', startedAt: answeredAt }));
     }
-    const outcome = await execute(def, args.value, input);
+    const outcome = await execute(def, args.value, input, progress);
     if (outcome.sources) send(acc.addSources(outcome.sources));
     return { status: outcome.status, text: outcome.text };
   };
@@ -236,12 +251,19 @@ async function runGuarded(call: ToolCallRequest, input: RunToolCallsInput): Prom
   } catch (err) {
     outcome = { status: 'error', text: errorText(err) };
   }
+  settled = true;
+  const finishedAt = clock.now();
+  // A stop or time-out can settle the call before its sub-agents report: they show as stopped.
+  const finalAgents = (agents as SubagentRun[] | null)?.map((r) =>
+    r.status === 'running' ? { ...r, status: 'stopped' as const, finishedAt } : r,
+  );
   send(
     acc.updateToolCall(call.id, {
       status: outcome.status,
       result: forStorage(outcome.text),
-      finishedAt: clock.now(),
+      finishedAt,
       ...(answeredAt !== null ? { startedAt: answeredAt } : {}),
+      ...(finalAgents ? { agents: finalAgents } : {}),
     }),
   );
   return { role: 'tool', toolCallId: call.id, content: forModel(outcome.text) };

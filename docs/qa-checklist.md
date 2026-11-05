@@ -31,7 +31,7 @@ Record: date, operating system, browser and version, Node version, commit.
 
 ## 3. Web search with citations
 
-- [ ] Turn on Web and ask something current ("What is today's date and one headline from the news?").
+- [ ] Ask something current ("What is today's date and one headline from the news?"). The model searches on its own; there is no Web toggle. A greeting such as "Halo!" does not search.
 - [ ] "Searching the web" shows while it runs.
 - [ ] The answer has numbered citation chips. Hovering one shows the source.
 - [ ] The Sources strip shows cards with pages. "All sources" opens a drawer you can filter.
@@ -102,9 +102,19 @@ Use NVDA on Windows, VoiceOver on macOS or iOS, or Orca on Linux.
 - [ ] Dialogs take focus when they open, trap it, and return it to the button that opened them.
 - [ ] Everything above works with the keyboard alone, and the focus ring is always visible.
 
+## 10b. Agents and sub-agents
+
+- [ ] Settings → Agents: create "Agent-Frontend" with a description and instructions, and import a small `.md` file into the instructions. A file over 200 KB is refused with a message.
+- [ ] In a new chat, pick the agent with the Agent button, then remove the chip; type `@Agent` at the start and pick it from the list. The answer shows "Agent-Frontend" in its details line.
+- [ ] Ask a big job with independent parts ("Research three separate topics in depth: … and cite sources"). A Sub-agents card shows each task running, then collapses to "N sub-agents finished". Opening a row shows its searches and report.
+- [ ] Ask "Halo!" and "17 x 23?": no Sub-agents card and no search.
+- [ ] Stop an answer while sub-agents run: the rows show as stopped.
+- [ ] Settings → Tools → Sub-agents set to Off: big jobs are answered without delegation.
+- [ ] Usage shows the sub-agent calls in the day's total.
+
 ## 11. Dark mode and motion
 
-- [ ] Choose Dark. Walk through chat, sources, compare, settings, the admin pages and dialogs. Text is easy to read everywhere and nothing is white on white or dark on dark.
+- [ ] Dark is the default for a new account. Choose Light, then Dark again. Walk through chat, sources, compare, settings, the admin pages and dialogs. Text is easy to read everywhere and nothing is white on white or dark on dark.
 - [ ] "System" follows the operating system when you change it.
 - [ ] With reduced motion on (the operating system or the NeoText setting), the caret does not breathe and nothing slides.
 

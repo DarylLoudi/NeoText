@@ -97,7 +97,7 @@ type QuickAction = z.infer<typeof QuickActionSchema>;
 const modelRefOrNull = () => ModelRefSchema.nullable().catch(null);
 
 const AppearanceSchema = section({
-  theme: leaf(z.enum(['system', 'light', 'dark']), 'system'),
+  theme: leaf(z.enum(['system', 'light', 'dark']), 'dark'),
   accent: leaf(z.enum(['marker', 'mint', 'sky', 'rose', 'graphite']), 'marker'),
   uiFont: leaf(z.enum(['atkinson', 'system']), 'atkinson'),
   readingFont: leaf(z.enum(['atkinson', 'literata', 'system']), 'atkinson'),
@@ -199,6 +199,8 @@ const WebSearchSchema = section({
 const ToolsSchema = section({
   policies: recordOf(ToolPolicySchema),
   maxSteps: leaf(z.number().int().min(1).max(20), 8),
+  subagentModel: modelRefOrNull(),
+  maxSubagents: leaf(z.number().int().min(2).max(6), 4),
 });
 
 const ModelsSchema = section({

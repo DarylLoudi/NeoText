@@ -12,6 +12,9 @@ describe('hasMath', () => {
     ['$$\nx\n$$', true],
     ['no math, costs 5 dollars', false],
     ['a lone $ sign', false],
+    [String.raw`inline \(x^2\) here`, true],
+    [String.raw`\[\frac{a}{b}\]`, true],
+    ['(plain parentheses)', false],
     ['', false],
   ])('%j -> %s', (text, expected) => {
     expect(hasMath(text)).toBe(expected);
@@ -26,6 +29,12 @@ describe('math rendering', () => {
     expect(out).toContain('class="katex"');
     expect(out).toContain('style="');
     expect(out).not.toContain('<annotation');
+  });
+
+  test('renders bracket delimiters', async () => {
+    await ensureMath();
+    expect(renderBlock(String.raw`Jika \(\alpha = 0\), maka`, opts)).toContain('class="katex"');
+    expect(renderBlock(String.raw`\[y(t) = C_1 \cos(\beta t)\]`, opts)).toContain('katex-display');
   });
 
   test('display math with blank lines stays one block and renders', async () => {

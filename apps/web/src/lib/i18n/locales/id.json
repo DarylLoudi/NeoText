@@ -110,7 +110,7 @@
       "smart": "Bagian pintar",
       "presets": "Preset"
     },
-    "pinnedEmpty": "Seret obrolan ke sini, atau pilih Sematkan dari menunya.",
+    "pinnedEmpty": "Seret obrolan ke sini untuk menyematkan.",
     "archivedEmpty": "Tidak ada obrolan yang diarsipkan.",
     "folderEmpty": "Belum ada obrolan di folder ini.",
     "loadFailed": "Obrolan tidak bisa dimuat. Periksa koneksimu, lalu coba lagi.",
@@ -196,7 +196,7 @@
       "previewFailed": "Jumlah yang cocok tidak bisa dihitung. Periksa koneksimu, lalu coba lagi."
     },
     "presets": {
-      "empty": "Belum ada preset. Preset menyimpan prompt sistem, model, dan pengaturan yang sering kamu pakai.",
+      "empty": "Simpan prompt dan model yang sering kamu pakai.",
       "new": "Preset baru",
       "edit": "Ubah",
       "delete": "Hapus",
@@ -226,7 +226,6 @@
         "optionalHint": "Opsional.",
         "temperatureInvalid": "Pakai angka dari 0 sampai 2.",
         "maxTokensInvalid": "Pakai bilangan bulat dari 1 sampai 200.000.",
-        "webSearch": "Cari di web",
         "invalid": "Periksa pengaturan preset lalu coba lagi."
       },
       "gone": "Preset itu sudah dihapus. Pesanmu belum terkirim; kirim lagi untuk mengobrol tanpa preset.",
@@ -250,8 +249,39 @@
       "show": "Tampilkan perbandingan",
       "continuesHere": "Berlanjut dari sini"
     },
+    "agents": {
+      "button": "Agen",
+      "menu": "Agen",
+      "none": "Belum ada agen. Tambahkan di Pengaturan, Agen.",
+      "remove": "Hapus {{agent}}",
+      "chip": "Menjawab sebagai {{agent}}",
+      "placeholder": "Tanya {{agent}}",
+      "compareOff": "Agen menjawab sendiri",
+      "suggestions": "Agen"
+    },
+    "subagents": {
+      "title": "Sub-agen",
+      "tasks_one": "{{count}} tugas",
+      "tasks_other": "{{count}} tugas",
+      "progress": "{{done}} dari {{total}} selesai",
+      "finished_one": "{{count}} sub-agen selesai",
+      "finished_other": "{{count}} sub-agen selesai",
+      "failed": "{{count}} gagal",
+      "stopped": "{{count}} dihentikan",
+      "status": {
+        "running": "Berjalan",
+        "ok": "Selesai",
+        "error": "Gagal",
+        "stopped": "Dihentikan"
+      },
+      "working": "Masih bekerja.",
+      "noReport": "Tidak ada laporan.",
+      "report": "Laporan dari {{title}}"
+    },
     "messagePlaceholder": "Kirim pesan ke NeoText",
     "send": "Kirim pesan",
+    "sendHintEnter": "Kirim (Enter)",
+    "sendHintMod": "Kirim (Ctrl+Enter)",
     "stop": "Hentikan jawaban",
     "regenerate": "Buat ulang jawaban",
     "edit": "Ubah pesan",
@@ -274,15 +304,6 @@
       "search": "Cari sumber",
       "noMatch": "Tidak ada sumber yang cocok dengan “{{query}}”."
     },
-    "webToggle": {
-      "label": "Web",
-      "tooltip": "Cari di web untuk pesanmu ini",
-      "via": "Memakai {{engine}}: {{price}}",
-      "engineMode": "{{engine}} ({{mode}})",
-      "viaBackend": "Memakai penyedia pencarianmu",
-      "viaNative": "Memakai pencarian milik penyedia model, dengan harganya",
-      "viaAuto": "Memakai pencarian bawaan model kalau ada, kalau tidak Exa"
-    },
     "activity": {
       "searching": "Mencari di web…",
       "working": "Memproses…",
@@ -292,7 +313,8 @@
     "tools": {
       "names": {
         "fetch_url": "Pembaca halaman web",
-        "web_search": "Pencarian web"
+        "web_search": "Pencarian web",
+        "delegate_tasks": "Sub-agen"
       },
       "labels": {
         "fetch_url": {
@@ -306,6 +328,10 @@
         "other": {
           "running": "Sedang memakai {{tool}}",
           "done": "Sudah memakai {{tool}}"
+        },
+        "delegate_tasks": {
+          "running": "Menjalankan sub-agen",
+          "done": "Sub-agen selesai"
         }
       },
       "failed": "Gagal",
@@ -435,7 +461,8 @@
       "connect": "Hubungkan penyedia model untuk mulai.",
       "connectButton": "Buka pengaturan penyedia",
       "noModels": "Belum ada model dari penyedia-penyediamu. Periksa penyedianya di pengaturan.",
-      "unknown": "Tidak tercantum"
+      "unknown": "Tidak tercantum",
+      "greeting": "Ada yang bisa saya bantu?"
     },
     "errors": {
       "thinkingBudget": "Model memakai seluruh jatah jawabannya untuk berpikir. Coba lagi, atau naikkan panjang jawaban, atau turunkan tingkat penalaran.",
@@ -483,6 +510,7 @@
       "mcp": "Server alat",
       "models": "Model",
       "tools": "Alat",
+      "agents": "Agen",
       "data": "Data",
       "security": "Keamanan",
       "about": "Tentang"
@@ -544,7 +572,7 @@
       "themeSystem": "Ikuti sistem",
       "accent": "Warna aksen",
       "accents": {
-        "marker": "Kuning stabilo",
+        "marker": "Netral",
         "mint": "Mint",
         "sky": "Langit",
         "rose": "Mawar",
@@ -774,9 +802,7 @@
     "tools": {
       "intro": "Apa yang bisa dilakukan asisten selain menulis: mencari di web, membaca halaman, dan memakai alat dari server alat.",
       "webSearch": "Pencarian web",
-      "webSearchIntro": "Mesin, mode, dan ukuran konteks berlaku untuk model di OpenRouter. Model lain mencari lewat backend pencarianmu.",
-      "defaultOn": "Cari di web secara bawaan",
-      "defaultOnHint": "Tombol Web langsung menyala di setiap pesan baru. Kamu tetap bisa mematikannya untuk satu pesan.",
+      "webSearchIntro": "Model sendiri yang menentukan kapan mencari. Mesin, mode, dan ukuran konteks berlaku untuk model di OpenRouter. Model lain mencari lewat backend pencarianmu.",
       "engine": "Mesin pencari",
       "mode": "Mode pencarian",
       "engines": {
@@ -824,7 +850,8 @@
       },
       "descriptions": {
         "fetch_url": "Membuka tautan dan membaca teks halamannya.",
-        "web_search": "Mencari di web lewat backend pencarianmu."
+        "web_search": "Mencari di web lewat backend pencarianmu.",
+        "delegate_tasks": "Model chat bisa memecah pekerjaan besar jadi tugas paralel."
       },
       "fromServer": "Dari server alat",
       "empty": "Belum ada alat yang tersedia.",
@@ -1089,9 +1116,57 @@
         "month": "Bulan ini: {{spent}} dari {{limit}}, sisa {{left}}",
         "exhausted": "Kamu sudah memakai anggaranmu di model bersama. Penyedia milikmu sendiri tetap bisa dipakai."
       }
+    },
+    "agents": {
+      "intro": "Agen adalah instruksi tersimpan yang bisa diberi tugas oleh model chat.",
+      "subagents": "Sub-agen",
+      "subagentModel": "Model sub-agen",
+      "clearSubagentModel": "Pakai model chat untuk sub-agen",
+      "sameModel": "Sama dengan chat",
+      "maxSubagents": "Sub-agen terbanyak per tugas",
+      "maxSubagentsInvalid": "Isi bilangan bulat dari 2 sampai 6.",
+      "subagentsHelp": "Model chat memecah pekerjaan besar jadi tugas paralel hanya saat itu membantu.",
+      "yours": "Agenmu",
+      "list": "Agenmu",
+      "empty": "Belum ada agen. Buat satu untuk pekerjaan yang kamu ulang, seperti meninjau kode frontend.",
+      "loadFailed": "Agen tidak bisa dimuat. Periksa koneksimu lalu coba lagi.",
+      "new": "Agen baru",
+      "edit": "Ubah",
+      "delete": "Hapus",
+      "editNamed": "Ubah {{name}}",
+      "deleteNamed": "Hapus {{name}}",
+      "enabled": "Aktifkan {{name}}",
+      "deleteTitle": "Hapus {{name}}?",
+      "deleteBody": "Agen ini dihapus. Chat yang sudah memakainya tetap menyimpan jawabannya.",
+      "editor": {
+        "newTitle": "Agen baru",
+        "editTitle": "Ubah agen",
+        "name": "Nama",
+        "nameRequired": "Beri nama untuk agen ini.",
+        "nameTooLong": "Nama paling banyak 60 karakter.",
+        "description": "Kapan dipakai",
+        "descriptionHint": "Satu baris yang memberi tahu model chat kapan agen ini cocok.",
+        "instructions": "Instruksi",
+        "instructionsRequired": "Tulis instruksi yang harus diikuti agen.",
+        "instructionsTooLong": "Instruksi paling banyak 50.000 karakter. Persingkat lalu coba lagi.",
+        "count": "{{count}} / {{max}} karakter",
+        "import": "Impor .md",
+        "importFile": "Berkas instruksi",
+        "importTooBig": "Berkas itu lebih dari 200 KB. Pilih berkas .md atau .txt yang lebih kecil.",
+        "importFailed": "Berkas tidak bisa dibaca. Coba berkas lain.",
+        "importCut": "Berkas lebih panjang dari {{max}} karakter, jadi bagian akhirnya dipotong.",
+        "model": "Model",
+        "clearModel": "Pakai model chat untuk agen ini",
+        "webSearch": "Boleh mencari di web",
+        "fetchUrl": "Boleh membaca halaman web",
+        "autoDelegate": "Biarkan model chat memanggil agen ini sendiri",
+        "invalid": "Ada isi agen yang tidak valid. Periksa isian lalu coba lagi."
+      }
     }
   },
   "shell": {
+    "contextMeter": "Jendela konteks: {{used}} dari {{limit}} token terpakai (sisa {{left}})",
+    "contextChanged": "Chat baru dimulai: model ini punya jendela konteks yang berbeda",
     "search": {
       "title": "Cari obrolan",
       "description": "Cari judul dan pesan di semua obrolanmu.",
@@ -1138,7 +1213,8 @@
     },
     "moreActions": "Aksi lainnya",
     "exportChat": "Ekspor obrolan ini",
-    "exportedChat": "Obrolan diekspor sebagai Markdown"
+    "exportedChat": "Obrolan diekspor sebagai Markdown",
+    "backToChats": "Kembali ke obrolan"
   },
   "admin": {
     "title": "Admin",

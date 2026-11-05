@@ -8,6 +8,7 @@ export const SECTIONS = [
   'mcp',
   'models',
   'tools',
+  'agents',
   'data',
   'security',
   'about',

@@ -166,7 +166,7 @@ async function noToolsProvider() {
   return id;
 }
 
-test('a model without tools gets pre-search results as untrusted context', async () => {
+test('a model without tools is not searched for ahead of the answer', async () => {
   await startSearx();
   await useBackend(await searxng(searxUrl));
   const id = await noToolsProvider();
@@ -174,24 +174,9 @@ test('a model without tools gets pre-search results as untrusted context', async
   const evs = await turn(id, true);
   const body = sentBodies()[0];
   expect(body?.tools).toBeUndefined();
-  const context = body?.messages.find((m) => m.content.includes('untrusted data'));
-  expect(context?.role).toBe('system');
-  expect(context?.content).toContain('[1] First — https://a.test/x');
-  expect(evs.flatMap((e) => (e.type === 'sources.added' ? e.sources : [])).map((s) => s.n)).toEqual(
-    [1, 2],
-  );
-  expect(activities(evs)).toEqual(['searching', 'idle']);
-});
-
-test('pre-search failure does not block the answer', async () => {
-  await useBackend(await searxng(mock.url)); // the mock has no /search: 404
-  const id = await noToolsProvider();
-  mock.enqueue({ frames: textFrames('Dijawab tanpa web') });
-  const evs = await turn(id, true);
-  const fin = evs.find((e) => e.type === 'generation.finished');
-  expect(fin?.type === 'generation.finished' && fin.message.status).toBe('complete');
-  expect(sentBodies()[0]?.messages.some((m) => m.content.includes('untrusted data'))).toBe(false);
-  expect(activities(evs)).toEqual(['searching', 'idle']);
+  expect(body?.messages.some((m) => m.content.includes('untrusted data'))).toBe(false);
+  expect(evs.some((e) => e.type === 'sources.added')).toBe(false);
+  expect(activities(evs)).toEqual([]);
 });
 
 test('GET /api/tools reports whether a usable search backend is chosen', async () => {
@@ -205,4 +190,17 @@ test('GET /api/tools reports whether a usable search backend is chosen', async (
   expect(await flag()).toBe(true);
   await api(`/api/providers/${id}`, { method: 'PATCH', body: JSON.stringify({ enabled: false }) });
   expect(await flag()).toBe(false);
+});
+
+test('the web_search policy off turns OpenRouter search off too', async () => {
+  await api('/api/settings', {
+    method: 'PATCH',
+    body: JSON.stringify({ patch: { tools: { policies: { web_search: 'off' } } } }),
+  });
+  mock.enqueue({ frames: textFrames('ok') });
+  await turn(await openRouter(), true);
+  const body = sentBodies()[0] as Record<string, unknown>;
+  expect(toolTypes(body)).not.toContain('openrouter:web_search');
+  expect(body.max_tool_calls).toBeUndefined();
+  expect(JSON.stringify(body.messages)).not.toContain('You can search the web.');
 });

@@ -1,0 +1,293 @@
+/* Sub-agents at work: a framed group while they run, one quiet line once they are done. */
+.card {
+  margin: var(--space-3) 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  overflow: hidden;
+  transition:
+    border-color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+/* Finished and folded: no frame, it reads like a tool row. */
+.card[data-finished="true"] {
+  border-color: transparent;
+}
+.card[data-finished="true"]:has(.rows) {
+  border-color: var(--rule);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 36px;
+  padding: var(--space-1) var(--space-3);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.card[data-finished="true"] .head {
+  width: fit-content;
+  max-width: 100%;
+  min-height: 28px;
+  padding-inline: 0 var(--space-1);
+}
+.card[data-finished="true"]:has(.rows) .head {
+  width: 100%;
+  padding-inline: var(--space-3);
+}
+.head:hover {
+  color: var(--ink);
+}
+.head:focus-visible,
+.rowButton:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+  border-radius: var(--radius-control);
+}
+
+.robot {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--ink);
+}
+.card[data-finished="true"] .robot {
+  color: var(--ink-muted);
+}
+.headTitle {
+  color: var(--ink);
+  font-weight: 550;
+}
+.card[data-finished="true"] .headTitle {
+  font-weight: 400;
+  color: inherit;
+}
+.meta,
+.failed {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.meta::before,
+.failed::before {
+  content: "·";
+  margin-inline-end: var(--space-2);
+  color: var(--ink-faint);
+}
+.failed {
+  color: var(--danger);
+}
+.progressText {
+  margin-inline-start: auto;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.chevron {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  color: var(--ink-faint);
+  transition: transform var(--dur-fast) var(--ease);
+}
+[aria-expanded="true"] > .chevron {
+  transform: rotate(90deg);
+}
+
+/* Done out of total: a hairline under the header that fills as rows finish. */
+.track {
+  height: 2px;
+  margin: 0 var(--space-3);
+  background: var(--rule);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.fill {
+  display: block;
+  height: 100%;
+  background: var(--ink-muted);
+  transition: inline-size var(--dur) var(--ease);
+}
+
+.rows {
+  display: grid;
+  margin: 0;
+  padding: var(--space-1) var(--space-1) var(--space-2);
+  list-style: none;
+}
+
+.row {
+  animation: row-in var(--dur) var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+.rowButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 32px;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.rowButton:hover {
+  background: var(--shelf);
+}
+
+.lead {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+.lead svg {
+  width: 15px;
+  height: 15px;
+}
+.spin {
+  color: var(--ink-muted);
+  animation: spin 900ms linear infinite;
+}
+.dot {
+  display: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+}
+.ok {
+  color: var(--success);
+}
+.error {
+  color: var(--danger);
+}
+.stopped {
+  color: var(--ink-faint);
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.title {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  unicode-bidi: isolate;
+}
+.row[data-status="stopped"] .title {
+  color: var(--ink-muted);
+}
+.agent {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 0 var(--space-1);
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-chip);
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  unicode-bidi: isolate;
+}
+.time {
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.cost {
+  flex: none;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.report {
+  margin: var(--space-1) var(--space-2) var(--space-2) calc(var(--space-2) + 7px);
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  border-inline-start: 1px solid var(--rule);
+  color: var(--ink);
+  max-height: 24rem;
+  overflow: auto;
+}
+.empty {
+  color: var(--ink-muted);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Reduced motion: the spinner rests as a dot. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="on"]) .spin {
+    display: none;
+  }
+  :root:not([data-motion="on"]) .dot {
+    display: block;
+  }
+}
+:root[data-motion="off"] .spin {
+  display: none;
+}
+:root[data-motion="off"] .dot {
+  display: block;
+}
+
+.calls {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}
+.call {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.call svg {
+  flex: none;
+  align-self: center;
+}
+.callDetail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

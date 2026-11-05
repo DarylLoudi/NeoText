@@ -25,6 +25,8 @@ export function formatDateLine(now: number, timeZone: string): string {
 export interface BuildContextInput {
   path: MessagePublic[];
   systemPrompt: string;
+  /** Extra instructions appended to the system message (e.g. when to search the web). */
+  extraSystem?: string;
   includeDate: boolean;
   timeZone: string;
   now: number;
@@ -129,6 +131,7 @@ export function buildContext(input: BuildContextInput): {
 } {
   const systemParts = [input.systemPrompt.trim()];
   if (input.includeDate) systemParts.push(formatDateLine(input.now, input.timeZone));
+  if (input.extraSystem) systemParts.push(input.extraSystem);
   const systemText = systemParts.filter((s) => s !== '').join('\n\n');
   const system: ChatMessage[] = systemText ? [{ role: 'system', content: systemText }] : [];
 

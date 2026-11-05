@@ -1,3 +1,4 @@
+import { modelKey } from '@neotext/shared';
 import { DotsThree, DownloadSimple, SidebarSimple } from '@phosphor-icons/react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouterState } from '@tanstack/react-router';
@@ -14,11 +15,17 @@ import { createPortal } from 'react-dom';
 import { ApiError } from '../../lib/api/client';
 import { conversationsApi } from '../../lib/api/conversations';
 import { downloadExport } from '../../lib/api/transfer';
-import { formatCost } from '../../lib/format';
-import { useT } from '../../lib/i18n';
+import { formatCost, formatTokens } from '../../lib/format';
+import { getLocale, useT } from '../../lib/i18n';
 import { qk } from '../../lib/query';
 import { useSettings } from '../../state/settings';
 import { IconButton, Menu, Tooltip, toast } from '../../ui';
+import { useModels } from '../chat/composer/use-models';
+import {
+  CONTEXT_DANGER_RATIO,
+  effectiveContextLength,
+  usedContextTokens,
+} from '../chat/context-window';
 import { InlineRename } from '../sidebar/ConversationItem';
 import { findConversation, useConversationMutations } from '../sidebar/use-conversations';
 import styles from './TopBar.module.css';
@@ -133,6 +140,63 @@ function ConversationCost({ id }: { id: string }) {
   );
 }
 
+/** How much of the model's context window the chat's latest answer filled. */
+function ContextMeter({ id }: { id: string }) {
+  const t = useT();
+  const overrides = useSettings((s) => s.settings.models.overrides);
+  const { byKey } = useModels();
+  const detail = useQuery({
+    queryKey: qk.conversation(id),
+    queryFn: () => conversationsApi.detail(id),
+  });
+  if (!detail.data) return null;
+  const { conversation, messages } = detail.data;
+  const used = usedContextTokens(messages, conversation.activeLeafId);
+  const ref =
+    conversation.modelRef ??
+    messages.findLast((m) => m.role === 'assistant' && m.model)?.model ??
+    null;
+  const model = ref ? (byKey.get(modelKey(ref)) ?? null) : null;
+  const limit = effectiveContextLength(model, overrides);
+  if (used === null || limit === null || limit <= 0) return null;
+  return <ContextMeterView used={used} limit={limit} label={t} />;
+}
+
+export function ContextMeterView({
+  used,
+  limit,
+  label: t,
+}: {
+  used: number;
+  limit: number;
+  label: ReturnType<typeof useT>;
+}) {
+  const nf = new Intl.NumberFormat(getLocale());
+  const text = t('shell.contextMeter', {
+    used: nf.format(used),
+    limit: nf.format(limit),
+    left: nf.format(Math.max(0, limit - used)),
+  });
+  const ratio = Math.min(1, used / limit);
+  return (
+    <Tooltip content={text} side="bottom">
+      <span
+        className={styles.context}
+        role="img"
+        aria-label={text}
+        data-full={ratio >= CONTEXT_DANGER_RATIO || undefined}
+      >
+        <span className={styles.contextTrack} aria-hidden>
+          <span className={styles.contextFill} style={{ width: `${ratio * 100}%` }} />
+        </span>
+        <span className={styles.contextText} aria-hidden>
+          {formatTokens(used)} / {formatTokens(limit)}
+        </span>
+      </span>
+    </Tooltip>
+  );
+}
+
 function PageTitle() {
   const t = useT();
   const params = useParams({ strict: false }) as { conversationId?: string };
@@ -142,6 +206,7 @@ function PageTitle() {
       <>
         <ConversationTitle id={params.conversationId} />
         <ConversationCost id={params.conversationId} />
+        <ContextMeter id={params.conversationId} />
       </>
     );
   }
@@ -149,7 +214,9 @@ function PageTitle() {
     ? t('settings.title')
     : pathname.startsWith('/usage')
       ? t('settings.usage.title')
-      : t('sidebar.newChat');
+      : pathname.startsWith('/admin')
+        ? t('admin.title')
+        : t('sidebar.newChat');
   return <h1 className={styles.title}>{text}</h1>;
 }
 

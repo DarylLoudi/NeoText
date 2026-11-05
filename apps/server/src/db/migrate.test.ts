@@ -34,6 +34,7 @@ test('fresh database applies all migrations without a backup', async () => {
     .all() as { name: string }[];
   expect(tables.map((t) => t.name).sort()).toEqual(
     [
+      'agents',
       'attachments',
       'audit_events',
       'conversations',

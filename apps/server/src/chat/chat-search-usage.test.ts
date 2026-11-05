@@ -101,21 +101,3 @@ test('each app web_search call writes one search usage row', async () => {
     }),
   ]);
 });
-
-test('a pre-search writes one search usage row', async () => {
-  const searchId = await useSearx();
-  mock.modelsBody = JSON.stringify({
-    data: [{ id: 'm1', pricing: { prompt: '0', completion: '0' }, supported_parameters: [] }],
-  });
-  const orId = await createProvider({
-    kind: 'openrouter',
-    name: 'OR',
-    baseUrl: mock.url,
-    apiKey: 'sk-or-test-1234567890',
-  });
-  expect((await api(`/api/providers/${orId}/models`)).status).toBe(200);
-  mock.enqueue({ frames: textFrames('Jawaban') });
-  await turn(orId);
-  expect(searches).toBe(1);
-  expect(searchRows()).toMatchObject([{ providerId: searchId, webSearchRequests: 1 }]);
-});

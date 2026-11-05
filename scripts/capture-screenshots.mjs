@@ -205,7 +205,6 @@ async function main() {
       processingDelayMs: 2500,
     });
     await page.goto('/');
-    await page.getByRole('button', { name: 'Web', exact: true }).click();
     await box.fill('What is the bitcoin price today?');
     await box.press('Enter');
     await thread.getByText('Bitcoin is about $78,188 today').waitFor();

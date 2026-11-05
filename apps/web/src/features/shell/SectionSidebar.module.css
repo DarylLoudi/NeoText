@@ -1,0 +1,73 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-2);
+  background: var(--shelf);
+  color: var(--ink);
+}
+
+.back {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-control);
+  color: var(--ink-muted);
+  font-size: var(--text-md);
+  text-decoration: none;
+}
+.back:hover {
+  background: var(--shelf-hover);
+  color: var(--ink);
+}
+.backIcon {
+  flex: none;
+  font-size: var(--text-lg);
+}
+
+.heading {
+  margin: var(--space-4) 0 var(--space-1);
+  padding-inline: var(--space-2);
+  color: var(--ink);
+  font-size: var(--text-lg);
+  font-weight: 650;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-control);
+  color: var(--ink-muted);
+  font-size: var(--text-md);
+  text-decoration: none;
+}
+.link:hover {
+  background: var(--shelf-hover);
+  color: var(--ink);
+}
+.link[aria-current="page"] {
+  background: var(--shelf-hover);
+  color: var(--ink);
+  font-weight: 600;
+}
+.back:focus-visible,
+.link:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}

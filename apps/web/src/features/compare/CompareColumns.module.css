@@ -79,11 +79,10 @@
   margin-top: var(--space-4);
 }
 
-/* Lines up with the answer text of a single turn (the gutter and its gap come first). */
+/* Lines up with the answer text of a single turn. */
 .show {
   display: grid;
-  grid-template-columns: var(--gutter) minmax(0, var(--measure));
-  column-gap: var(--space-4);
+  grid-template-columns: minmax(0, var(--measure));
   justify-content: center;
   margin-top: calc(-1 * var(--space-5));
   padding: 0 var(--space-6) var(--space-7);
@@ -92,9 +91,7 @@
   font-size: var(--text-lg);
 }
 .show > * {
-  grid-column: 2;
   justify-self: start;
-  margin-inline-start: calc(var(--space-4) + 3px);
 }
 
 @media (max-width: 899px) {

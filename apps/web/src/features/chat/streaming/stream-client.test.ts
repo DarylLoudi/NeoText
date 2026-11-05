@@ -19,6 +19,7 @@ const body: ChatRequestBody = {
     temperature: null,
     maxOutputTokens: null,
     presetId: null,
+    agentId: null,
     folderId: null,
     timeZone: 'Asia/Jakarta',
   },

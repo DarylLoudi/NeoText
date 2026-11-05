@@ -7,7 +7,13 @@ import {
 } from '@neotext/shared';
 import { expect, test } from 'vitest';
 import { createSearchBudget } from '../search/budget';
-import { openRouterWebSearch } from './generation/web-search';
+import { DELEGATE_GUIDANCE } from '../tools/builtin/delegate';
+import type { ToolDefinition } from '../tools/types';
+import {
+  openRouterWebSearch,
+  WEB_SEARCH_GUIDANCE,
+  type WebSearchPlan,
+} from './generation/web-search';
 import { buildTurnRequest, endUserIdFor, resolveReasoningEffort } from './turn-request';
 
 type Input = Parameters<typeof buildTurnRequest>[0];
@@ -56,6 +62,7 @@ function input(over: Partial<Input> = {}): Input {
       temperature: null,
       maxOutputTokens: null,
       presetId: null,
+      agentId: null,
       folderId: null,
       timeZone: 'UTC',
     },
@@ -179,6 +186,23 @@ test('only a server plan puts the web search tool into the request', () => {
   }
 });
 
+test('the search guidance joins the system prompt only when a search tool is offered', () => {
+  const guided = (plan: WebSearchPlan) =>
+    buildTurnRequest({ ...input(), plan }).request.messages.some(
+      (m) => m.role === 'system' && m.content.includes(WEB_SEARCH_GUIDANCE),
+    );
+  const server = {
+    kind: 'server' as const,
+    serverTools: openRouterWebSearch().serverTools,
+    maxServerToolCalls: 2,
+    budget: createSearchBudget(2),
+  };
+  const tool = { kind: 'tool' as const, tool: {} as ToolDefinition, budget: createSearchBudget(2) };
+  expect(guided(server)).toBe(true);
+  expect(guided(tool)).toBe(true);
+  expect(guided({ kind: 'none' })).toBe(false);
+});
+
 test('contextTrimmed reports messages dropped to fit a small context window', () => {
   const long = 'word '.repeat(2000);
   const path = [userMessage(long), { ...userMessage('ok'), id: 'm2', role: 'assistant' as const }];
@@ -192,4 +216,26 @@ test('contextTrimmed reports messages dropped to fit a small context window', ()
   });
   expect(none.contextTrimmed).toBe(0);
   expect(none.request.messages).toHaveLength(3);
+});
+
+test('the delegation guidance joins the system prompt only when delegate_tasks is offered', () => {
+  const system = (delegation: boolean | undefined) =>
+    buildTurnRequest({ ...input(), ...(delegation !== undefined ? { delegation } : {}) }).request
+      .messages[0];
+  expect(system(true)).toEqual({ role: 'system', content: DELEGATE_GUIDANCE });
+  expect(system(false)?.role).not.toBe('system');
+  expect(system(undefined)?.role).not.toBe('system');
+  const server = {
+    kind: 'server' as const,
+    serverTools: openRouterWebSearch().serverTools,
+    maxServerToolCalls: 2,
+    budget: createSearchBudget(2),
+  };
+  const both = buildTurnRequest({ ...input(), plan: server, delegation: true }).request.messages[0];
+  expect(both).toEqual({
+    role: 'system',
+    content: `${WEB_SEARCH_GUIDANCE}\n\n${DELEGATE_GUIDANCE}`,
+  });
+  // Small talk must not delegate: the text says so.
+  expect(DELEGATE_GUIDANCE).toContain('Never use it for greetings, short questions');
 });

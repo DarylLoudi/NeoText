@@ -65,7 +65,7 @@ test('restore asks, then updates the store', async () => {
 
   const dialog = await screen.findByRole('dialog', { name: 'Restore these settings?' });
   expect(restores).toEqual([]);
-  expect(getSettingsState().settings.appearance.theme).toBe('system');
+  expect(getSettingsState().settings.appearance.theme).toBe('dark');
   await user.click(within(dialog).getByRole('button', { name: 'Restore' }));
 
   await waitFor(() => expect(restores).toEqual([6]));

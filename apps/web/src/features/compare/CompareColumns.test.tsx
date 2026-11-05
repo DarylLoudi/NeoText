@@ -31,6 +31,7 @@ const a = msg({
     ttftMs: null,
     durationMs: 2400,
     upstreamProvider: null,
+    contextTokens: null,
   },
   parts: [{ type: 'text', text: 'Red' }],
 });

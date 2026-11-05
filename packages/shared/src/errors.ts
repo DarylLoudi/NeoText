@@ -17,6 +17,11 @@ export const ERROR_CODES = [
   'invalid_recovery_key',
   'provider_error',
   'quota_exceeded',
+  'agent_limit',
+  'agent_not_found',
+  'agent_single_target',
+  'agent_model_unavailable',
+  'agent_name_taken',
   'internal',
 ] as const;
 

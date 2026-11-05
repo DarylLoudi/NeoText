@@ -1,6 +1,15 @@
-import type { ModelInfo, ModelRef, Preset } from '@neotext/shared';
+import type { AgentPublic, ModelInfo, ModelRef, Preset } from '@neotext/shared';
 import { useQueryClient } from '@tanstack/react-query';
-import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type KeyboardEvent,
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { errorText } from '../../../lib/api/error-text';
 import { useAppCommand } from '../../../lib/app-commands';
 import { useT } from '../../../lib/i18n';
@@ -9,6 +18,7 @@ import { qk } from '../../../lib/query';
 import { useMediaQuery } from '../../../lib/use-media-query';
 import { useSettings } from '../../../state/settings';
 import { TextArea, toast } from '../../../ui';
+import { useAgents } from '../../agents/use-agents';
 import { compareTargets, seedCompareTargets, useCompareState } from '../../compare/compare-state';
 import { LazyComparePicker } from '../../compare/LazyComparePicker';
 import { setPendingPreset } from '../../presets/use-presets';
@@ -22,8 +32,14 @@ import { ComposerToolbar } from './ComposerToolbar';
 import { QuotaNotice } from './QuotaNotice';
 import { type EffortChoice, effortFor } from './ReasoningSelect';
 import { SnippetMenu } from './SnippetMenu';
-import { useWebSearch } from './WebSearchToggle';
+import { useWebSearchAvailable } from './use-web-search';
 import { warmProvider } from './warm';
+
+// The agent controls load after the composer itself, so the first paint stays small.
+const loadPicker = () => import('./AgentPicker');
+const AgentButton = lazy(() => loadPicker().then((m) => ({ default: m.AgentButton })));
+const AgentChip = lazy(() => loadPicker().then((m) => ({ default: m.AgentChip })));
+const AgentMention = lazy(() => loadPicker().then((m) => ({ default: m.AgentMention })));
 
 /** What the composer needs from `useChatStream`. */
 export interface ComposerStream {
@@ -75,15 +91,23 @@ export function Composer({ conversationId, model, stream, preset = null }: Compo
   const [picked, setPicked] = useState<EffortChoice | null>(null);
   const effort = effortFor(model?.reasoning ?? null, picked ?? defaultEffort);
   const qc = useQueryClient();
-  // The preset seeds only the first message's web toggle: the toggle is per message (R19).
-  const webSearch = useWebSearch(model, conversationId, preset?.data.webSearch);
-  const searchWeb = webSearch.on;
-  const resetWebSearch = webSearch.reset;
+  // Web search is automatic: every message allows it when something can search, and the model
+  // decides whether to. A preset's `webSearch` flag (and the old `defaultOn` setting) is kept in
+  // the stored data for compatibility but no longer read.
+  const searchWeb = useWebSearchAvailable(model);
   const attachments = useAttachments(conversationId);
   const { readyIds, uploading, clear: clearAttachments } = attachments;
+  const agentsQuery = useAgents();
+  const agents = useMemo(
+    () => (agentsQuery.data ?? []).filter((a) => a.data.enabled),
+    [agentsQuery.data],
+  );
+  /** The agent that answers the next message only. */
+  const [agent, setAgent] = useState<AgentPublic | null>(null);
 
   useEffect(() => {
     touched.current = false;
+    setAgent(null);
     let current = true;
     void loadDraft(draftKey).then((draft) => {
       if (current && !touched.current && draft !== '') setText(draft);
@@ -104,10 +128,12 @@ export function Composer({ conversationId, model, stream, preset = null }: Compo
     [model],
   );
   const compare = useCompareState();
+  // An agent answers alone: compare stays off while one is chosen.
+  const comparing = compare.enabled && agent === null;
   // Every model a send goes to: the compare choice while compare is on, else the one in use.
   const targets = useMemo(
-    () => (compare.enabled ? compareTargets(compare.targets, ref) : ref ? [ref] : []),
-    [compare.enabled, compare.targets, ref],
+    () => (comparing ? compareTargets(compare.targets, ref) : ref ? [ref] : []),
+    [comparing, compare.targets, ref],
   );
   // Compare turned on from the sidebar has no model yet: the one in use becomes the first.
   useEffect(() => {
@@ -142,12 +168,13 @@ export function Composer({ conversationId, model, stream, preset = null }: Compo
         reasoningEffort: effort === 'auto' ? null : effort,
         webSearch: searchWeb,
         ...(preset ? { presetId: preset.id } : {}),
+        ...(agent ? { agentId: agent.id } : {}),
         ...(readyIds.length > 0 ? { attachmentIds: readyIds } : {}),
       });
       // Only an untouched box is emptied: anything typed while the turn started stays.
       if (started) {
-        resetWebSearch();
         clearAttachments();
+        setAgent(null);
         if (preset) setPendingPreset(null);
       }
       if (started && textRef.current === body) {
@@ -167,16 +194,21 @@ export function Composer({ conversationId, model, stream, preset = null }: Compo
     targets,
     effort,
     searchWeb,
-    resetWebSearch,
     readyIds,
     uploading,
     clearAttachments,
     preset,
+    agent,
     qc,
     stream,
     draftKey,
     t,
   ]);
+
+  const pickAgent = (picked: AgentPublic) => {
+    setAgent(picked);
+    if (compare.enabled) compare.toggle(ref);
+  };
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key !== 'Enter' || composing(e)) return;
@@ -205,11 +237,32 @@ export function Composer({ conversationId, model, stream, preset = null }: Compo
     >
       <div className={styles.row}>
         <QuotaNotice targets={targets} />
-        <span className={styles.speaker}>{t('chat.you')}</span>
         <AttachmentDropZone className={styles.box} onFiles={attachments.add}>
           <SnippetMenu field={field} text={text} snippets={snippets} onChange={change} />
-          {compare.enabled ? (
-            <LazyComparePicker value={targets} onChange={compare.setTargets} />
+          {agents.length > 0 ? (
+            <Suspense fallback={null}>
+              <AgentMention
+                field={field}
+                text={text}
+                agents={agents}
+                onPick={(picked, rest) => {
+                  pickAgent(picked);
+                  change(rest);
+                }}
+              />
+            </Suspense>
+          ) : null}
+          {comparing ? <LazyComparePicker value={targets} onChange={compare.setTargets} /> : null}
+          {agent ? (
+            <Suspense fallback={null}>
+              <AgentChip
+                agent={agent}
+                onRemove={() => {
+                  setAgent(null);
+                  field.current?.focus();
+                }}
+              />
+            </Suspense>
           ) : null}
           <AttachmentChips items={attachments.items} model={model} onRemove={attachments.remove} />
           <TextArea
@@ -220,9 +273,11 @@ export function Composer({ conversationId, model, stream, preset = null }: Compo
             minRows={MIN_ROWS}
             maxRows={MAX_ROWS}
             placeholder={
-              model
-                ? t('chat.composer.placeholder', { model: model.name })
-                : t('chat.composer.placeholderNoModel')
+              agent
+                ? t('chat.agents.placeholder', { agent: agent.name })
+                : model
+                  ? t('chat.composer.placeholder', { model: model.name })
+                  : t('chat.composer.placeholderNoModel')
             }
             value={text}
             dir="auto"
@@ -236,20 +291,19 @@ export function Composer({ conversationId, model, stream, preset = null }: Compo
             model={model}
             effort={effort}
             onEffort={setPicked}
-            webSearch={webSearch}
-            compare={compare.enabled}
+            compare={comparing}
+            compareBlockedBy={agent ? t('chat.agents.compareOff') : null}
             onCompare={() => compare.toggle(ref)}
-            hint={
-              sendKey === 'mod-enter'
-                ? t('chat.composer.hintMod')
-                : enterSends
-                  ? t('chat.composer.hintEnter')
-                  : t('chat.composer.hintTouch')
-            }
             generating={stream.generating}
             canSend={canSend}
+            enterSends={sendKey === 'enter'}
             onStop={stream.stop}
             attach={<AttachButton onFiles={attachments.add} />}
+            agent={
+              <Suspense fallback={null}>
+                <AgentButton agents={agents} onPick={pickAgent} />
+              </Suspense>
+            }
           />
         </AttachmentDropZone>
       </div>

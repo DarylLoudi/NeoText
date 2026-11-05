@@ -14,7 +14,6 @@ test.beforeEach(async ({ page, request }) => {
 });
 
 const message = (page: Page) => page.getByRole('textbox', { name: 'Message' });
-const webToggle = (page: Page) => page.getByRole('button', { name: 'Web', exact: true });
 
 /** Seven more sources than the fixture's two (its third repeats the first). */
 const extra = Array.from({ length: 7 }, (_, i) => ({
@@ -26,8 +25,6 @@ const extra = Array.from({ length: 7 }, (_, i) => ({
 async function askWithWeb(page: Page, text: string): Promise<void> {
   await page.goto('/');
   await expect(message(page)).toHaveAttribute('placeholder', /DeepSeek/);
-  await webToggle(page).click();
-  await expect(webToggle(page)).toHaveAttribute('aria-pressed', 'true');
   await message(page).fill(text);
   await message(page).press('Enter');
 }

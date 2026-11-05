@@ -30,6 +30,8 @@ export interface Accumulator {
   usage(): ProviderUsage | null;
   /** Usage reported by this step's model call, for its own usage row. */
   stepUsage(): ProviderUsage | null;
+  /** Prompt plus completion tokens of the last model call that reported usage. */
+  contextTokens(): number | null;
   /** The upstream id of this step's model call, when the provider sent one. */
   stepGenerationRef(): string | null;
   finishReason(): FinishReason | null;
@@ -42,14 +44,21 @@ export interface Accumulator {
 type CorePart = Extract<MessagePart, { type: 'text' | 'reasoning' | 'tool_call' }>;
 type ActivityKind = 'searching' | 'processing' | 'idle';
 
-export function createAccumulator(opts: { clock: Clock; webSearch: boolean }): Accumulator {
+/** `lead` parts (such as the `agent` part) come first in every snapshot and never count as output. */
+export function createAccumulator(opts: {
+  clock: Clock;
+  webSearch: boolean;
+  lead?: MessagePart[];
+}): Accumulator {
   const { clock } = opts;
+  const lead = opts.lead ?? [];
   const core: CorePart[] = [];
   const sources = createSourceCollector();
   let calls = new Map<number, ToolCallRequest>();
   let details: unknown[] = [];
   let total: ProviderUsage | null = null;
   let step: ProviderUsage | null = null;
+  let lastCall: number | null = null;
   let finish: FinishReason | null = null;
   let upstreamProvider: string | null = null;
   let generationRef: string | null = null;
@@ -90,6 +99,7 @@ export function createAccumulator(opts: { clock: Clock; webSearch: boolean }): A
   const addUsage = (u: ProviderUsage) => {
     step = sum(step, u);
     total = sum(total, u);
+    lastCall = step.promptTokens + step.completionTokens;
     return total;
   };
 
@@ -159,7 +169,13 @@ export function createAccumulator(opts: { clock: Clock; webSearch: boolean }): A
         const sum = addUsage(e.usage);
         out.push({
           type: 'usage',
-          usage: { ...sum, ttftMs: null, durationMs: null, upstreamProvider },
+          usage: {
+            ...sum,
+            ttftMs: null,
+            durationMs: null,
+            upstreamProvider,
+            contextTokens: lastCall,
+          },
         });
         break;
       }
@@ -177,7 +193,7 @@ export function createAccumulator(opts: { clock: Clock; webSearch: boolean }): A
   return {
     apply,
     parts: () => {
-      const parts: MessagePart[] = core.map((p) => ({ ...p }));
+      const parts: MessagePart[] = [...lead.map((p) => ({ ...p })), ...core.map((p) => ({ ...p }))];
       const all = sources.all();
       if (all.length > 0) parts.push({ type: 'sources', sources: all as Source[] });
       return parts;
@@ -212,6 +228,7 @@ export function createAccumulator(opts: { clock: Clock; webSearch: boolean }): A
     },
     usage: () => (total ? { ...total } : null),
     stepUsage: () => (step ? { ...step } : null),
+    contextTokens: () => lastCall,
     stepGenerationRef: () => stepRef,
     finishReason: () => finish,
     meta: () => ({ upstreamProvider, generationRef }),

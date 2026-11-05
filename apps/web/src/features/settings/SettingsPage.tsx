@@ -1,5 +1,6 @@
 import { Navigate, useParams } from '@tanstack/react-router';
 import type { ComponentType } from 'react';
+import { AgentsSettings } from '../agents/AgentsSettings';
 import { SettingsLayout } from './SettingsLayout';
 import { isSection, type SectionId } from './section-ids';
 import { AboutSettings } from './sections/AboutSettings';
@@ -25,6 +26,7 @@ const PAGES: Record<SectionId, ComponentType> = {
   mcp: McpSettings,
   models: ModelsSettings,
   tools: ToolsSettings,
+  agents: AgentsSettings,
   data: DataSettings,
   security: SecuritySettings,
   about: AboutSettings,

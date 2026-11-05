@@ -37,18 +37,18 @@ afterEach(async () => {
 
 test('appearance changes apply at once', async () => {
   const { user } = renderWithClient(<AppearanceSettings />);
-  await user.click(screen.getByRole('radio', { name: 'Dark' }));
-  expect(root.dataset.theme).toBe('dark');
-  expect(realUpdate).toHaveBeenCalledWith({ appearance: { theme: 'dark' } });
-  expect(getSettingsState().settings.appearance.theme).toBe('dark');
-
   await user.click(screen.getByRole('radio', { name: 'Light' }));
   expect(root.dataset.theme).toBe('light');
+  expect(realUpdate).toHaveBeenCalledWith({ appearance: { theme: 'light' } });
+  expect(getSettingsState().settings.appearance.theme).toBe('light');
+
+  await user.click(screen.getByRole('radio', { name: 'Dark' }));
+  expect(root.dataset.theme).toBe('dark');
 });
 
 test('accent swatches are named choices and apply at once', async () => {
   const { user } = renderWithClient(<AppearanceSettings />);
-  expect(screen.getByRole('radio', { name: 'Marker yellow' })).toBeChecked();
+  expect(screen.getByRole('radio', { name: 'Neutral' })).toBeChecked();
   await user.click(screen.getByRole('radio', { name: 'Mint' }));
   expect(root.dataset.accent).toBe('mint');
   expect(realUpdate).toHaveBeenCalledWith({ appearance: { accent: 'mint' } });

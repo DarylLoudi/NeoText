@@ -1,24 +1,27 @@
-import type { ModelRef } from '@neotext/shared';
+import { type ModelRef, modelKey } from '@neotext/shared';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { ApiError } from '../../lib/api/client';
 import { useAppCommand } from '../../lib/app-commands';
 import { useT } from '../../lib/i18n';
 import { useGenerations } from '../../state/generations';
 import { useSettings } from '../../state/settings';
-import { Button, EmptyState } from '../../ui';
+import { Button, EmptyState, toast } from '../../ui';
 import { useCompare } from '../compare/compare-state';
-import { usePendingPreset } from '../presets/use-presets';
+import { setPendingPreset, usePendingPreset } from '../presets/use-presets';
 import { TopBarSlot } from '../shell/TopBar';
 import styles from './ChatView.module.css';
 import { Composer } from './composer/Composer';
 import { ModelButton, ModelPicker } from './composer/ModelPicker';
 import { ModelSheet } from './composer/ModelSheet';
 import { useActiveModel } from './composer/use-models';
+import { effectiveContextLength, needsNewChat } from './context-window';
 import { useJumpToMessage } from './jump-to-message';
 import { type ChatActions, ChatActionsContext } from './MessageActions';
 import { MessageList } from './MessageList';
 import { prefetchMarkdown } from './markdown/engine';
+import { setNextChatModel, takeNextChatModel } from './next-chat-model';
 import { conversationDetailQuery, useChatStream } from './streaming/use-chat-stream';
 import { buildThread } from './thread';
 
@@ -79,8 +82,8 @@ export function ChatView({ conversationId, presets, focusMessageId }: ChatViewPr
   const codeTheme = useSettings((s) => s.settings.appearance.codeTheme);
   /** The model picked in the top bar for the next message; it wins over the chat's own. */
   const [pending, setPending] = useState<ModelRef | null>(null);
-  // The command palette's "Use <model>" lands here, like a pick from the top bar.
-  useAppCommand('switch-model', setPending);
+  const navigate = useNavigate();
+  const overrides = useSettings((s) => s.settings.models.overrides);
   // A new chat may start from a preset: its model stands in until one is picked here.
   const started = usePendingPreset();
   const preset = conversationId === null ? started : null;
@@ -88,7 +91,37 @@ export function ChatView({ conversationId, presets, focusMessageId }: ChatViewPr
   const presetId = preset?.id;
   // biome-ignore lint/correctness/useExhaustiveDependencies: a different preset drops the pick
   useEffect(() => setPending(null), [presetId]);
+  // A new chat started by a model switch opens with that model.
+  useEffect(() => {
+    if (conversationId === null) {
+      const picked = takeNextChatModel();
+      if (picked) setPending(picked);
+    }
+  }, [conversationId]);
   const active = useActiveModel(detail.data?.conversation ?? null, pending ?? presetModel);
+  const hasMessages = (detail.data?.messages.length ?? 0) > 0;
+
+  /** A pick in a chat with messages and a different context window starts a new chat instead. */
+  const pick = (ref: ModelRef) => {
+    const next = active.byKey.get(modelKey(ref)) ?? null;
+    if (
+      conversationId !== null &&
+      hasMessages &&
+      needsNewChat(
+        effectiveContextLength(active.model, overrides),
+        effectiveContextLength(next, overrides),
+      )
+    ) {
+      setPendingPreset(null);
+      setNextChatModel(ref);
+      void navigate({ to: '/' });
+      toast({ message: t('shell.contextChanged') });
+      return;
+    }
+    setPending(ref);
+  };
+  // The command palette's "Use <model>" lands here, like a pick from the top bar.
+  useAppCommand('switch-model', pick);
   const providerName =
     active.providers.find((p) => p.providerId === active.model?.providerId)?.providerName ?? null;
 
@@ -147,7 +180,7 @@ export function ChatView({ conversationId, presets, focusMessageId }: ChatViewPr
     <ChatActionsContext.Provider value={actions}>
       <main className={styles.view} aria-busy={detail.isPending && conversationId !== null}>
         <TopBarSlot name="model">
-          <ModelPicker value={active.ref} onChange={setPending} align="end">
+          <ModelPicker value={active.ref} onChange={pick} align="end">
             <ModelButton model={active.model} />
           </ModelPicker>
         </TopBarSlot>

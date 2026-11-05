@@ -57,7 +57,13 @@ const makePreset = async (over: Partial<PresetData>) =>
 const patchChat = (chat: Record<string, unknown>) =>
   api('/api/settings', {
     method: 'PATCH',
-    body: JSON.stringify({ patch: { chat: { includeDate: false, ...chat } } }),
+    // Delegation off, so the system message is the prompt alone (no delegation guidance).
+    body: JSON.stringify({
+      patch: {
+        chat: { includeDate: false, ...chat },
+        tools: { policies: { delegate_tasks: 'off' } },
+      },
+    }),
   });
 const turn = (options: Record<string, unknown> = {}, over: Record<string, unknown> = {}) => ({
   conversationId: null,

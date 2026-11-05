@@ -64,13 +64,16 @@
   border-top: 1px solid var(--rule);
 }
 
-/* Marker yellow shows up only as the underline, never as a text color. */
+/* Links read as text with a quiet underline that firms up on hover. */
 .root a {
   color: inherit;
   text-decoration-line: underline;
-  text-decoration-color: var(--marker);
-  text-decoration-thickness: 0.2em;
+  text-decoration-color: var(--ink-faint);
+  text-decoration-thickness: 1px;
   text-underline-offset: 0.12em;
+}
+.root a:hover {
+  text-decoration-color: currentColor;
 }
 .root a:focus-visible {
   outline: 2px solid var(--ink);
@@ -129,7 +132,53 @@
   font-family: var(--font-code);
   font-size: var(--text-xs);
 }
-.root :global(.md-code-bar) button,
+/* Copy: an icon that turns into a check for a moment once the code is on the clipboard. */
+.root :global(.md-code-bar) button {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.root :global(.md-code-bar) button::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M216 32H88a8 8 0 0 0-8 8v40H40a8 8 0 0 0-8 8v128a8 8 0 0 0 8 8h128a8 8 0 0 0 8-8v-40h40a8 8 0 0 0 8-8V40a8 8 0 0 0-8-8Zm-56 176H48V96h112Zm48-48h-32V88a8 8 0 0 0-8-8H96V48h112Z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+.root :global(.md-code-bar) button[data-copied] {
+  color: var(--success);
+}
+.root :global(.md-code-bar) button[data-copied]::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='m229.66 77.66-128 128a8 8 0 0 1-11.32 0l-56-56a8 8 0 0 1 11.32-11.32L96 188.69 218.34 66.34a8 8 0 0 1 11.32 11.32Z'/%3E%3C/svg%3E");
+  animation: md-pop var(--dur) var(--ease);
+}
+@keyframes md-pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+.root :global(.md-code-bar) button:hover {
+  background: var(--shelf-hover);
+  color: var(--ink);
+}
+.root :global(.md-sr) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .root :global(.md-load-image) {
   min-height: 28px;
   padding: 0 var(--space-3);
@@ -141,7 +190,6 @@
   font-size: var(--text-xs);
   cursor: pointer;
 }
-.root :global(.md-code-bar) button:hover,
 .root :global(.md-load-image):hover {
   background: var(--shelf-hover);
 }

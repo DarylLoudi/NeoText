@@ -8,10 +8,14 @@ test.beforeEach(async ({ request }) => {
 
 const html = (page: Page) => page.locator('html');
 const dark = (page: Page) => page.getByRole('radio', { name: 'Dark' });
+// Loaded from the server (the reset theme), so picking Dark is a real change.
+const loaded = (page: Page) =>
+  expect(page.getByRole('region', { name: 'Color' }).getByLabel('Match system')).toBeChecked();
 const modEnter = (page: Page) => page.getByRole('radio', { name: 'Ctrl or Cmd with Enter' });
 
 test('settings survive a server restart', async ({ page, request }) => {
   await page.goto('/settings/appearance');
+  await loaded(page);
   const saved = settingsSaved(page);
   await dark(page).check();
   await expect(html(page)).toHaveAttribute('data-theme', 'dark');
@@ -55,6 +59,7 @@ test('two tabs changing different settings both stick', async ({ context, reques
   const general = await context.newPage();
   await appearance.goto('/settings/appearance');
   await general.goto('/settings/general');
+  await loaded(appearance);
   await expect(dark(appearance)).not.toBeChecked();
   await expect(modEnter(general)).not.toBeChecked();
 
@@ -76,14 +81,15 @@ test('two tabs changing different settings both stick', async ({ context, reques
 });
 
 test('sidebar layout persists', async ({ page, request }) => {
-  await page.goto('/settings/sidebar');
+  // Settings shows its own sections in the sidebar; the chats' sidebar is checked from a chat page.
   const sidebar = page.getByRole('complementary', { name: 'Sidebar' });
+  await page.goto('/');
   await expect(sidebar.getByRole('heading', { name: 'Folders' })).toBeVisible();
 
+  await page.goto('/settings/sidebar');
   await page.getByRole('switch', { name: 'Folders' }).uncheck();
-  await expect(sidebar.getByRole('heading', { name: 'Folders' })).toHaveCount(0);
   await page.getByRole('radio', { name: 'Right' }).check();
-  const box = async () => (await sidebar.boundingBox())?.x ?? 0;
+  const box = async () => (await page.locator('#app-sidebar').boundingBox())?.x ?? 0;
   await expect.poll(box).toBeGreaterThan(400);
   await expect
     .poll(async () => {
@@ -93,9 +99,10 @@ test('sidebar layout persists', async ({ page, request }) => {
     .toEqual(['right', false]);
 
   await page.reload();
+  await expect(page.getByRole('switch', { name: 'Folders' })).not.toBeChecked();
+  await expect(page.getByRole('radio', { name: 'Right' })).toBeChecked();
+  await page.goto('/');
   await expect(sidebar.getByRole('heading', { name: 'Recent' })).toBeVisible();
   await expect(sidebar.getByRole('heading', { name: 'Folders' })).toHaveCount(0);
   await expect.poll(box).toBeGreaterThan(400);
-  await expect(page.getByRole('switch', { name: 'Folders' })).not.toBeChecked();
-  await expect(page.getByRole('radio', { name: 'Right' })).toBeChecked();
 });

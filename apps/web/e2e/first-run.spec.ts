@@ -42,7 +42,7 @@ test('setup, recovery gate, connect a custom endpoint, first answer', async ({ p
   await expect(page.getByText(/Connected in \d+ ?ms/)).toBeVisible();
   await page.getByRole('button', { name: 'Cancel' }).click();
 
-  await page.getByRole('link', { name: 'New chat' }).click();
+  await page.getByRole('link', { name: 'Back to chats' }).click();
   await page
     .getByRole('banner')
     .getByRole('button', { name: /mock\/alpha|Choose a model/ })

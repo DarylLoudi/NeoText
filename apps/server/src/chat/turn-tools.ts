@@ -1,4 +1,10 @@
-import type { ChatRequestBody, ModelInfo, ModelRef, UserSettings } from '@neotext/shared';
+import type {
+  AgentPublic,
+  ChatRequestBody,
+  ModelInfo,
+  ModelRef,
+  UserSettings,
+} from '@neotext/shared';
 import type { AuthContext } from '../http/env';
 import type { ProviderService } from '../providers/service';
 import { assembleToolSet } from '../tools/registry';
@@ -47,6 +53,17 @@ export function anyTargetMayUseTools(
       return false;
     }
   });
+}
+
+/** An agent's switches drop `web_search` and `fetch_url`; every other tool stays. */
+export function filterAgentTools(
+  available: ToolDefinition[],
+  agent: AgentPublic,
+): ToolDefinition[] {
+  const { webSearch, fetchUrl } = agent.data.tools;
+  return available.filter(
+    (t) => !((t.name === 'web_search' && !webSearch) || (t.name === 'fetch_url' && !fetchUrl)),
+  );
 }
 
 /** The text the turn answers: the new message, or the user message being regenerated. */

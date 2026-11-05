@@ -5,6 +5,7 @@ import {
   newId,
   pathToLeaf,
 } from '@neotext/shared';
+import type { AgentsService } from '../agents/service';
 import type { AttachmentsService } from '../attachments/service';
 import type { DbHandle } from '../db/client';
 import type { AuthContext } from '../http/env';
@@ -29,6 +30,7 @@ import { webSearchPlanner } from './generation/web-search';
 import type { MessagesRepo } from './messages-repo';
 import { startTargetRun } from './target-run';
 import { fallbackTitle, generateTitle, TITLE_TIMEOUT_MS } from './title';
+import { agentTargets, resolveTurnAgent } from './turn-agent';
 import { checkParent, loadHistory, resolvePreset } from './turn-history';
 import { prepareFiles, reuse } from './turn-prepare';
 import { assertSharedQuota } from './turn-quota';
@@ -58,6 +60,8 @@ export interface ChatServiceDeps {
   quotas: QuotaService;
   conversations: ConversationsRepo;
   presets: PresetsService;
+  /** The user's agents: direct calls (`get`) and the `delegate_tasks` list (`list`). */
+  agents: Pick<AgentsService, 'get' | 'list'>;
   /** Links uploads to the user message and opens them for the model. */
   attachments: Pick<AttachmentsService, 'attach' | 'prepareReuse' | 'loadForTurn' | 'discard'>;
   messages: MessagesRepo;
@@ -92,6 +96,18 @@ export function createChatService(deps: ChatServiceDeps): ChatService {
     clock,
     log,
     toolsHttp: deps.toolsHttp,
+    ...(deps.agents
+      ? {
+          delegation: {
+            agents: deps.agents,
+            providers,
+            quotas: deps.quotas,
+            usage: deps.usage,
+            clock,
+            log,
+          },
+        }
+      : {}),
   };
 
   /**
@@ -209,11 +225,13 @@ export function createChatService(deps: ChatServiceDeps): ChatService {
           preset?.data ?? null,
         );
         checkParent(body, history);
+        const agent = resolveTurnAgent(deps.agents, auth, body, history);
         manager.assertCapacity(auth.userId, body.targets.length);
         if (body.targets.some((ref) => providers.isSearchBackend(auth, ref.providerId))) {
           throw new AppError('bad_request', 'That provider is for web search, not chat.', 400);
         }
-        const targets = body.targets.map((ref) => ({
+        const targetRefs = agentTargets({ providers, quotas: deps.quotas }, auth, agent, body);
+        const targets = targetRefs.map((ref) => ({
           ref,
           provider: providers.resolveEnabled(auth, ref.providerId),
           model: providers.cachedModel(ref.providerId, ref.modelId),
@@ -243,7 +261,7 @@ export function createChatService(deps: ChatServiceDeps): ChatService {
           parentId: answersId,
           role: 'assistant',
           status: 'streaming',
-          parts: [],
+          parts: agent ? [{ type: 'agent', agentId: agent.id, name: agent.name }] : [],
           model: t.ref,
           updatedAt: now,
         }));
@@ -289,7 +307,10 @@ export function createChatService(deps: ChatServiceDeps): ChatService {
             );
           }
           const added = assistants.length + (userMessage ? 1 : 0);
-          const modelRef = firstAssistant.model as ModelRef;
+          // An agent's own model answers this once; the chat keeps the model the user picked.
+          const modelRef = agent?.data.model
+            ? (body.targets[0] as ModelRef)
+            : (firstAssistant.model as ModelRef);
           conversations.recordTurn(conversationId, now, firstAssistant.id, added, modelRef);
         })();
         linked = true;
@@ -298,7 +319,8 @@ export function createChatService(deps: ChatServiceDeps): ChatService {
           auth,
           providers,
           userSettings.webSearch,
-          options.webSearch,
+          // Search is the model's call, unless the user turned the web_search tool off.
+          options.webSearch && userSettings.tools.policies.web_search !== 'off',
           searchUsageRecorder(deps.usage, { userId: auth.userId, conversationId, clock, log }),
         );
         const path = pathToLeaf(userMessage ? [...history, userMessage] : history, answersId);
@@ -320,10 +342,12 @@ export function createChatService(deps: ChatServiceDeps): ChatService {
             chat,
             options,
             toolSettings: userSettings.tools,
+            searchesPerTask: userSettings.webSearch.maxSearchesPerTurn,
             available,
             userText,
             endUserId,
             now,
+            ...(agent ? { agent } : {}),
             ...(i === 0 && userMessage && chat.autoTitle
               ? {
                   afterFinish: (g: Generation, final: MessagePublic) =>

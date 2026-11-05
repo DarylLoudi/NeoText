@@ -8,15 +8,17 @@ export type SwitchProps = {
   onChange: (checked: boolean) => void;
   hint?: string;
   disabled?: boolean;
+  /** Keeps the label for assistive tech only, when the row around it already names the thing. */
+  hideLabel?: boolean;
 };
 
-export function Switch({ label, checked, onChange, hint, disabled }: SwitchProps) {
+export function Switch({ label, checked, onChange, hint, disabled, hideLabel }: SwitchProps) {
   const id = useId();
   const hintId = hint ? `${id}-hint` : undefined;
   return (
     <div className={styles.row}>
       <div className={styles.text}>
-        <label className={styles.label} htmlFor={id}>
+        <label className={hideLabel ? styles.hidden : styles.label} htmlFor={id}>
           {label}
         </label>
         {hint ? (

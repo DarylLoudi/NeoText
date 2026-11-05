@@ -54,6 +54,113 @@ samp {
   min-height: 100dvh;
 }
 
+/* Scrollbars that follow the theme instead of the operating system's bright default. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
+}
+*:hover {
+  scrollbar-color: var(--control-edge) transparent;
+}
+
+/*
+ * Radio buttons and checkboxes drawn in the app's own style. Visually hidden inputs (segmented
+ * choices, swatches) keep working: only the look of a visible box changes.
+ */
+input[type="radio"],
+input[type="checkbox"] {
+  appearance: none;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1.5px solid var(--control-edge);
+  background: var(--paper);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+input[type="radio"] {
+  border-radius: 50%;
+}
+input[type="checkbox"] {
+  border-radius: 5px;
+}
+input[type="radio"]:hover,
+input[type="checkbox"]:hover {
+  border-color: var(--ink);
+}
+input[type="radio"]:checked {
+  border-color: var(--ink);
+  background: var(--ink);
+  box-shadow: inset 0 0 0 3.5px var(--paper);
+}
+input[type="checkbox"]:checked {
+  border-color: var(--ink);
+  background: var(--ink) var(--check-icon) center / 12px no-repeat;
+}
+input[type="radio"]:disabled,
+input[type="checkbox"]:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* Sliders: a thin track and a round thumb in ink. */
+input[type="range"] {
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--rule);
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+/* Disclosure rows without their own style get a small chevron instead of the browser's triangle. */
+summary {
+  cursor: pointer;
+}
+summary:not([class]) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  list-style: none;
+  color: var(--ink-muted);
+}
+summary:not([class])::-webkit-details-marker {
+  display: none;
+}
+summary:not([class])::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--dur-fast) var(--ease);
+}
+details[open] > summary:not([class])::before {
+  transform: rotate(45deg);
+}
+summary:not([class]):hover {
+  color: var(--ink);
+}
+
 ::selection {
   background: var(--marker);
   color: var(--on-marker);

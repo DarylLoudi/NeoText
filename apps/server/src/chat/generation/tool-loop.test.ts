@@ -1,4 +1,4 @@
-import type { ToolCallPart } from '@neotext/shared';
+import type { SubagentRun, ToolCallPart } from '@neotext/shared';
 import { afterEach, expect, test, vi } from 'vitest';
 import {
   awaiting,
@@ -444,4 +444,49 @@ test('every model call writes its own usage row', async () => {
   expect(r.usageRows[0]?.messageId).toBe('msg_1');
   expect(r.final.usage?.promptTokens).toBe(30);
   expect(r.final.usage?.costUsd).toBeCloseTo(0.002);
+});
+
+const subRow = (status: SubagentRun['status']): SubagentRun => ({
+  id: 'sub_1',
+  title: 'A',
+  agentName: null,
+  status,
+  startedAt: 1,
+  finishedAt: status === 'running' ? null : 2,
+  report: status === 'running' ? null : 'r',
+  costUsd: null,
+});
+
+test('progress emits tool.updated with the agents and keeps them on the part', async () => {
+  const t = tool('delegate_tasks', async (_args, ctx) => {
+    ctx.progress?.([subRow('running')]);
+    ctx.progress?.([subRow('ok')]);
+    return { ok: true, content: '## A\nr' };
+  });
+  const r = await run([callStep('c1', 'delegate_tasks', '{}'), [text('Done'), stop]], [t]);
+  const updates = r.events.filter((e) => e.type === 'tool.updated') as {
+    call: ToolCallPart;
+  }[];
+  expect(updates.map((e) => e.call.agents?.[0]?.status)).toEqual(['running', 'ok', 'ok']);
+  expect(toolParts(r.final)[0]?.agents).toEqual([subRow('ok')]);
+});
+
+test('sub-agents still running when the answer stops are stored as stopped', async () => {
+  let started!: () => void;
+  const running = new Promise<void>((resolve) => {
+    started = resolve;
+  });
+  const t = tool('delegate_tasks', async (_args, ctx) => {
+    ctx.progress?.([subRow('running')]);
+    started();
+    return new Promise(() => {});
+  });
+  const s = start([callStep('c1', 'delegate_tasks', '{}')], [t]);
+  await running;
+  s.generation.abort('user');
+  const final = await s.finished;
+  expect(toolParts(final)[0]?.agents?.[0]).toMatchObject({
+    status: 'stopped',
+    finishedAt: expect.any(Number),
+  });
 });

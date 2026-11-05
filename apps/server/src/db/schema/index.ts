@@ -1,3 +1,4 @@
+export * from './agents';
 export * from './attachments';
 export * from './auth';
 export * from './chat';

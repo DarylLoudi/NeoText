@@ -26,7 +26,7 @@ describe('parseSettings', () => {
     const { settings, resetPaths } = parseSettings({
       appearance: { theme: 'neon', accent: 'mint' },
     });
-    expect(settings.appearance.theme).toBe('system');
+    expect(settings.appearance.theme).toBe('dark');
     expect(settings.appearance.accent).toBe('mint');
     expect(resetPaths).toEqual(['appearance.theme']);
   });
@@ -145,7 +145,12 @@ describe('parseSettings', () => {
       contextSize: null,
       backendProviderId: null,
     });
-    expect(d.tools).toEqual({ policies: {}, maxSteps: 8 });
+    expect(d.tools).toEqual({
+      policies: {},
+      maxSteps: 8,
+      subagentModel: null,
+      maxSubagents: 4,
+    });
   });
   test('web search fields reset one by one and keep unknown keys', () => {
     const { settings, resetPaths } = parseSettings({
@@ -186,6 +191,8 @@ describe('parseSettings', () => {
     expect(parseSettings({ tools: { policies: [], maxSteps: 20 } }).settings.tools).toEqual({
       policies: {},
       maxSteps: 20,
+      subagentModel: null,
+      maxSubagents: 4,
     });
   });
   test('budget defaults, and a bad field resets alone', () => {

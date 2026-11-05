@@ -1,4 +1,5 @@
 import {
+  type AgentPublic,
   type ChatRequestBody,
   type MessagePublic,
   type ModelInfo,
@@ -21,8 +22,9 @@ import { type RunDeps, type RunSpec, runGeneration } from './generation/runner';
 import { preContextFields, type WebSearchPlan } from './generation/web-search';
 import { createMessageWriter } from './generation/writer';
 import type { MessagesRepo } from './messages-repo';
+import { type DelegationDeps, delegateToolFor, offersDelegation } from './turn-delegate';
 import { buildTurnRequest } from './turn-request';
-import { toolsForTarget, turnToolFields } from './turn-tools';
+import { filterAgentTools, toolsForTarget, turnToolFields } from './turn-tools';
 
 export interface TargetRunDeps {
   messages: MessagesRepo;
@@ -32,6 +34,8 @@ export interface TargetRunDeps {
   log: Logger;
   /** Client for app tools that reach the web; private networks refused. */
   toolsHttp: HttpClient;
+  /** Offers `delegate_tasks`; without it no target is offered the tool. */
+  delegation?: DelegationDeps;
   /** The generation runner; replaced in tests. */
   run?: (spec: RunSpec, deps: RunDeps) => Promise<void>;
 }
@@ -49,11 +53,15 @@ export interface TargetRunInput {
   chat: UserSettings['chat'];
   options: ChatRequestBody['options'];
   toolSettings: UserSettings['tools'];
+  /** Searches each delegated task may run: the user's per-turn search limit. */
+  searchesPerTask: number;
   /** Tools of the turn before this target's web search plan is applied. */
   available: ToolDefinition[];
   userText: string;
   endUserId: string;
   now: number;
+  /** A custom agent called directly: its instructions replace the system prompt. */
+  agent?: AgentPublic;
   afterFinish?: (generation: Generation, final: MessagePublic) => Promise<void>;
 }
 
@@ -62,7 +70,25 @@ export function startTargetRun(
   deps: TargetRunDeps,
   input: TargetRunInput,
 ): { generation: Generation; contextTrimmed: number } {
-  const { auth, message, target, plan, afterFinish } = input;
+  const { auth, message, target, afterFinish } = input;
+  // An agent with web search off gets none, on any path: no provider search, tool or guidance.
+  const plan: WebSearchPlan =
+    input.agent?.data.tools.webSearch === false ? { kind: 'none' } : input.plan;
+  const delegate =
+    deps.delegation && offersDelegation({ model: target.model, toolSettings: input.toolSettings })
+      ? [
+          delegateToolFor(deps.delegation, {
+            auth,
+            conversationId: input.conversationId,
+            messageId: message.id,
+            target,
+            plan,
+            toolSettings: input.toolSettings,
+            searchesPerTask: input.searchesPerTask,
+            endUserId: input.endUserId,
+          }),
+        ]
+      : [];
   const turn = buildTurnRequest({
     path: input.path,
     chat: input.chat,
@@ -72,6 +98,8 @@ export function startTargetRun(
     plan,
     endUserId: input.endUserId,
     now: input.now,
+    ...(input.agent ? { systemPrompt: input.agent.data.instructions } : {}),
+    ...(delegate.length > 0 ? { delegation: true } : {}),
     ...(input.loadAttachment ? { loadAttachment: input.loadAttachment } : {}),
   });
   const generation = createGeneration({
@@ -106,7 +134,13 @@ export function startTargetRun(
         ...preContextFields(plan, input.userText),
         ...(plan.kind === 'server' || plan.kind === 'tool' ? { searchBudget: plan.budget } : {}),
         ...turnToolFields({
-          available: toolsForTarget(input.available, plan),
+          available: [
+            ...toolsForTarget(
+              input.agent ? filterAgentTools(input.available, input.agent) : input.available,
+              plan,
+            ),
+            ...delegate,
+          ],
           settings: input.toolSettings,
           model: target.model,
           context: {

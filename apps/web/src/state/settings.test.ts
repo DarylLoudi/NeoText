@@ -308,7 +308,7 @@ describe('settings store', () => {
     off();
     expect(seen).toHaveBeenCalledTimes(1);
     expect(seen).toHaveBeenCalledWith(expect.anything(), { appearance: { theme: 'dark' } });
-    expect(state().settings.appearance.theme).toBe('system');
+    expect(state().settings.appearance.theme).toBe('dark');
     const db = await activePersistence();
     expect(await db.outboxAll()).toEqual([]);
     const kept = await db.getKV<RejectedPatch[]>(REJECTED_KV_KEY);
@@ -366,12 +366,12 @@ describe('settings store', () => {
     const srv = fakeServer({ appearance: { accent: 'rose' } });
     await hydrateSettings('alice');
     srv.patchStatus = 401; // alice's session lapsed: her edit is held
-    updateSettings({ appearance: { theme: 'dark' } });
+    updateSettings({ appearance: { theme: 'light' } });
     await flushSettings();
     expect(srv.patches).toEqual([]);
     await teardownSettings(); // sign-out
     expect(state().hydrated).toBe(false);
-    expect(state().settings.appearance.theme).toBe('system');
+    expect(state().settings.appearance.theme).toBe('dark');
 
     const aliceRaw = srv.raw;
     srv.raw = {};
@@ -384,15 +384,15 @@ describe('settings store', () => {
     await flushSettings();
     stop();
     expect(seenByBob.length).toBeGreaterThan(0);
-    expect(seenByBob.every((v) => v === 'system/marker')).toBe(true);
+    expect(seenByBob.every((v) => v === 'dark/marker')).toBe(true);
     expect(srv.patches).toEqual([{ chat: { autoTitle: false } }]);
     await teardownSettings();
 
     srv.raw = aliceRaw;
     srv.patches = [];
     await hydrateSettings('alice');
-    expect(srv.patches).toEqual([{ appearance: { theme: 'dark' } }]);
-    expect(state().settings.appearance.theme).toBe('dark');
+    expect(srv.patches).toEqual([{ appearance: { theme: 'light' } }]);
+    expect(state().settings.appearance.theme).toBe('light');
     expect(state().settings.appearance.accent).toBe('rose');
   });
 

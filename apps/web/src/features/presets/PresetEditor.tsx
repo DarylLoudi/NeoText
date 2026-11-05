@@ -7,7 +7,7 @@ import {
 } from '@neotext/shared';
 import { type FormEvent, useId, useState } from 'react';
 import { useT } from '../../lib/i18n';
-import { Button, Dialog, Select, Switch, TextArea, TextField } from '../../ui';
+import { Button, Dialog, Select, TextArea, TextField } from '../../ui';
 import { ModelPicker } from '../chat/composer/ModelPicker';
 import { useModels } from '../chat/composer/use-models';
 import { ACCENTS } from '../settings/AccentSwatches';
@@ -216,11 +216,6 @@ function PresetForm({ preset, onClose }: { preset: Preset | null; onClose: () =>
           autoComplete="off"
         />
       </div>
-      <Switch
-        label={t('sidebar.presets.editor.webSearch')}
-        checked={draft.webSearch}
-        onChange={(v) => set('webSearch', v)}
-      />
       <div className={styles.actions}>
         <Button type="button" variant="ghost" onClick={onClose}>
           {t('common.cancel')}

@@ -17,6 +17,7 @@ import { SidebarCustomizer } from '../sidebar/SidebarCustomizer';
 import { SidebarResizer } from '../sidebar/SidebarResizer';
 import { useBudgetAlerts } from '../usage/use-budget-alerts';
 import styles from './AppShell.module.css';
+import { SectionSidebar, sectionArea } from './SectionSidebar';
 import { SettingsBanner } from './SettingsBanner';
 import { TopBar, TopBarSlotsProvider } from './TopBar';
 
@@ -100,6 +101,8 @@ export function AppShell({ children, onSearch, onCustomize }: AppShellProps) {
   };
 
   const shownWidth = liveWidth ?? width;
+  // On a phone the page shows its own strip of sections, and the drawer keeps the chats.
+  const area = narrow ? null : sectionArea(pathname);
   return (
     <div
       className={styles.shell}
@@ -116,14 +119,18 @@ export function AppShell({ children, onSearch, onCustomize }: AppShellProps) {
         hidden={!narrow && collapsed}
         inert={narrow && !drawerOpen}
       >
-        <Sidebar
-          onSearch={onSearch}
-          onCustomize={() => {
-            setCustomizing(true);
-            onCustomize?.();
-          }}
-          onClose={narrow ? closeDrawer : undefined}
-        />
+        {area ? (
+          <SectionSidebar area={area} />
+        ) : (
+          <Sidebar
+            onSearch={onSearch}
+            onCustomize={() => {
+              setCustomizing(true);
+              onCustomize?.();
+            }}
+            onClose={narrow ? closeDrawer : undefined}
+          />
+        )}
         {narrow ? null : (
           <SidebarResizer
             width={shownWidth}

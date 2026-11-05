@@ -108,6 +108,7 @@ export function seed(
         ttftMs: 100,
         durationMs: 400,
         upstreamProvider: null,
+        contextTokens: null,
       },
       finishReason: 'stop',
     },

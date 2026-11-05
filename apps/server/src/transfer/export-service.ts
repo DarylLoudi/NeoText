@@ -6,6 +6,7 @@ import {
   SETTINGS_SCHEMA_VERSION,
 } from '@neotext/shared';
 import { strToU8 } from 'fflate';
+import type { AgentsService } from '../agents/service';
 import type { AuditLog } from '../audit/audit';
 import type { ConversationsRepo } from '../chat/conversations-repo';
 import type { FoldersRepo } from '../chat/folders-repo';
@@ -39,6 +40,7 @@ export interface ExportServiceDeps {
   messages: MessagesRepo;
   folders: FoldersRepo;
   presets: PresetsService;
+  agents: Pick<AgentsService, 'list'>;
   settings: SettingsService;
   providers: ProviderService;
   audit: AuditLog;
@@ -68,7 +70,8 @@ const attachmentsIn = (list: MessagePublic[]) =>
 const stamp = (ms: number) => new Date(ms).toISOString().slice(0, 10).replaceAll('-', '');
 
 export function createExportService(deps: ExportServiceDeps): ExportService {
-  const { conversations, messages, folders, presets, settings, providers, audit, clock } = deps;
+  const { conversations, messages, folders, presets, agents, settings, providers, audit, clock } =
+    deps;
   const maxBundleBytes = deps.maxBundleBytes ?? MAX_UNPACKED_BYTES;
   const newPace = () => createPace(deps.workBudgetMs ?? WORK_BUDGET_MS);
 
@@ -143,6 +146,7 @@ export function createExportService(deps: ExportServiceDeps): ExportService {
     }
     w.endArray();
     w.value('presets', presets.list(auth));
+    w.value('agents', agents.list(auth));
     if (withKeys) w.value('providers', ownProviders(auth));
     const json = w.end();
     if (json.length > maxBytes) throw tooLarge();

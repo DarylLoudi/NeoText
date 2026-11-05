@@ -6,7 +6,7 @@ import { toolsApi } from '../../../lib/api/tools';
 import { useT } from '../../../lib/i18n';
 import { qk } from '../../../lib/query';
 import { flushSettings, updateSettings, useSettings } from '../../../state/settings';
-import { Button, Select, Spinner, Switch } from '../../../ui';
+import { Button, Select, Spinner } from '../../../ui';
 import { toolName } from '../../chat/tools/tool-names';
 import { NumberField } from '../NumberField';
 import { Group, Row, SectionHeader } from '../SettingsParts';
@@ -120,12 +120,6 @@ function WebSearchGroup() {
 
   return (
     <Group title={t('settings.tools.webSearch')} intro={t('settings.tools.webSearchIntro')}>
-      <Switch
-        label={t('settings.tools.defaultOn')}
-        hint={t('settings.tools.defaultOnHint')}
-        checked={web.defaultOn}
-        onChange={(defaultOn) => save({ defaultOn })}
-      />
       <Row>
         <div className={styles.select}>
           <Select

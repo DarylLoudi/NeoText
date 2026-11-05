@@ -34,8 +34,8 @@ function Row({ term, children }: { term: string; children: ReactNode }) {
 }
 
 /**
- * Shown on an empty chat in place of a greeting: what the chosen model is, what it costs and
- * what it can do. It sits in the transcript's own columns, at the top, not centered.
+ * Shown on an empty chat: a short greeting, then the chosen model with what it costs and what
+ * it can do as one quiet line of facts, centred like the start of most chat apps.
  */
 export function ModelSheet({
   model,
@@ -82,10 +82,11 @@ export function ModelSheet({
 
   return (
     <section className={styles.sheet} aria-labelledby={headingId}>
-      <p className={styles.gutter}>{providerName}</p>
       <div className={styles.column}>
-        <h2 id={headingId} className={styles.name} dir="auto">
-          {model.name}
+        <p className={styles.greeting}>{t('chat.sheet.greeting')}</p>
+        <h2 className={styles.name} dir="auto">
+          <span id={headingId}>{model.name}</span>
+          {providerName ? <span className={styles.provider}> · {providerName}</span> : null}
         </h2>
         <dl className={styles.list}>
           <Row term={t('chat.sheet.contextWindow')}>

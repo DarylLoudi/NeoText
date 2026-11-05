@@ -1,4 +1,5 @@
 import type { ImportResult, ImportSource } from '@neotext/shared';
+import type { AgentsService } from '../agents/service';
 import type { AuditLog } from '../audit/audit';
 import type { ConversationsRepo } from '../chat/conversations-repo';
 import type { FoldersRepo } from '../chat/folders-repo';
@@ -37,6 +38,7 @@ export interface ImportServiceDeps {
   messages: MessagesRepo;
   folders: FoldersRepo;
   presets: PresetsService;
+  agents: Pick<AgentsService, 'list' | 'create'>;
   settings: SettingsService;
   providers: ProviderService;
   audit: AuditLog;

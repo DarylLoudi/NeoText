@@ -90,3 +90,10 @@
     transition: none;
   }
 }
+
+.toggle[aria-disabled="true"] {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
