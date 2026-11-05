@@ -1,0 +1,15 @@
+# Copy to deploy/Caddyfile and replace the domain. Caddy gets and renews the certificate itself.
+# Set NEOTEXT_PUBLIC_URL=https://neotext.example.com and NEOTEXT_TRUST_PROXY=true in .env.
+neotext.example.com {
+	encode zstd gzip
+
+	reverse_proxy neotext:3420 {
+		# Send streamed answers to the browser as they arrive instead of buffering them.
+		flush_interval -1
+		# NEOTEXT_TRUST_PROXY=true keys rate limits on the first X-Forwarded-For entry, so it must
+		# be the real client. Caddy already drops a client-sent value unless `trusted_proxies` is
+		# set; this line makes the overwrite explicit. Keep `trusted_proxies` unset unless another
+		# proxy (a CDN) sits in front, and then list only that proxy's addresses.
+		header_up X-Forwarded-For {remote_host}
+	}
+}

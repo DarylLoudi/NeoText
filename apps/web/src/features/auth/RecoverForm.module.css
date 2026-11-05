@@ -1,0 +1,15 @@
+.form {
+  composes: form from "./AuthForm.module.css";
+}
+.intro {
+  composes: intro from "./AuthForm.module.css";
+}
+.fields {
+  composes: fields from "./AuthForm.module.css";
+}
+.actions {
+  composes: actions from "./AuthForm.module.css";
+}
+.link {
+  composes: link from "./AuthForm.module.css";
+}

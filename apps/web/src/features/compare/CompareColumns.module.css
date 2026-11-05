@@ -1,0 +1,128 @@
+/*
+ * Columns share the chat's full width, split by hairline rules: no cards, no shadows. Text is
+ * set a step smaller than a single answer so four columns still hold a readable line.
+ */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 2), minmax(0, 1fr));
+  padding: 0 var(--space-6) var(--space-7);
+  font-family: var(--font-reading);
+  font-size: var(--text-md);
+  line-height: 1.6;
+}
+
+.column {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 var(--space-5);
+}
+.column + .column {
+  border-inline-start: 1px solid var(--rule);
+}
+.column:first-child {
+  padding-inline-start: 0;
+}
+.column:last-child {
+  padding-inline-end: 0;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+.model {
+  min-width: 0;
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* The column the thread continues from while no answer is chosen. */
+.active {
+  color: var(--ink);
+}
+
+.figures {
+  display: flex;
+  column-gap: var(--space-2);
+  margin-inline-start: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keeps room for the caret when nothing has arrived yet. */
+.body {
+  flex: 1;
+  min-height: calc(var(--text-md) * 1.6);
+}
+
+.note {
+  margin-top: var(--space-3);
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.actions {
+  display: flex;
+  margin-top: var(--space-4);
+}
+
+/* Lines up with the answer text of a single turn (the gutter and its gap come first). */
+.show {
+  display: grid;
+  grid-template-columns: var(--gutter) minmax(0, var(--measure));
+  column-gap: var(--space-4);
+  justify-content: center;
+  margin-top: calc(-1 * var(--space-5));
+  padding: 0 var(--space-6) var(--space-7);
+  /* The measure is in `ch` of the reading face, as in a message. */
+  font-family: var(--font-reading);
+  font-size: var(--text-lg);
+}
+.show > * {
+  grid-column: 2;
+  justify-self: start;
+  margin-inline-start: calc(var(--space-4) + 3px);
+}
+
+@media (max-width: 899px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0 var(--space-4) var(--space-6);
+  }
+  .column,
+  .column:first-child,
+  .column:last-child {
+    padding: var(--space-5) 0 0;
+  }
+  .column:first-child {
+    padding-top: 0;
+  }
+  .column + .column {
+    margin-top: var(--space-5);
+    border-inline-start: 0;
+    border-top: 1px solid var(--rule);
+  }
+}
+
+@media (max-width: 767px) {
+  .show {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0 var(--space-4) var(--space-6);
+  }
+  .show > * {
+    grid-column: 1;
+  }
+}

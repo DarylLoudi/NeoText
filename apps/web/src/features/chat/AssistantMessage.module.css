@@ -1,0 +1,40 @@
+/* Muted like "You": the gutter names the speaker without competing with the text. */
+.model {
+  color: var(--ink-muted);
+}
+
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  column-gap: var(--space-2);
+}
+
+/* Keeps room for the caret when nothing has arrived yet. */
+.parts {
+  min-height: calc(var(--text-lg) * 1.6);
+}
+
+.note {
+  margin-top: var(--space-3);
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.failed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-3);
+  color: var(--danger);
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+}
+
+@media (max-width: 767px) {
+  .figures {
+    justify-content: flex-start;
+  }
+}

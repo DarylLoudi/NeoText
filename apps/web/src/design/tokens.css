@@ -1,0 +1,139 @@
+:root {
+  --paper: #fbfbfa;
+  --shelf: #f1f2ef;
+  --shelf-hover: #e5e7e2;
+  --scrim: rgb(20 24 30 / 0.36);
+  --ink: #23272e;
+  --ink-muted: #5c6370;
+  --ink-faint: #8a919c;
+  --rule: #dee0dc;
+  --control-edge: #7d848f;
+  --marker: #fce45c;
+  --marker-soft: color-mix(in srgb, var(--marker) 40%, transparent);
+  --on-marker: #23272e;
+  --danger: #b42318;
+  --success: #1e7a46;
+  /* Chart marks: one series, validated against --paper (dataviz validator, light). */
+  --chart-1: #2a78d6;
+  /* Folder color dots (stored on the folder as the light hex; marker yellow is reserved). */
+  --folder-mint: #9ee6c4;
+  --folder-sky: #a7d3f5;
+  --folder-rose: #f5b3c2;
+  --folder-graphite: #c9cdd3;
+  /* Accent choices in Settings, shown as they are whatever accent is active. */
+  --swatch-marker: #fce45c;
+  --swatch-mint: #9ee6c4;
+  --swatch-sky: #a7d3f5;
+  --swatch-rose: #f5b3c2;
+  --swatch-graphite: #c9cdd3;
+  --font-scale: 1;
+  --font-ui: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
+  --font-reading: var(--font-ui);
+  --font-code: "Atkinson Hyperlegible Mono Variable", ui-monospace, monospace;
+  --text-xs: calc(12px * var(--font-scale));
+  --text-sm: calc(13.5px * var(--font-scale));
+  --text-md: calc(15px * var(--font-scale));
+  --text-lg: calc(17px * var(--font-scale));
+  --text-xl: calc(20px * var(--font-scale));
+  --text-2xl: calc(24px * var(--font-scale));
+  --text-3xl: calc(30px * var(--font-scale));
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
+  --radius-chip: 3px;
+  --radius-control: 6px;
+  --radius-panel: 10px;
+  --radius-dialog: 14px;
+  --shadow-float: 0 1px 2px rgb(20 24 30 / 0.08), 0 12px 32px -12px rgb(20 24 30 / 0.25);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --measure: 68ch;
+  --gutter: 120px;
+  --sidebar-width: 288px;
+}
+
+:root[data-theme="dark"] {
+  --paper: #1c1f23;
+  --shelf: #16191c;
+  --shelf-hover: #23272c;
+  --scrim: rgb(0 0 0 / 0.55);
+  --ink: #e7e5e0;
+  --ink-muted: #a3a9b1;
+  --ink-faint: #737a84;
+  --rule: #30353b;
+  --marker: #e3c94a;
+  --swatch-marker: #e3c94a;
+  --danger: #f2736b;
+  --success: #5bc88a;
+  --chart-1: #3987e5;
+  --folder-mint: #6fc9a2;
+  --folder-sky: #7fb6e2;
+  --folder-rose: #e48ea3;
+  --folder-graphite: #8f969f;
+  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px -12px rgb(0 0 0 / 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1c1f23;
+    --shelf: #16191c;
+    --shelf-hover: #23272c;
+    --scrim: rgb(0 0 0 / 0.55);
+    --ink: #e7e5e0;
+    --ink-muted: #a3a9b1;
+    --ink-faint: #737a84;
+    --rule: #30353b;
+    --marker: #e3c94a;
+    --swatch-marker: #e3c94a;
+    --danger: #f2736b;
+    --success: #5bc88a;
+    --chart-1: #3987e5;
+    --folder-mint: #6fc9a2;
+    --folder-sky: #7fb6e2;
+    --folder-rose: #e48ea3;
+    --folder-graphite: #8f969f;
+    --shadow-float: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px -12px rgb(0 0 0 / 0.6);
+  }
+}
+
+/* Accents come after the theme blocks so they win at equal specificity or higher. */
+:root[data-accent="mint"] {
+  --marker: #9ee6c4;
+}
+:root[data-accent="sky"] {
+  --marker: #a7d3f5;
+}
+:root[data-accent="rose"] {
+  --marker: #f5b3c2;
+}
+:root[data-accent="graphite"] {
+  --marker: #c9cdd3;
+}
+
+:root[data-reading-font="literata"] {
+  --font-reading: "Literata Variable", Georgia, serif;
+}
+:root[data-reading-font="system"] {
+  --font-reading: system-ui, sans-serif;
+}
+:root[data-ui-font="system"] {
+  --font-ui: system-ui, sans-serif;
+}
+:root[data-code-font="system-mono"] {
+  --font-code: ui-monospace, monospace;
+}
+
+:root[data-width="narrow"] {
+  --measure: 60ch;
+}
+:root[data-width="wide"] {
+  --measure: 96ch;
+}

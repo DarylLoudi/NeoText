@@ -1,0 +1,10 @@
+.list {
+  max-width: 32rem;
+}
+.add {
+  align-self: flex-start;
+}
+.reset {
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--rule);
+}

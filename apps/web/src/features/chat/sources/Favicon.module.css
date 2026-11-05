@@ -1,0 +1,43 @@
+.icon {
+  display: inline-block;
+  flex: none;
+  border-radius: var(--radius-chip);
+  object-fit: contain;
+}
+.sm {
+  width: 16px;
+  height: 16px;
+}
+.md {
+  width: 20px;
+  height: 20px;
+}
+
+/* Many icons are dark marks on transparency; on dark paper they get a light chip to sit on. */
+:global(:root[data-theme="dark"]) .image {
+  padding: 1px;
+  background: var(--ink);
+  box-sizing: border-box;
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .image {
+    padding: 1px;
+    background: var(--ink);
+    box-sizing: border-box;
+  }
+}
+
+.letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--rule);
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 650;
+  line-height: 1;
+}
+.md.letter {
+  font-size: var(--text-sm);
+}

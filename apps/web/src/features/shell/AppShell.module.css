@@ -1,0 +1,73 @@
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  grid-template-areas: "sidebar main";
+  height: 100dvh;
+  background: var(--paper);
+}
+.shell[data-sidebar-position="right"] {
+  grid-template-columns: minmax(0, 1fr) var(--sidebar-width);
+  grid-template-areas: "main sidebar";
+}
+.shell[data-sidebar-collapsed="true"],
+.shell[data-narrow] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "main";
+}
+
+.sidebar {
+  position: relative;
+  grid-area: sidebar;
+  min-width: 0;
+  min-height: 0;
+  border-inline-end: 1px solid var(--rule);
+}
+.shell[data-sidebar-position="right"] .sidebar {
+  border-inline-end: 0;
+  border-inline-start: 1px solid var(--rule);
+}
+
+.main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Drawer below 768 px: the sidebar slides over the page from its side. */
+.shell[data-narrow] .sidebar {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 50;
+  width: min(320px, 86vw);
+  border: 0;
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition:
+    transform var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
+}
+.shell[data-narrow][data-sidebar-position="right"] .sidebar {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  transform: translateX(100%);
+}
+.shell[data-narrow][data-drawer="open"] .sidebar {
+  transform: none;
+  visibility: visible;
+  box-shadow: var(--shadow-float);
+  transition: transform var(--dur) var(--ease);
+}
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--scrim);
+}

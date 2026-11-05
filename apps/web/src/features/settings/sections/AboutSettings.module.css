@@ -1,0 +1,10 @@
+.fact {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+}
+.note {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--ink-muted);
+}

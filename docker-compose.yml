@@ -1,0 +1,38 @@
+# NeoText with Docker Compose.
+#   1. cp .env.example .env and set NEOTEXT_PUBLIC_URL (and anything else you need).
+#   2. docker compose up -d --build
+# Your data lives in the neotext-data volume. Back it up before upgrading.
+services:
+  neotext:
+    build: .
+    restart: unless-stopped
+    # Bound to this machine only. Put a reverse proxy in front for HTTPS (see caddy below).
+    ports:
+      - "127.0.0.1:3420:3420"
+    volumes:
+      - neotext-data:/data
+    env_file: .env
+
+  # HTTPS with Caddy. To use it:
+  #   - copy deploy/Caddyfile.example to deploy/Caddyfile and set your domain
+  #   - in .env set NEOTEXT_PUBLIC_URL=https://your.domain and NEOTEXT_TRUST_PROXY=true
+  #   - uncomment this service (and the caddy volumes below)
+  #   - optional: remove the neotext `ports:` entry so only Caddy is reachable
+  # caddy:
+  #   image: caddy:2
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - neotext
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #     - "443:443/udp"
+  #   volumes:
+  #     - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - caddy-data:/data
+  #     - caddy-config:/config
+
+volumes:
+  neotext-data:
+  # caddy-data:
+  # caddy-config:

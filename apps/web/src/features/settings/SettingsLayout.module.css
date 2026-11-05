@@ -1,0 +1,125 @@
+.page {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  align-content: start;
+  min-height: 100%;
+}
+.nav {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  padding: var(--space-7) var(--space-4) var(--space-7) var(--space-6);
+}
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.link {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-inline-start: 2px solid transparent;
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+  color: var(--ink-muted);
+  text-decoration: none;
+}
+.link:hover {
+  background: var(--shelf);
+  color: var(--ink);
+}
+.link[aria-current="page"] {
+  border-inline-start-color: var(--ink);
+  color: var(--ink);
+  font-weight: 650;
+}
+.link:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.content {
+  min-width: 0;
+  padding: var(--space-7) var(--space-6) var(--space-10) var(--space-4);
+}
+.column {
+  max-width: 44rem;
+}
+.notice {
+  margin: 0 0 var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-control);
+  background: var(--shelf);
+}
+.rejected {
+  margin: 0 0 var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-panel);
+}
+.rejectedTitle {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 650;
+}
+.rejectedBody {
+  margin: var(--space-1) 0 var(--space-3);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+.rejectedList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rejectedItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+.rejectedMessage {
+  flex: 1 1 16rem;
+  margin: 0;
+}
+.rejectedActions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Below the drawer breakpoint the nav becomes a strip across the top of the page. */
+@media (max-width: 767px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nav {
+    position: static;
+    padding: var(--space-3) var(--space-4) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .navList {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: var(--space-1);
+    scrollbar-width: thin;
+  }
+  .link {
+    padding: var(--space-2) var(--space-3);
+    border-inline-start: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    white-space: nowrap;
+  }
+  .link[aria-current="page"] {
+    border-bottom-color: var(--ink);
+  }
+  .content {
+    padding: var(--space-6) var(--space-4) var(--space-9);
+  }
+}

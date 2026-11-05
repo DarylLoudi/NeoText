@@ -1,0 +1,112 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--shelf);
+  color: var(--ink);
+}
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2) var(--space-2);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  padding-inline: var(--space-2);
+}
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+/* The static caret: a marker block, as in the transcript it is named after. */
+.caret {
+  display: inline-block;
+  width: 0.4em;
+  height: 1.05em;
+  margin-inline-start: 0.08em;
+  border-radius: 1px;
+  background: var(--marker);
+}
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 34px;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--text-md);
+  text-align: start;
+  text-decoration: none;
+}
+.action:hover:not(:disabled) {
+  background: var(--shelf-hover);
+}
+.action:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.action:disabled {
+  color: var(--ink-muted);
+  cursor: default;
+}
+.actionIcon {
+  flex: none;
+  color: var(--ink-muted);
+  font-size: var(--text-lg);
+}
+/* A quick action that is a toggle (compare), while on. */
+.action[aria-pressed="true"] {
+  background: var(--shelf);
+  font-weight: 500;
+}
+.action[aria-pressed="true"] .actionIcon {
+  color: var(--ink);
+}
+.shortcut {
+  display: inline-flex;
+  gap: var(--space-1);
+  margin-inline-start: auto;
+}
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-1) var(--space-2) var(--space-3);
+}
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.dragPreview {
+  max-width: 260px;
+  padding: var(--space-1) var(--space-3);
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-control);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow-float);
+  font-size: var(--text-md);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: grabbing;
+}

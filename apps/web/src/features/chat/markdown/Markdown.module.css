@@ -1,0 +1,223 @@
+.root {
+  max-width: var(--measure);
+  font-family: var(--font-reading);
+  font-size: var(--text-lg);
+  line-height: 1.6;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.block {
+  display: contents;
+}
+
+/* The text as written, shown for the moment before the renderer's chunk arrives. */
+.plain {
+  white-space: pre-wrap;
+}
+
+/* Spacing is owned by the elements; the last one in the message adds none. */
+.root > .block:last-child > :global(div) > :last-child {
+  margin-bottom: 0;
+}
+
+.root :where(p, ul, ol, blockquote, hr, table) {
+  margin: 0 0 var(--space-4);
+}
+
+.root :where(h1, h2, h3, h4, h5, h6) {
+  margin: var(--space-6) 0 var(--space-3);
+  font-weight: 650;
+  line-height: 1.3;
+}
+.root h1 {
+  font-size: var(--text-2xl);
+}
+.root h2 {
+  font-size: var(--text-xl);
+}
+.root :where(h3, h4, h5, h6) {
+  font-size: var(--text-lg);
+}
+.root > .block:first-child > :global(div) > :where(h1, h2, h3, h4, h5, h6):first-child {
+  margin-top: 0;
+}
+
+.root :where(ul, ol) {
+  padding-inline-start: var(--space-6);
+}
+.root li {
+  margin-bottom: var(--space-1);
+}
+.root li > :where(ul, ol) {
+  margin: var(--space-1) 0 0;
+}
+
+.root blockquote {
+  padding-inline-start: var(--space-4);
+  border-inline-start: 3px solid var(--rule);
+  color: var(--ink-muted);
+}
+
+.root hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+/* Marker yellow shows up only as the underline, never as a text color. */
+.root a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-color: var(--marker);
+  text-decoration-thickness: 0.2em;
+  text-underline-offset: 0.12em;
+}
+.root a:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: var(--radius-chip);
+}
+
+/* A link to one of the answer's sources: its number on a marker chip, then the link text.
+   Inline-block keeps the link's underline off the number. */
+.root :global(.md-cite)::before {
+  content: attr(data-source);
+  display: inline-block;
+  min-width: 1.5em;
+  background: var(--marker);
+  color: var(--on-marker);
+  border-radius: var(--radius-chip);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  text-align: center;
+  vertical-align: 0.1em;
+  padding: 0 4px;
+  margin-right: 4px;
+}
+
+.root :where(code) {
+  font-family: var(--font-code);
+  font-size: 0.88em;
+}
+.root :not(pre) > code {
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-chip);
+  background: var(--shelf);
+}
+
+.root :global(.md-code) {
+  margin: 0 0 var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  background: var(--shelf);
+  overflow: hidden;
+  /* Skip layout and paint for long code blocks that are scrolled out of view. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 12rem;
+}
+.root :global(.md-code-bar) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-muted);
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+}
+.root :global(.md-code-bar) button,
+.root :global(.md-load-image) {
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius-control);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+.root :global(.md-code-bar) button:hover,
+.root :global(.md-load-image):hover {
+  background: var(--shelf-hover);
+}
+.root :global(.md-code-bar) button:focus-visible,
+.root :global(.md-load-image):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.root :global(.md-load-image) {
+  font-size: var(--text-sm);
+}
+
+.root :global(.md-code) pre {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  overflow: auto;
+  font-family: var(--font-code);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  tab-size: 2;
+  background: transparent;
+}
+.root :global(.md-code) pre:focus-visible,
+.root :global(.md-table):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.root :global(.md-code) pre code {
+  font-size: inherit;
+  padding: 0;
+  background: none;
+}
+
+/* Shiki writes both palettes as variables; the app theme decides which one paints. */
+.root :global(.shiki) span {
+  color: var(--shiki-light);
+}
+:global(:root[data-theme="dark"]) .root :global(.shiki) span {
+  color: var(--shiki-dark);
+}
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .root :global(.shiki) span {
+    color: var(--shiki-dark);
+  }
+}
+
+.root :global(.md-table) {
+  margin: 0 0 var(--space-4);
+  overflow-x: auto;
+}
+.root :global(.md-table) table {
+  margin: 0;
+  border-collapse: collapse;
+  font-size: var(--text-md);
+}
+.root :where(th, td) {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  text-align: start;
+  vertical-align: top;
+}
+.root th {
+  font-weight: 650;
+  border-bottom-color: var(--control-edge);
+}
+
+.root img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 0 var(--space-4);
+  border-radius: var(--radius-control);
+}
+
+.root :global(.katex-display) {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: var(--space-1);
+}

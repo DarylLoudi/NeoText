@@ -1,0 +1,87 @@
+import { CaretRight } from '@phosphor-icons/react';
+import { DropdownMenu as M } from 'radix-ui';
+import type { ReactNode } from 'react';
+import styles from './Menu.module.css';
+
+export type MenuItem =
+  | {
+      /** Defaults to `label`; set it when two items may share a label. */
+      id?: string;
+      label: string;
+      icon?: ReactNode;
+      onSelect: () => void;
+      danger?: boolean;
+      disabled?: boolean;
+    }
+  | { id?: string; label: string; icon?: ReactNode; items: MenuItem[]; disabled?: boolean }
+  | { separator: true };
+
+export type MenuProps = {
+  trigger: ReactNode;
+  items: MenuItem[];
+  align?: 'start' | 'center' | 'end';
+  side?: 'top' | 'right' | 'bottom' | 'left';
+  /** Return focus somewhere other than the trigger on close (e.g. an input that replaced it). */
+  onCloseAutoFocus?: (event: Event) => void;
+};
+
+function itemClass(danger?: boolean): string {
+  return [styles.item, danger ? styles.danger : ''].filter(Boolean).join(' ');
+}
+
+function Items({ items }: { items: MenuItem[] }) {
+  return items.map((item, i) => {
+    if ('separator' in item) {
+      // biome-ignore lint/suspicious/noArrayIndexKey: separators have no identity
+      return <M.Separator key={`sep-${i}`} className={styles.separator} />;
+    }
+    const icon = item.icon ? <span className={styles.icon}>{item.icon}</span> : null;
+    if ('items' in item) {
+      return (
+        <M.Sub key={item.id ?? item.label}>
+          <M.SubTrigger className={itemClass()} disabled={item.disabled}>
+            {icon}
+            {item.label}
+            <CaretRight className={styles.subCaret} aria-hidden />
+          </M.SubTrigger>
+          <M.Portal>
+            <M.SubContent className={styles.content} sideOffset={4} collisionPadding={8}>
+              <Items items={item.items} />
+            </M.SubContent>
+          </M.Portal>
+        </M.Sub>
+      );
+    }
+    return (
+      <M.Item
+        key={item.id ?? item.label}
+        className={itemClass(item.danger)}
+        disabled={item.disabled}
+        onSelect={item.onSelect}
+      >
+        {icon}
+        {item.label}
+      </M.Item>
+    );
+  });
+}
+
+export function Menu({ trigger, items, align = 'start', side, onCloseAutoFocus }: MenuProps) {
+  return (
+    <M.Root>
+      <M.Trigger asChild>{trigger}</M.Trigger>
+      <M.Portal>
+        <M.Content
+          className={styles.content}
+          align={align}
+          side={side}
+          sideOffset={6}
+          collisionPadding={8}
+          onCloseAutoFocus={onCloseAutoFocus}
+        >
+          <Items items={items} />
+        </M.Content>
+      </M.Portal>
+    </M.Root>
+  );
+}

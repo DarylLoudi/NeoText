@@ -1,0 +1,92 @@
+/* The chosen models, above the text while compare is on. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-2) var(--space-2) 0 var(--space-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.label {
+  color: var(--ink-muted);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 28px;
+  max-width: 100%;
+  padding-inline-start: var(--space-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-chip);
+  background: var(--shelf);
+  color: var(--ink);
+}
+.chipName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.remove {
+  flex: none;
+}
+
+.add {
+  color: var(--ink-muted);
+}
+
+.count {
+  padding: var(--space-3) var(--space-3) 0;
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+/* Matches the web search toggle beside it. */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+  min-height: 28px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+.toggle:hover {
+  border-color: var(--rule);
+  background: var(--shelf);
+  color: var(--ink);
+}
+.toggle[aria-pressed="true"] {
+  border-color: var(--control-edge);
+  background: var(--shelf);
+  color: var(--ink);
+  font-weight: 500;
+}
+.toggle:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.icon {
+  font-size: var(--text-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle {
+    transition: none;
+  }
+}

@@ -1,0 +1,113 @@
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 34px;
+  padding-inline-end: var(--space-1);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  list-style: none;
+  touch-action: pan-y;
+}
+:root[data-density="compact"] .row {
+  min-height: 28px;
+}
+.row:hover {
+  background: var(--shelf-hover);
+}
+.row[data-active] {
+  background: var(--marker);
+  color: var(--on-marker);
+}
+.row[data-dragging] {
+  opacity: 0.4;
+}
+.row[data-over] {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+
+.link {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-control);
+  color: inherit;
+  font-size: var(--text-md);
+  text-decoration: none;
+}
+.link:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.row[data-active] .link:focus-visible {
+  outline-color: var(--on-marker);
+}
+.title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.row[data-active] .title {
+  font-weight: 500;
+}
+
+.status {
+  display: inline-flex;
+  flex: none;
+  color: var(--ink-muted);
+}
+.row[data-active] .status {
+  color: var(--on-marker);
+}
+
+/* The row menu shows on hover, keyboard focus, for the open chat, and always on touch screens. */
+.menu {
+  display: inline-flex;
+  flex: none;
+  opacity: 0;
+}
+.row:hover .menu,
+.row:focus-within .menu,
+.row[data-active] .menu,
+.menu:has([data-state="open"]) {
+  opacity: 1;
+}
+@media (hover: none) {
+  .menu {
+    opacity: 1;
+  }
+}
+.menu button:hover:not(:disabled),
+.menu button[data-state="open"] {
+  background: var(--rule);
+  color: var(--ink);
+}
+.row[data-active] .menu button {
+  color: var(--on-marker);
+}
+.row[data-active] .menu button:hover:not(:disabled) {
+  background: transparent;
+  outline: 1px solid var(--on-marker);
+  outline-offset: -1px;
+}
+
+.rename {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius-control);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: var(--text-md);
+}
+.rename:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 0;
+}

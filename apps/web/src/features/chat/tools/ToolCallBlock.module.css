@@ -1,0 +1,150 @@
+/* Tool rows read like the reasoning line: small, muted, no box. Runs of them stack tightly. */
+.block {
+  margin: var(--space-3) 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+.block + .block {
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 28px;
+  max-width: 100%;
+  width: fit-content;
+  padding: 2px var(--space-1) 2px 0;
+  border-radius: var(--radius-chip);
+  cursor: pointer;
+  list-style: none;
+}
+.summary::-webkit-details-marker {
+  display: none;
+}
+.summary:hover {
+  color: var(--ink);
+}
+.summary:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.lead {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+.icon {
+  width: 15px;
+  height: 15px;
+}
+
+.label {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  unicode-bidi: isolate;
+}
+
+/* The host or the search words: only the room left over, so the label is cut only when it has to be. */
+.detail {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  unicode-bidi: isolate;
+}
+
+.outcome {
+  flex: none;
+}
+.block[data-status="error"] .outcome {
+  color: var(--danger);
+}
+
+.duration {
+  flex: none;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.chevron {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  color: var(--ink-faint);
+  transition: transform var(--dur-fast) var(--ease);
+}
+details[open] > .summary .chevron {
+  transform: rotate(90deg);
+}
+
+.body {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 var(--space-3);
+  padding-inline-start: var(--space-4);
+  border-inline-start: 1px solid var(--rule);
+}
+
+.heading {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  font-weight: 650;
+}
+.heading:not(:first-child) {
+  margin-top: var(--space-2);
+}
+
+.args,
+.result {
+  max-height: 16rem;
+  margin: 0;
+  overflow: auto;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+/* Arguments are JSON: code font, on the shelf like a code block. */
+.args {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--shelf);
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  white-space: pre-wrap;
+  tab-size: 2;
+  unicode-bidi: isolate;
+}
+
+.note {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}
+
+.result {
+  white-space: pre-wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
+.args:focus-visible,
+.result:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}

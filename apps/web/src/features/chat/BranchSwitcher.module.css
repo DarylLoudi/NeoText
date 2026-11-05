@@ -1,0 +1,14 @@
+.switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.count {
+  min-width: 3.5em;
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}

@@ -1,0 +1,22 @@
+/* The one moving thing in the app. Reduced motion (system or setting) stops it via base.css. */
+.caret {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.55em;
+  height: 1.15em;
+  font-size: var(--text-lg);
+  border-radius: 1px;
+  background: var(--marker);
+  pointer-events: none;
+  animation: breathe 1.2s var(--ease) infinite alternate;
+}
+
+@keyframes breathe {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.5;
+  }
+}

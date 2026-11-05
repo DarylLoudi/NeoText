@@ -1,0 +1,90 @@
+[
+  {
+    "id": "conv-chatgpt-1",
+    "conversation_id": "conv-chatgpt-1",
+    "title": "Rencana liburan",
+    "create_time": 1767225600.5,
+    "update_time": 1767225900.25,
+    "current_node": "node-last",
+    "mapping": {
+      "node-root": {
+        "id": "node-root",
+        "parent": null,
+        "children": ["node-system"],
+        "message": null
+      },
+      "node-system": {
+        "id": "node-system",
+        "parent": "node-root",
+        "children": ["node-user"],
+        "message": {
+          "author": { "role": "system" },
+          "create_time": null,
+          "content": { "content_type": "text", "parts": [""] },
+          "metadata": { "is_visually_hidden_from_conversation": true }
+        }
+      },
+      "node-user": {
+        "id": "node-user",
+        "parent": "node-system",
+        "children": ["node-a", "node-b"],
+        "message": {
+          "author": { "role": "user" },
+          "create_time": 1767225601,
+          "content": { "content_type": "text", "parts": ["Halo"] },
+          "metadata": {}
+        }
+      },
+      "node-a": {
+        "id": "node-a",
+        "parent": "node-user",
+        "children": [],
+        "message": {
+          "author": { "role": "assistant" },
+          "create_time": 1767225605.125,
+          "content": { "content_type": "text", "parts": ["Jawaban A"] },
+          "metadata": { "model_slug": "gpt-4o" }
+        }
+      },
+      "node-b": {
+        "id": "node-b",
+        "parent": "node-user",
+        "children": ["node-follow"],
+        "message": {
+          "author": { "role": "assistant" },
+          "create_time": 1767225700,
+          "content": { "content_type": "text", "parts": ["Jawaban B"] },
+          "metadata": { "model_slug": "gpt-4o" }
+        }
+      },
+      "node-follow": {
+        "id": "node-follow",
+        "parent": "node-b",
+        "children": ["node-last"],
+        "message": {
+          "author": { "role": "user" },
+          "create_time": 1767225800,
+          "content": {
+            "content_type": "multimodal_text",
+            "parts": [
+              { "content_type": "image_asset_pointer", "asset_pointer": "file-service://x" },
+              "Lanjut"
+            ]
+          },
+          "metadata": {}
+        }
+      },
+      "node-last": {
+        "id": "node-last",
+        "parent": "node-follow",
+        "children": [],
+        "message": {
+          "author": { "role": "assistant" },
+          "create_time": null,
+          "content": { "content_type": "text", "parts": ["Selesai"] },
+          "metadata": { "model_slug": "gpt-4o-mini" }
+        }
+      }
+    }
+  }
+]

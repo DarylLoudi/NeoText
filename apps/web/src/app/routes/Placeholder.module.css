@@ -1,0 +1,15 @@
+.page {
+  max-width: var(--measure);
+  padding: var(--space-9) var(--space-4);
+  margin-inline: clamp(0px, 8vw, 120px) auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.title {
+  font-size: var(--text-xl);
+  font-weight: 650;
+}
+.body {
+  color: var(--ink-muted);
+}

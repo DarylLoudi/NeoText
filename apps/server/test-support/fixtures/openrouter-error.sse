@@ -1,0 +1,5 @@
+data: {"id":"gen-err","object":"chat.completion.chunk","created":1793701600,"model":"deepseek/deepseek-v4.1-flash","choices":[{"index":0,"delta":{"content":"Partial ","role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"gen-err","object":"chat.completion.chunk","created":1793701600,"model":"deepseek/deepseek-v4.1-flash","error":{"code":"server_error","message":"Provider disconnected unexpectedly"},"choices":[{"index":0,"delta":{"content":""},"finish_reason":"error"}]}
+
+data: [DONE]

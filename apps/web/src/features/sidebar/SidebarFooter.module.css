@@ -1,0 +1,39 @@
+.footer {
+  padding: var(--space-2);
+  border-top: 1px solid var(--rule);
+}
+.account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 36px;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--text-md);
+  text-align: start;
+}
+.account:hover,
+.account[data-state="open"] {
+  background: var(--shelf-hover);
+}
+.account:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.icon {
+  flex: none;
+  color: var(--ink-muted);
+  font-size: var(--text-lg);
+}

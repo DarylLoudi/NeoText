@@ -1,0 +1,65 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  max-width: 40rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+}
+.row:first-child {
+  border-top: 1px solid var(--rule);
+}
+.name {
+  min-width: 0;
+}
+.keys {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+.buttons {
+  display: inline-flex;
+  gap: var(--space-1);
+  justify-content: flex-end;
+  min-width: 9rem;
+}
+.listening {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.prompt,
+.problem {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+.prompt {
+  color: var(--ink-muted);
+}
+.problem {
+  color: var(--danger);
+}
+.all {
+  align-self: flex-start;
+  padding-top: var(--space-2);
+}
+
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .name {
+    grid-column: 1 / -1;
+  }
+  .buttons {
+    min-width: 0;
+  }
+}

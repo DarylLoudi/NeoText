@@ -1,0 +1,122 @@
+.page {
+  max-width: 52rem;
+  padding: var(--space-7) var(--space-6) var(--space-10);
+  margin-inline: clamp(0px, 4vw, 64px) auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.title {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: 650;
+  line-height: 1.2;
+}
+.muted {
+  margin: 0;
+  color: var(--ink-muted);
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.error {
+  margin: 0;
+  color: var(--danger);
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  transition: opacity var(--dur) var(--ease);
+}
+/* A refetch keeps the last figures on screen, quieter, until the new ones arrive. */
+.body[data-stale] {
+  opacity: 0.6;
+}
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.lines p {
+  margin: 0;
+}
+.spent {
+  font-size: var(--text-lg);
+  font-weight: 650;
+}
+.blocked {
+  color: var(--danger);
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.sectionTitle,
+.caption {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 650;
+  text-align: start;
+}
+.caption {
+  padding-bottom: var(--space-3);
+}
+.details summary {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.details[open] summary {
+  margin-bottom: var(--space-3);
+}
+.section:has(> .table) {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.table thead th {
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+.table .text {
+  text-align: start;
+}
+.model {
+  max-width: 20rem;
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+}
+@media (max-width: 767px) {
+  .page {
+    padding: var(--space-6) var(--space-4) var(--space-9);
+    margin-inline: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .body {
+    transition: none;
+  }
+}

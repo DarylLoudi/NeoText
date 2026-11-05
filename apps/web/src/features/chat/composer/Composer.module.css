@@ -1,0 +1,73 @@
+/* The composer is the next line of the transcript: the same grid, so it sits in the text column. */
+.dock {
+  flex: none;
+  padding: var(--space-3) var(--space-6) var(--space-5);
+  background: var(--paper);
+}
+
+.row {
+  /* Set like a message's grid, so the column's `ch` width, and so its edges, match. */
+  font-family: var(--font-reading);
+  font-size: var(--text-lg);
+  display: grid;
+  grid-template-columns: var(--gutter) minmax(0, var(--measure));
+  column-gap: var(--space-4);
+  justify-content: center;
+}
+
+.speaker {
+  grid-row: 2;
+  grid-column: 1;
+  /* Lines up with the first line of the typed text. */
+  padding-top: calc(var(--space-3) + (var(--text-md) * 1.5 - var(--text-sm) * 1.4) / 2);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  text-align: end;
+}
+
+.box {
+  grid-row: 2;
+  grid-column: 2;
+  position: relative;
+  min-width: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius-panel);
+  background: var(--paper);
+}
+.box:hover:not(:focus-within) {
+  border-color: var(--ink-muted);
+}
+.box:focus-within {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.field textarea {
+  width: 100%;
+  padding: var(--space-3) var(--space-3) var(--space-1);
+  border: 0;
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  background: transparent;
+  font-size: var(--text-md);
+}
+.field textarea:focus-visible {
+  outline: none;
+}
+
+@media (max-width: 767px) {
+  .dock {
+    padding: var(--space-2) var(--space-3) var(--space-3);
+  }
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .speaker {
+    display: none;
+  }
+  .box {
+    grid-column: 1;
+  }
+}

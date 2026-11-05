@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <title>Panduan caching</title>
+    <style>.hidden { display: none; }</style>
+    <script>window.tracker = 'jangan tampilkan skrip ini';</script>
+  </head>
+  <body>
+    <header>
+      <nav><a href="/">Beranda</a> <a href="/blog">Blog</a> <a href="/kontak">Kontak</a></nav>
+    </header>
+    <main>
+      <article>
+        <h1>Panduan caching</h1>
+        <p>Caching menyimpan salinan data yang sering dipakai supaya permintaan berikutnya tidak perlu menghubungi sumber aslinya. Dengan begitu halaman terasa lebih cepat dan beban server turun.</p>
+        <p>Ada tiga lapisan yang biasa dipakai: cache peramban, cache perantara seperti CDN, dan cache di sisi server. Setiap lapisan punya aturan kedaluwarsa sendiri, jadi pastikan header Cache-Control diatur dengan sengaja.</p>
+        <p>Saat isi halaman berubah, gunakan ETag atau Last-Modified agar klien dapat memeriksa apakah salinannya masih sah tanpa mengunduh ulang seluruh respons.</p>
+        <p>Terakhir, ukur hasilnya. Cache yang tidak pernah kena hanya menambah kerumitan, sedangkan cache yang terlalu lama menyajikan data basi kepada pembaca.</p>
+      </article>
+    </main>
+    <footer>Hak cipta contoh. Semua hak dilindungi.</footer>
+  </body>
+</html>

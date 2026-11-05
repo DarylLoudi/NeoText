@@ -1,0 +1,142 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.heading {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 650;
+}
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block: var(--space-1);
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+.row[data-dragging] {
+  z-index: 1;
+  background: var(--shelf);
+  box-shadow: var(--shadow-float);
+}
+.handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-lg);
+  cursor: grab;
+  touch-action: none;
+}
+.handle:hover {
+  background: var(--shelf);
+  color: var(--ink);
+}
+.handle:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.row[data-dragging] .handle {
+  cursor: grabbing;
+}
+.switch {
+  flex: 1;
+  min-width: 0;
+}
+.tools {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  /* Keeps the switches in one column whether or not a row has Remove. */
+  min-width: calc(3 * 28px + 2 * 2px);
+  justify-content: flex-end;
+}
+.add {
+  align-self: flex-start;
+}
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+}
+.width {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+.fieldLabel {
+  padding: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.range {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--ink);
+}
+.range:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.value {
+  min-width: 6ch;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.quick .fieldLabel {
+  flex-basis: 100%;
+  margin-bottom: var(--space-1);
+}
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 28px;
+}
+.check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+.check input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.reset {
+  /* The label lines up with the content's left edge, not the button's padding. */
+  margin-inline: calc(var(--space-4) * -1) auto;
+}

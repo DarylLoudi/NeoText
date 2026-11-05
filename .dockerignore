@@ -1,0 +1,12 @@
+# The build stage installs its own dependencies and produces its own dist.
+**/node_modules
+**/dist
+# Any data directory (database, backups, instance key) and env file, wherever a dev run left it.
+**/data
+**/.env*
+.git
+.superpowers
+**/*.log
+**/coverage
+**/playwright-report
+**/test-results

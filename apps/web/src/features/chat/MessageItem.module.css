@@ -1,0 +1,54 @@
+/*
+ * The grid is set in the reading face at reading size, so the text column's `ch` matches the
+ * measure the markdown itself uses.
+ */
+.item {
+  display: grid;
+  grid-template-columns: var(--gutter) minmax(0, var(--measure));
+  column-gap: var(--space-4);
+  justify-content: center;
+  padding: 0 var(--space-6) var(--space-7);
+  font-family: var(--font-reading);
+  font-size: var(--text-lg);
+  line-height: 1.6;
+}
+
+.gutter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 0;
+  /* Lines the speaker's first line up with the first line of reading text. */
+  padding-top: calc((var(--text-lg) * 1.6 - var(--text-sm) * 1.4) / 2);
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+/* Both kinds of turn share this inset; a user turn's marker rule sits inside it (UserMessage). */
+.body {
+  position: relative;
+  min-width: 0;
+  padding-inline-start: calc(var(--space-4) + 3px);
+}
+
+@media (max-width: 767px) {
+  .item {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-1);
+    padding: 0 var(--space-4) var(--space-6);
+  }
+  .gutter {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: var(--space-3);
+    padding-top: 0;
+    padding-inline-start: calc(var(--space-4) + 3px);
+    text-align: start;
+  }
+}

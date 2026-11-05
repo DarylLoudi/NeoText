@@ -1,0 +1,32 @@
+{
+  "name": "neotext",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24.7.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "start": "node scripts/start.mjs",
+    "smoke:prod": "node scripts/smoke-prod.mjs",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "biome check . && node scripts/check-file-size.mjs && node scripts/check-secrets.mjs",
+    "audit": "npm audit --omit=dev --audit-level=high",
+    "format": "biome format --write .",
+    "test": "npm run test --workspaces --if-present",
+    "test:live": "npm run test:live -w @neotext/server",
+    "test:e2e": "npm run e2e -w @neotext/web",
+    "check:bundle": "node scripts/check-bundle-size.mjs",
+    "bench": "node scripts/bench-chat.mjs"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.4",
+    "typescript": "7.0.2"
+  }
+}

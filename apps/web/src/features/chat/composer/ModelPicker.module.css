@@ -1,0 +1,191 @@
+/* The top bar trigger: the model's name in the title's own voice, with a caret. */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  max-width: min(320px, 46vw);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--text-md);
+}
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+  background: var(--shelf);
+}
+.triggerName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trigger svg {
+  flex: none;
+  color: var(--ink-muted);
+}
+
+.content {
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  width: min(460px, calc(100vw - var(--space-4)));
+  max-height: min(520px, var(--radix-popover-content-available-height));
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow-float);
+}
+
+.command {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.search {
+  flex: none;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+}
+.search::placeholder {
+  color: var(--ink-muted);
+}
+.search:focus-visible {
+  /* The box is always focused while open: a heavy underline says so without a frame. */
+  outline: none;
+  padding-bottom: calc(var(--space-3) - 1px);
+  border-bottom: 2px solid var(--ink);
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-1) var(--space-2) var(--space-2);
+}
+
+.group [cmdk-group-heading] {
+  padding: var(--space-3) var(--space-2) var(--space-1);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.row,
+.more {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  user-select: none;
+}
+.row[data-selected="true"],
+.more[data-selected="true"] {
+  background: var(--shelf-hover);
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+.name {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-3);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+
+.capabilities {
+  display: flex;
+  flex: none;
+  gap: var(--space-1);
+  color: var(--ink-muted);
+  font-size: var(--text-lg);
+}
+.capability {
+  display: inline-flex;
+}
+
+.star {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-lg);
+}
+.star:hover {
+  background: var(--shelf-hover);
+  color: var(--ink);
+}
+.star[aria-pressed="true"] {
+  color: var(--ink);
+}
+
+.more {
+  justify-content: space-between;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+.link {
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.hint {
+  flex: none;
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--rule);
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}
+
+@media (hover: none) {
+  .hint {
+    display: none;
+  }
+}

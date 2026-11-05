@@ -1,0 +1,1 @@
+ALTER TABLE `usage_events` ADD `generation_ref` text;

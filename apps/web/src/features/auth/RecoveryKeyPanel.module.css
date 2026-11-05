@@ -1,0 +1,45 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.label {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.key {
+  display: block;
+  padding: var(--space-4);
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius-control);
+  background: var(--shelf);
+  font-size: var(--text-lg);
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.honest {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+.ack {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+.ack input {
+  margin-top: 4px;
+  accent-color: var(--ink);
+}
+.ack:focus-within {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}

@@ -1,0 +1,34 @@
+/* A thin hit area on the sidebar's inner edge; the visible line appears on hover and focus. */
+.handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 9px;
+  cursor: col-resize;
+  touch-action: none;
+}
+.handle[data-side="left"] {
+  inset-inline-end: -5px;
+}
+.handle[data-side="right"] {
+  inset-inline-start: -5px;
+}
+.handle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 1px;
+  background: transparent;
+  transition: background var(--dur-fast) var(--ease);
+}
+.handle:hover::after,
+.handle:active::after {
+  background: var(--control-edge);
+}
+.handle:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}

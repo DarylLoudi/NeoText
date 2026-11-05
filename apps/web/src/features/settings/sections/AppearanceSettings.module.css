@@ -1,0 +1,55 @@
+.sample {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  background: var(--shelf);
+}
+.sampleTitle {
+  margin: 0 0 var(--space-2);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.sampleText {
+  margin: 0;
+  max-width: var(--measure);
+  font-family: var(--font-reading);
+  font-size: var(--text-lg);
+  line-height: 1.6;
+}
+.sampleCode {
+  margin: var(--space-3) 0 0;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: var(--text-sm);
+}
+.sampleCode code {
+  font-family: inherit;
+}
+.size {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 32rem;
+}
+.sizeLabel {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.range {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--ink);
+}
+.range:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.sizeValue {
+  min-width: 5ch;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}

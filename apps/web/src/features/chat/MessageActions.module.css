@@ -1,0 +1,21 @@
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  /* Shown on hover or keyboard focus; the space is kept so nothing jumps. */
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+:where([data-turn]:hover, [data-turn]:focus-within) .actions {
+  opacity: 1;
+}
+
+/* Touch screens have no hover: always show them. */
+@media (hover: none) {
+  .actions {
+    opacity: 1;
+  }
+}

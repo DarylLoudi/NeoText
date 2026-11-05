@@ -1,0 +1,40 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+}
+
+.hint {
+  flex: 1;
+  min-width: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.3;
+}
+
+/* The reasoning choice reads as a setting in the line, not a form field. */
+.toolbar .select {
+  min-height: 28px;
+  padding: var(--space-1) var(--space-2);
+  border-color: transparent;
+  background: transparent;
+  font-size: var(--text-sm);
+}
+.toolbar .select:hover:not(:disabled) {
+  border-color: var(--rule);
+  background: var(--shelf);
+}
+
+.action {
+  min-width: 72px;
+}
+
+@media (max-width: 767px) {
+  .hint {
+    display: none;
+  }
+  .toolbar .select {
+    margin-inline-end: auto;
+  }
+}

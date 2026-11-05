@@ -1,0 +1,11 @@
+.content {
+  z-index: 100;
+  max-width: 260px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  box-shadow: var(--shadow-float);
+}

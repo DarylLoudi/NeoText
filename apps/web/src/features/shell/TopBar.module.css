@@ -1,0 +1,81 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+.titleWrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+.title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: var(--text-md);
+  font-weight: 650;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.titleButton {
+  max-width: 100%;
+  padding: var(--space-1) var(--space-2);
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: inherit;
+  font-weight: inherit;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+.titleButton:hover {
+  background: var(--shelf);
+}
+.title:not(:has(button)) {
+  padding: var(--space-1) var(--space-2);
+}
+.rename {
+  width: min(100%, 480px);
+  height: 32px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius-control);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: var(--text-md);
+  font-weight: 650;
+}
+.cost {
+  flex: none;
+  align-self: center;
+  padding-inline: var(--space-2);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.slot {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+.slot:empty {
+  display: none;
+}
+/* Read out as the title button's description; not shown (the tooltip shows it on hover). */
+.hint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

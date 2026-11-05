@@ -1,0 +1,114 @@
+.tableWrap {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  text-align: start;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.table thead th {
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+.table .number {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.name {
+  display: flex;
+  flex-direction: column;
+}
+.displayName {
+  font-weight: 500;
+}
+.username,
+.muted {
+  color: var(--ink-muted);
+}
+.disabled {
+  color: var(--danger);
+}
+.note {
+  margin: var(--space-4) 0 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3) var(--space-4);
+}
+.form > * {
+  flex: 0 1 12rem;
+}
+.form > button {
+  flex: 0 0 auto;
+}
+.secret {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.secretLabel {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.secretRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.secretValue {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius-control);
+  background: var(--shelf);
+  font-size: var(--text-lg);
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.shown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.shown p {
+  margin: 0;
+}
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.dialogBody p {
+  margin: 0;
+}
+.error {
+  color: var(--danger);
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

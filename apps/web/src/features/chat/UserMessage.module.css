@@ -1,0 +1,30 @@
+/* The marker rule runs along the text only, at the inset's outer edge (MessageItem .body). */
+.ruled {
+  margin-inline-start: calc(-1 * (var(--space-4) + 3px));
+  padding-inline-start: var(--space-4);
+  border-inline-start: 3px solid var(--marker);
+}
+
+.text {
+  max-width: var(--measure);
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  /* Each line typed (Arabic, then English) takes its own direction, not the first one's. */
+  unicode-bidi: plaintext;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: var(--measure);
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+}
+
+.editorActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

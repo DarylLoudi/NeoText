@@ -1,0 +1,73 @@
+.group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+}
+.option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  cursor: pointer;
+}
+.input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.chip {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius-chip);
+}
+.chip[data-accent="marker"] {
+  background: var(--swatch-marker);
+}
+.chip[data-accent="mint"] {
+  background: var(--swatch-mint);
+}
+.chip[data-accent="sky"] {
+  background: var(--swatch-sky);
+}
+.chip[data-accent="rose"] {
+  background: var(--swatch-rose);
+}
+.chip[data-accent="graphite"] {
+  background: var(--swatch-graphite);
+}
+.text {
+  color: var(--ink-muted);
+}
+.input:hover ~ .text {
+  color: var(--ink);
+}
+/* The chosen swatch gets an ink frame and its name turns to ink; nothing relies on color alone. */
+.input:checked ~ .chip {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.input:checked ~ .text {
+  color: var(--ink);
+  font-weight: 650;
+}
+.input:focus-visible ~ .chip {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}

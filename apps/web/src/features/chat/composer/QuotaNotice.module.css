@@ -1,0 +1,18 @@
+/* Sits in the composer's grid, above the box and in its column. */
+.notice {
+  grid-row: 1;
+  grid-column: 2;
+  margin: 0 0 var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-inline-start: 2px solid var(--danger);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+@media (max-width: 767px) {
+  .notice {
+    grid-column: 1;
+  }
+}

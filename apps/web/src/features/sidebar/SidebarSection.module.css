@@ -1,0 +1,63 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  padding-block-end: var(--space-2);
+}
+.heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-height: 30px;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  text-align: start;
+}
+.toggle:hover {
+  color: var(--ink);
+}
+.toggle:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.caret {
+  font-size: var(--text-xs);
+  opacity: 0;
+  transform: rotate(-90deg);
+  transition:
+    transform var(--dur-fast) var(--ease),
+    opacity var(--dur-fast) var(--ease);
+}
+.caret[data-open] {
+  transform: none;
+}
+.toggle:hover .caret,
+.toggle:focus-visible .caret,
+.toggle[aria-expanded="false"] .caret {
+  opacity: 1;
+}
+.note {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  padding: var(--space-1) var(--space-2);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+.dropZone {
+  border-radius: var(--radius-panel);
+}
+.dropZone[data-over] {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}

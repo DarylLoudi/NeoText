@@ -1,0 +1,86 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 34px;
+  padding-inline-end: var(--space-1);
+  border-radius: var(--radius-control);
+}
+:root[data-density="compact"] .row {
+  min-height: 28px;
+}
+.row:hover {
+  background: var(--shelf-hover);
+}
+.start {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--text-md);
+  text-align: start;
+}
+.start:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+}
+.dot[data-accent="marker"] {
+  background: var(--swatch-marker);
+}
+.dot[data-accent="mint"] {
+  background: var(--folder-mint);
+}
+.dot[data-accent="sky"] {
+  background: var(--folder-sky);
+}
+.dot[data-accent="rose"] {
+  background: var(--folder-rose);
+}
+.dot[data-accent="graphite"] {
+  background: var(--folder-graphite);
+}
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menu {
+  flex: none;
+}
+.add {
+  margin-block-start: var(--space-1);
+}
+.note {
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+.starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

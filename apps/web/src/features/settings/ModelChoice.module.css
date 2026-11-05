@@ -1,0 +1,46 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+  max-width: 28rem;
+  min-height: 36px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius-control);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: start;
+}
+.trigger:hover {
+  border-color: var(--ink-muted);
+}
+.value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.value[data-empty] {
+  color: var(--ink-muted);
+}
+.caret {
+  flex: none;
+  color: var(--ink-muted);
+}

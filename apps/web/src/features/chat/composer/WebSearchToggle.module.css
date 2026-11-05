@@ -1,0 +1,53 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+  min-height: 28px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+.toggle:hover {
+  border-color: var(--rule);
+  background: var(--shelf);
+  color: var(--ink);
+}
+.toggle[aria-pressed="true"] {
+  border-color: var(--control-edge);
+  background: var(--shelf);
+  color: var(--ink);
+  font-weight: 500;
+}
+.toggle:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.icon {
+  font-size: var(--text-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle {
+    transition: none;
+  }
+}
+
+.tip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* The engine line, quieter than what the button does. Tooltips are ink on paper-coloured text. */
+.tipMuted {
+  color: color-mix(in srgb, var(--paper) 72%, transparent);
+}
