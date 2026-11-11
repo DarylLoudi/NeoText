@@ -1,4 +1,6 @@
 .tableWrap {
+  /* Positioned, so hidden labels inside the table scroll with it instead of widening the page. */
+  position: relative;
   overflow-x: auto;
 }
 .table {

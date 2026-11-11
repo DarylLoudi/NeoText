@@ -6,6 +6,7 @@ import { conversationsApi } from '../../../lib/api/conversations';
 import { getLocale, useT } from '../../../lib/i18n';
 import { qk } from '../../../lib/query';
 import { Button, Dialog, Spinner, toast } from '../../../ui';
+import { forgetPreviewStorage } from '../../project/preview-storage';
 import styles from './TrashPanel.module.css';
 
 const DAY_MS = 86_400_000;
@@ -139,13 +140,16 @@ export function TrashPanel({ now = Date.now }: { now?: () => number }) {
               loading={busy}
               onClick={() => {
                 if (pending?.kind === 'all') {
-                  void run(() => conversationsApi.emptyTrash(), t('settings.data.trash.emptied'));
+                  void run(async () => {
+                    const { ids } = await conversationsApi.emptyTrash();
+                    await forgetPreviewStorage(ids);
+                  }, t('settings.data.trash.emptied'));
                 } else if (pending) {
                   const id = pending.item.id;
-                  void run(
-                    () => conversationsApi.deleteForever(id),
-                    t('settings.data.trash.deleted'),
-                  );
+                  void run(async () => {
+                    await conversationsApi.deleteForever(id);
+                    await forgetPreviewStorage([id]);
+                  }, t('settings.data.trash.deleted'));
                 }
               }}
             >

@@ -13,6 +13,8 @@ const sections = [
 export async function resetState(request: APIRequestContext): Promise<void> {
   await resetMock(request);
   await patchSettings(request, {
+    // A test that switched language can have its page deliver that change after it ended.
+    locale: 'en',
     appearance: { theme: 'system', reduceMotion: 'system' },
     // Titles come from a second model call that would take a script meant for the next test.
     chat: { autoTitle: false, sendKey: 'enter' },

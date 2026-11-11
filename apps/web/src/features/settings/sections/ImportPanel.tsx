@@ -11,7 +11,8 @@ import { transferApi } from '../../../lib/api/transfer';
 import { useT } from '../../../lib/i18n';
 import { qk } from '../../../lib/query';
 import { flushSettings, refetchSettings } from '../../../state/settings';
-import { Button, Switch, TextField, toast } from '../../../ui';
+import { Button, TextField, toast } from '../../../ui';
+import { Switch } from '../../../ui/Switch/Switch';
 import styles from './ImportPanel.module.css';
 
 const SOURCES: ImportSource[] = ['neotext', 'chatgpt', 'claude'];

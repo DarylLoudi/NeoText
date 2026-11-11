@@ -23,6 +23,9 @@
 .trigger:hover:not(:disabled) {
   border-color: var(--ink-muted);
 }
+.trigger:focus-visible {
+  outline-offset: -2px;
+}
 .trigger:disabled {
   opacity: 0.55;
   cursor: not-allowed;

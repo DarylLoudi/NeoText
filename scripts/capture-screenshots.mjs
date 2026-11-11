@@ -1,4 +1,4 @@
-// Takes the screenshots used in README.md, at 1440x900, into docs/images.
+// Takes the screenshots used in README.md, at 1440x900, into assets/screenshots.
 //
 // It starts the same server the browser tests use (apps/web/e2e/support/e2e-server.ts: the real
 // app on port 3421 with mock model providers, so nothing leaves this machine and no key is
@@ -165,7 +165,7 @@ async function main() {
     const shot = async (name) => {
       await settle();
       await page.screenshot({ path: join(OUT, name), type: 'png' });
-      console.log(`wrote docs/images/${name}`);
+      console.log(`wrote assets/screenshots/${name}`);
     };
 
     // 1. A chat in light and dark.

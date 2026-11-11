@@ -46,6 +46,8 @@ export interface TurnRequestInput {
   delegation?: boolean;
   /** The system line of an agent offered `search_knowledge` (`knowledgeGuidance`). */
   knowledgeGuidance?: string;
+  /** The system line of a branch with a web project (`projectGuidance`). */
+  projectGuidance?: string;
 }
 
 export interface TurnRequest {
@@ -66,6 +68,7 @@ export function buildTurnRequest(input: TurnRequestInput): TurnRequest {
     plan.kind === 'server' || plan.kind === 'tool' ? WEB_SEARCH_GUIDANCE : '',
     input.delegation ? DELEGATE_GUIDANCE : '',
     input.knowledgeGuidance ?? '',
+    input.projectGuidance ?? '',
   ]
     .filter((s) => s !== '')
     .join('\n\n');

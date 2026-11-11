@@ -7,7 +7,8 @@ import {
 } from '@neotext/shared';
 import { type FormEvent, useId, useState } from 'react';
 import { useT } from '../../lib/i18n';
-import { Button, Dialog, Select, TextArea, TextField } from '../../ui';
+import { Button, Dialog, TextArea, TextField } from '../../ui';
+import { Select } from '../../ui/Select/Select';
 import { ModelPicker } from '../chat/composer/ModelPicker';
 import { useModels } from '../chat/composer/use-models';
 import { ACCENTS } from '../settings/AccentSwatches';

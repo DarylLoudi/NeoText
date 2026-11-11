@@ -26,7 +26,7 @@ import {
   effectiveContextLength,
   usedContextTokens,
 } from '../chat/context-window';
-import { InlineRename } from '../sidebar/ConversationItem';
+import { InlineRename } from '../sidebar/InlineRename';
 import { findConversation, useConversationMutations } from '../sidebar/use-conversations';
 import styles from './TopBar.module.css';
 
@@ -210,14 +210,16 @@ function PageTitle() {
       </>
     );
   }
-  const text = pathname.startsWith('/settings')
+  const section = pathname.startsWith('/settings')
     ? t('settings.title')
     : pathname.startsWith('/usage')
       ? t('settings.usage.title')
       : pathname.startsWith('/admin')
         ? t('admin.title')
-        : t('sidebar.newChat');
-  return <h1 className={styles.title}>{text}</h1>;
+        : null;
+  // Settings, usage and admin pages carry their own heading; the bar only names the area.
+  if (section) return <p className={styles.title}>{section}</p>;
+  return <h1 className={styles.title}>{t('sidebar.newChat')}</h1>;
 }
 
 /** The overflow menu of an open chat. */

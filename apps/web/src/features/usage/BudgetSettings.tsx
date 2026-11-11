@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { formatCost } from '../../lib/format';
 import { useT } from '../../lib/i18n';
 import { updateSettings, useSettings } from '../../state/settings';
-import { Switch } from '../../ui';
+import { Switch } from '../../ui/Switch/Switch';
 import { NumberField } from '../settings/NumberField';
 import { Group, Row } from '../settings/SettingsParts';
 import styles from './UsageDashboard.module.css';

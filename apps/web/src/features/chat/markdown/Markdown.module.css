@@ -171,6 +171,17 @@
   background: var(--shelf-hover);
   color: var(--ink);
 }
+/* A labeled text button beside Copy, on HTML pages the project preview can open. */
+.root :global(.md-code-bar) button:global(.md-preview) {
+  width: auto;
+  margin-inline-start: auto;
+  padding: 0 var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+.root :global(.md-code-bar) button:global(.md-preview)::before {
+  content: none;
+}
 .root :global(.md-sr) {
   position: absolute;
   width: 1px;
@@ -250,6 +261,8 @@
   border-bottom: 1px solid var(--rule);
   text-align: start;
   vertical-align: top;
+  /* Words stay whole in a cell: a narrow screen scrolls the table instead of splitting numbers. */
+  overflow-wrap: break-word;
 }
 .root th {
   font-weight: 650;

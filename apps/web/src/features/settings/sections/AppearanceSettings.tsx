@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import { useT } from '../../../lib/i18n';
 import { updateSettings, useSettings } from '../../../state/settings';
-import { Switch } from '../../../ui';
+import { Switch } from '../../../ui/Switch/Switch';
 import { ChoiceGroup } from '../../sidebar/ChoiceGroup';
 import { AccentSwatches } from '../AccentSwatches';
 import { Group, Row, SectionHeader } from '../SettingsParts';

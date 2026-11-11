@@ -3,7 +3,7 @@ import { resetState } from './support/api';
 import { addAccount, enqueue, seedAccount } from './support/control';
 import { APP_URL } from './support/ports';
 
-// Spec §4 budgets. PERF_SLACK multiplies them on slow machines (CI sets 2).
+// Performance budgets. PERF_SLACK multiplies them on slow machines (CI sets 2).
 const SLACK = Number(process.env.PERF_SLACK) || 1;
 const OPEN_MS = 100 * SLACK;
 const LONG_TASK_MS = 50 * SLACK;

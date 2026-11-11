@@ -11,6 +11,7 @@ export interface OutboxRecord {
 export interface Persistence {
   getKV<T>(key: string): Promise<T | undefined>;
   setKV(key: string, value: unknown): Promise<void>;
+  deleteKV(key: string): Promise<void>;
   outboxAdd(record: OutboxRecord): Promise<number>;
   /** In id order. */
   outboxAll(): Promise<({ id: number } & OutboxRecord)[]>;
@@ -121,6 +122,9 @@ function idbPersistence(name: string, first: IDBPDatabase<NeoTextDB>, onLost: { 
     setKV: async (key, value) => {
       await conn().put('kv', value, key);
     },
+    deleteKV: async (key) => {
+      await conn().delete('kv', key);
+    },
     outboxAdd: async (record) => conn().add('outbox', record),
     outboxAll: async () => {
       const tx = conn().transaction('outbox');
@@ -158,6 +162,9 @@ export function memoryPersistence(): Persistence {
     getKV: async <T>(key: string) => structuredClone(kv.get(key)) as T | undefined,
     setKV: async (key, value) => {
       kv.set(key, structuredClone(value));
+    },
+    deleteKV: async (key) => {
+      kv.delete(key);
     },
     outboxAdd: async (record) => {
       const id = nextId++;
@@ -207,13 +214,26 @@ export async function openPersistence(userId: string): Promise<Persistence> {
 
 let active: { userId: string; store: Promise<Persistence> } | null = null;
 let pageMemory: Persistence | null = null;
+/** Waiting for a user's store to open (see `whenUserPersistence`). */
+const waiting = new Set<() => void>();
 
 /** Makes `userId`'s store the page's store (closing another user's). */
 export function openUserPersistence(userId: string): Promise<Persistence> {
   if (active?.userId === userId) return active.store;
   closeUserPersistence();
   active = { userId, store: openPersistence(userId) };
+  for (const resolve of waiting) resolve();
+  waiting.clear();
   return active.store;
+}
+
+/**
+ * Resolves once a signed-in user's store is the page's store. After a reload the app's views
+ * render before the session opens it, so what they read must wait for it.
+ */
+export function whenUserPersistence(): Promise<void> {
+  if (active) return Promise.resolve();
+  return new Promise((resolve) => waiting.add(resolve));
 }
 
 export function activeUserId(): string | null {

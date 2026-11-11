@@ -5,6 +5,8 @@ import {
   type ModelInfo,
   type ModelRef,
   newId,
+  PROJECT_TOOLS,
+  replayProject,
   type UserSettings,
 } from '@neotext/shared';
 import type { AttachmentLookup } from '../attachments/model-file';
@@ -15,6 +17,7 @@ import type { HttpClient } from '../net/http-client';
 import { getAdapter } from '../providers/registry';
 import type { ResolvedProvider } from '../providers/types';
 import { createFetchSlots } from '../tools/builtin/fetch-url';
+import { createProjectTools, projectGuidance } from '../tools/builtin/project-files';
 import type { ToolDefinition } from '../tools/types';
 import { createGeneration, type Generation } from './generation/generation';
 import type { GenerationManager } from './generation/manager';
@@ -74,6 +77,23 @@ export interface TargetRunInput {
   afterFinish?: (generation: Generation, final: MessagePublic) => Promise<void>;
 }
 
+/**
+ * The file tools of a target, over the project its branch has so far, and the system line naming
+ * the files. The line goes only to a model that can read them (tools, and `read_file` not off).
+ */
+function projectFor(input: TargetRunInput): {
+  tools: ReturnType<typeof createProjectTools>;
+  guidance: string | null;
+} {
+  if (!toolsPossible(input.target.model)) return { tools: [], guidance: null };
+  const project = replayProject(input.path);
+  const readable = input.toolSettings.policies[PROJECT_TOOLS.read] !== 'off';
+  return {
+    tools: createProjectTools(new Map(project.files)),
+    guidance: readable ? projectGuidance(project.files, project.versions.length) : null,
+  };
+}
+
 /** Builds the request, generation and writer of one target and starts its run. */
 export function startTargetRun(
   deps: TargetRunDeps,
@@ -102,6 +122,7 @@ export function startTargetRun(
     input.agent && deps.knowledge && toolsPossible(target.model)
       ? agentKnowledge(deps.knowledge, auth, input.agent, input.toolSettings.policies)
       : null;
+  const project = projectFor(input);
   const turn = buildTurnRequest({
     path: input.path,
     chat: input.chat,
@@ -114,6 +135,7 @@ export function startTargetRun(
     ...(input.agent ? { systemPrompt: input.agent.data.instructions } : {}),
     ...(delegate.length > 0 ? { delegation: true } : {}),
     ...(knowledge ? { knowledgeGuidance: knowledge.guidance } : {}),
+    ...(project.guidance ? { projectGuidance: project.guidance } : {}),
     ...(input.loadAttachment ? { loadAttachment: input.loadAttachment } : {}),
   });
   const generation = createGeneration({
@@ -155,6 +177,7 @@ export function startTargetRun(
             ),
             ...delegate,
             ...(knowledge ? [knowledge.tool] : []),
+            ...project.tools,
           ],
           settings: input.toolSettings,
           model: target.model,

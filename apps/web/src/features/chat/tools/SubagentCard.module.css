@@ -119,6 +119,8 @@
 
 .rows {
   display: grid;
+  /* A long title must not widen the rows past the card: it is cut short instead. */
+  grid-template-columns: minmax(0, 1fr);
   margin: 0;
   padding: var(--space-1) var(--space-1) var(--space-2);
   list-style: none;

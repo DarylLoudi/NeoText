@@ -99,7 +99,8 @@ test('the date line stays after the instructions', async () => {
 
 test('fetch_url is absent when the agent turns it off, present otherwise', async () => {
   const off = await makeAgent({ tools: { webSearch: true, fetchUrl: false } });
-  expect((await send(turn(off.id))).sent?.tools).toBeUndefined();
+  const offNames = (await send(turn(off.id))).sent?.tools?.map((x) => x.function.name);
+  expect(offNames).not.toContain('fetch_url');
   const on = await makeAgent();
   const names = (await send(turn(on.id))).sent?.tools?.map((x) => x.function.name);
   expect(names).toContain('fetch_url');

@@ -31,6 +31,12 @@ const echo: ToolDefinition = {
   execute: vi.fn(),
 };
 
+/** The tools offered besides the project file tools, which every tool-capable target gets. */
+const otherTools = (spec: RunSpec) =>
+  (spec.tools?.defs.map((d) => d.name) ?? []).filter(
+    (n) => !['write_file', 'edit_file', 'delete_file', 'read_file'].includes(n),
+  );
+
 function setup(plan: WebSearchPlan, over: Partial<TargetRunInput> = {}) {
   const specs: RunSpec[] = [];
   let started: Generation | null = null;
@@ -86,7 +92,7 @@ test('a server plan puts the OpenRouter tool into the request and runs the loop 
   expect(spec.webSearch).toBe(true);
   expect(spec.searchBudget).toBe(plan.budget);
   expect(spec.request.serverTools).toEqual(plan.serverTools);
-  expect(spec.tools?.defs.map((d) => d.name)).toEqual(['echo']);
+  expect(otherTools(spec)).toEqual(['echo']);
   expect(spec.preContext).toBeUndefined();
   // Each generation gets its own fetch_url slots.
   expect(spec.toolContext?.fetchSlots).not.toBe(setup(plan).spec.toolContext?.fetchSlots);
@@ -99,7 +105,7 @@ test('a tool plan offers its web_search first; a pre-search plan carries the sea
   const tool = { ...echo, name: 'web_search' };
   const budget = createSearchBudget(3);
   const withTool = setup({ kind: 'tool', tool, budget });
-  expect(withTool.spec.tools?.defs.map((d) => d.name)).toEqual(['web_search', 'echo']);
+  expect(otherTools(withTool.spec)).toEqual(['web_search', 'echo']);
   expect(withTool.spec.searchBudget).toBe(budget);
   expect(withTool.spec.webSearch).toBe(false);
 
@@ -146,7 +152,65 @@ test('an agent with web search off gets no search on any plan', () => {
     expect(spec.request.serverTools).toBeUndefined();
     expect(spec.webSearch).toBe(false);
     expect(spec.searchBudget).toBeUndefined();
-    expect(spec.tools?.defs.map((d) => d.name)).toEqual(['echo']);
+    expect(otherTools(spec)).toEqual(['echo']);
     expect(JSON.stringify(spec.request.messages)).not.toContain(WEB_SEARCH_GUIDANCE);
   }
+});
+
+function withProject(over: Partial<TargetRunInput> = {}) {
+  const write = {
+    type: 'tool_call' as const,
+    id: 'call_w',
+    name: 'write_file',
+    source: 'app' as const,
+    args: JSON.stringify({ path: 'index.html', content: '<p>a</p>' }),
+    status: 'ok' as const,
+    result: null,
+    startedAt: 0,
+    finishedAt: 0,
+  };
+  const path = [{ ...message, id: 'msg_old', status: 'complete', parts: [write] } as MessagePublic];
+  return setup({ kind: 'none' }, { path, ...over });
+}
+
+const PROJECT_TOOL_NAMES = ['write_file', 'edit_file', 'delete_file', 'read_file'];
+
+test('the project tools come after the others, bound to the branch files', async () => {
+  const { spec } = withProject();
+  expect(spec.tools?.defs.map((d) => d.name)).toEqual(['echo', ...PROJECT_TOOL_NAMES]);
+  const read = spec.tools?.get('read_file');
+  expect(await read?.execute({ path: 'index.html' }, spec.toolContext as never)).toEqual({
+    ok: true,
+    content: '1| <p>a</p>',
+  });
+  expect(JSON.stringify(spec.request.messages)).toContain(
+    'This chat has a web project (version 1): index.html (0.0 KB).',
+  );
+});
+
+test('a branch without a project gets the tools but no project line', () => {
+  const { spec } = setup({ kind: 'none' });
+  expect(spec.tools?.defs.map((d) => d.name)).toEqual(['echo', ...PROJECT_TOOL_NAMES]);
+  expect(JSON.stringify(spec.request.messages)).not.toContain('web project');
+});
+
+test('a model without tools gets neither the tools nor the project line', () => {
+  const { spec } = withProject({
+    target: {
+      ref: { providerId: 'prv_1', modelId: 'm1' },
+      provider: { id: 'prv_1', kind: 'openai-compatible' } as unknown as ResolvedProvider,
+      model: { supports: { tools: false }, inputModalities: [], contextLength: null } as never,
+    },
+  });
+  expect(spec.tools).toBeUndefined();
+  expect(JSON.stringify(spec.request.messages)).not.toContain('web project');
+});
+
+test('turning read_file off drops the project line', () => {
+  const tools = defaultSettings().tools;
+  const { spec } = withProject({
+    toolSettings: { ...tools, policies: { ...tools.policies, read_file: 'off' } },
+  });
+  expect(spec.tools?.defs.map((d) => d.name)).not.toContain('read_file');
+  expect(JSON.stringify(spec.request.messages)).not.toContain('web project');
 });

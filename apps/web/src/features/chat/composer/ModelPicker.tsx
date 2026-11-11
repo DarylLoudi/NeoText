@@ -1,6 +1,6 @@
 import type { ModelInfo, ModelRef } from '@neotext/shared';
 import { CaretDown } from '@phosphor-icons/react';
-import { Popover } from 'radix-ui';
+import * as Popover from 'radix-ui/popover';
 import { type ButtonHTMLAttributes, type ReactElement, useCallback, useState } from 'react';
 import { useT } from '../../../lib/i18n';
 import { ModelList } from './ModelList';

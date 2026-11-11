@@ -1,7 +1,7 @@
 import { type ModelRef, modelKey } from '@neotext/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, type ReactNode, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { ApiError } from '../../lib/api/client';
 import { useAppCommand } from '../../lib/app-commands';
 import { useT } from '../../lib/i18n';
@@ -10,6 +10,10 @@ import { useSettings } from '../../state/settings';
 import { Button, EmptyState, toast } from '../../ui';
 import { useCompare } from '../compare/compare-state';
 import { setPendingPreset, usePendingPreset } from '../presets/use-presets';
+import { panelPathFor } from '../project/panel-path';
+import { previewStorage } from '../project/preview-storage';
+import { closeProjectPanel, useProjectPanel } from '../project/project-panel-state';
+import { ProjectContext, useChatProject } from '../project/project-versions';
 import { TopBarSlot } from '../shell/TopBar';
 import styles from './ChatView.module.css';
 import { Composer } from './composer/Composer';
@@ -25,7 +29,13 @@ import { setNextChatModel, takeNextChatModel } from './next-chat-model';
 import { conversationDetailQuery, useChatStream } from './streaming/use-chat-stream';
 import { buildThread } from './thread';
 
-/** Performance marks around opening a chat (spec §4: ≤ 100 ms to first paint of messages). */
+// The preview panel and everything it runs load the first time a chat opens it.
+const ProjectPanel = lazy(() => import('../project/ProjectPanel'));
+const PreviewToggle = lazy(() =>
+  import('../project/ProjectChangeRow').then((m) => ({ default: m.PreviewToggle })),
+);
+
+/** Performance marks around opening a chat (budget: 100 ms to first paint of messages). */
 export const OPEN_START_MARK = 'neotext:open-start';
 export const MESSAGES_PAINTED_MARK = 'neotext:messages-painted';
 
@@ -99,6 +109,9 @@ export function ChatView({ conversationId, presets, focusMessageId }: ChatViewPr
     }
   }, [conversationId]);
   const active = useActiveModel(detail.data?.conversation ?? null, pending ?? presetModel);
+  const panel = useProjectPanel();
+  const panelOpen =
+    conversationId !== null && panel.open && panel.conversationId === conversationId;
   const hasMessages = (detail.data?.messages.length ?? 0) > 0;
 
   /** A pick in a chat with messages and a different context window starts a new chat instead. */
@@ -137,6 +150,29 @@ export function ChatView({ conversationId, presets, focusMessageId }: ChatViewPr
       (userMessageId) => chosen.has(userMessageId),
     );
   }, [detail.data, byMessage, chosen]);
+
+  /**
+   * The visible branch's project, from the stored messages only: rows and the top bar switch
+   * appear once an answer is saved, and streaming frames do not replay the project.
+   */
+  const storedPath = useMemo(() => {
+    if (!detail.data) return [];
+    const { messages, conversation } = detail.data;
+    return buildThread(messages, conversation.activeLeafId, () => undefined).map((i) => i.message);
+  }, [detail.data]);
+  const project = useChatProject(storedPath);
+
+  /**
+   * The branch the open panel shows: the visible one with live answers, or the branch of the
+   * answer it was opened from when that one is not on it (a compare column).
+   */
+  const panelView = useMemo(
+    () =>
+      panelOpen && detail.data
+        ? panelPathFor(items, detail.data.messages, panel.messageId, (id) => byMessage[id]?.message)
+        : { path: [], messageId: null },
+    [panelOpen, detail.data, items, panel.messageId, byMessage],
+  );
 
   const { reconnecting, lost } = useMemo(() => {
     const live = Object.values(byMessage);
@@ -178,39 +214,61 @@ export function ChatView({ conversationId, presets, focusMessageId }: ChatViewPr
 
   return (
     <ChatActionsContext.Provider value={actions}>
-      <main className={styles.view} aria-busy={detail.isPending && conversationId !== null}>
-        <TopBarSlot name="model">
-          <ModelPicker value={active.ref} onChange={pick} align="end">
-            <ModelButton model={active.model} />
-          </ModelPicker>
-        </TopBarSlot>
-        {empty ? (
-          <div className={styles.sheet}>
-            <ModelSheet
+      <ProjectContext.Provider value={project}>
+        <div className={styles.layout}>
+          <main className={styles.view} aria-busy={detail.isPending && conversationId !== null}>
+            <TopBarSlot name="model">
+              {conversationId !== null && project.hasPage ? (
+                <Suspense fallback={null}>
+                  <PreviewToggle conversationId={conversationId} hasPage />
+                </Suspense>
+              ) : null}
+              <ModelPicker value={active.ref} onChange={pick} align="end">
+                <ModelButton model={active.model} />
+              </ModelPicker>
+            </TopBarSlot>
+            {empty ? (
+              <div className={styles.sheet}>
+                <ModelSheet
+                  model={active.model}
+                  providerName={providerName}
+                  hasProvider={active.providers.length > 0}
+                  loading={active.isLoading}
+                  presets={presets}
+                />
+              </div>
+            ) : (
+              <MessageList
+                items={items}
+                showCost={showCost}
+                codeTheme={codeTheme}
+                reconnecting={reconnecting}
+                lost={lost}
+                focusId={focusMessageId}
+              />
+            )}
+            <Composer
+              conversationId={conversationId}
               model={active.model}
-              providerName={providerName}
-              hasProvider={active.providers.length > 0}
-              loading={active.isLoading}
-              presets={presets}
+              stream={stream}
+              preset={preset}
             />
-          </div>
-        ) : (
-          <MessageList
-            items={items}
-            showCost={showCost}
-            codeTheme={codeTheme}
-            reconnecting={reconnecting}
-            lost={lost}
-            focusId={focusMessageId}
-          />
-        )}
-        <Composer
-          conversationId={conversationId}
-          model={active.model}
-          stream={stream}
-          preset={preset}
-        />
-      </main>
+          </main>
+          {panelOpen ? (
+            <Suspense fallback={null}>
+              <ProjectPanel
+                conversationId={conversationId}
+                title={detail.data?.conversation.title ?? ''}
+                path={panelView.path}
+                generating={stream.generating}
+                storage={previewStorage}
+                messageId={panelView.messageId}
+                onClose={closeProjectPanel}
+              />
+            </Suspense>
+          ) : null}
+        </div>
+      </ProjectContext.Provider>
     </ChatActionsContext.Provider>
   );
 }

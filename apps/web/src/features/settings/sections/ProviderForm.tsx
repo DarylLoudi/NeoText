@@ -8,7 +8,9 @@ import type {
 } from '@neotext/shared';
 import { type FormEvent, useId, useRef, useState } from 'react';
 import { useT } from '../../../lib/i18n';
-import { Button, Select, Switch, TextArea, TextField, toast } from '../../../ui';
+import { Button, TextArea, TextField, toast } from '../../../ui';
+import { Select } from '../../../ui/Select/Select';
+import { Switch } from '../../../ui/Switch/Switch';
 import { mapError } from '../../auth/authErrors';
 import { FormError } from '../../auth/FormError';
 import { useFocusFirstError } from '../../auth/useFocusFirstError';

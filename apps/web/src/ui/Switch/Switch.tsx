@@ -1,4 +1,4 @@
-import { Switch as S } from 'radix-ui';
+import * as S from 'radix-ui/switch';
 import { useId } from 'react';
 import styles from './Switch.module.css';
 

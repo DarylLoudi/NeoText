@@ -138,9 +138,15 @@ function directCall(target: AgentPublic, policies: Record<string, 'auto' | 'ask'
   return { spec, kb, system: JSON.stringify(spec.request.messages[0]) };
 }
 
+/** The tools offered besides the project file tools, which every tool-capable target gets. */
+const otherTools = (spec: RunSpec) =>
+  (spec.tools?.defs.map((d) => d.name) ?? []).filter(
+    (n) => !['write_file', 'edit_file', 'delete_file', 'read_file'].includes(n),
+  );
+
 test('a direct call to an agent with ready files offers the tool and adds the guidance', async () => {
   const { spec, kb, system } = directCall(agent('agt_kb'));
-  expect(spec.tools?.defs.map((d) => d.name)).toEqual([KNOWLEDGE_TOOL]);
+  expect(otherTools(spec)).toEqual([KNOWLEDGE_TOOL]);
   expect(system).toContain('kalkulus.pdf; notes.md');
   // Searches only this agent's files.
   await spec.tools?.get(KNOWLEDGE_TOOL)?.execute({ query: 'rantai' }, ctx);
@@ -149,10 +155,10 @@ test('a direct call to an agent with ready files offers the tool and adds the gu
 
 test('an agent without files gets neither the tool nor the guidance; off removes both', () => {
   const none = directCall(agent('agt_plain'));
-  expect(none.spec.tools).toBeUndefined();
+  expect(otherTools(none.spec)).toEqual([]);
   expect(none.system).not.toContain('search_knowledge');
   const off = directCall(agent('agt_kb'), { [KNOWLEDGE_TOOL]: 'off' });
-  expect(off.spec.tools).toBeUndefined();
+  expect(otherTools(off.spec)).toEqual([]);
   expect(off.system).not.toContain('search_knowledge');
 });
 

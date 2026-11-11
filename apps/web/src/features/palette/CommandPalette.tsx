@@ -4,7 +4,7 @@ import { ChatText, Cpu, MagnifyingGlass, Terminal } from '@phosphor-icons/react'
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { Command } from 'cmdk';
-import { Dialog as D } from 'radix-ui';
+import * as D from 'radix-ui/dialog';
 import { type ReactNode, useMemo, useState } from 'react';
 import { hasAppCommand, runAppCommand } from '../../lib/app-commands';
 import { formatCombo, IS_MAC, resolveShortcuts } from '../../lib/hotkeys';
@@ -57,7 +57,9 @@ function Keys({ combo }: { combo: string }) {
     <span className={styles.keys}>
       {formatCombo(combo, IS_MAC).map((key, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length list rebuilt as a whole
-        <Kbd key={`${i}:${key}`}>{key}</Kbd>
+        <Kbd key={`${i}:${key}`} hint>
+          {key}
+        </Kbd>
       ))}
     </span>
   );
@@ -164,7 +166,7 @@ function PaletteBody({ close }: { close: () => void }) {
           placeholder={t('shell.palette.placeholder')}
           autoFocus
         />
-        <Kbd>Esc</Kbd>
+        <Kbd hint>Esc</Kbd>
       </div>
       <Command.List className={styles.list} label={t('shell.palette.listLabel')}>
         {shownCommands.length > 0 ? (

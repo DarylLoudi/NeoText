@@ -96,19 +96,3 @@
   outline: 1px solid var(--on-marker);
   outline-offset: -1px;
 }
-
-.rename {
-  flex: 1;
-  min-width: 0;
-  height: 30px;
-  padding: 0 var(--space-2);
-  border: 1px solid var(--control-edge);
-  border-radius: var(--radius-control);
-  background: var(--paper);
-  color: var(--ink);
-  font-size: var(--text-md);
-}
-.rename:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 0;
-}

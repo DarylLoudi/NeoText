@@ -1,10 +1,13 @@
 import { describe, expect, test } from 'vitest';
 import en from './locales/en.json';
+import enPages from './locales/en.pages.json';
 import id from './locales/id.json';
+import idPages from './locales/id.pages.json';
 import { flatEntries, interpolationVars } from './parity';
 
-const enEntries = flatEntries(en);
-const idEntries = flatEntries(id);
+// Each locale is its core file plus the Settings and Admin strings those pages load.
+const enEntries = { ...flatEntries(en), ...flatEntries(enPages) };
+const idEntries = { ...flatEntries(id), ...flatEntries(idPages) };
 
 describe('locale parity', () => {
   test('en and id have the same keys', () => {
@@ -21,6 +24,12 @@ describe('locale parity', () => {
     for (const [key, v] of Object.entries(enEntries)) {
       expect(interpolationVars(idEntries[key] ?? ''), key).toEqual(interpolationVars(v));
     }
+  });
+
+  test('the page files hold only settings and admin, with no key also in the core file', () => {
+    expect(Object.keys(enPages).sort()).toEqual(['admin', 'settings']);
+    const core = flatEntries(en);
+    for (const key of Object.keys(flatEntries(enPages))) expect(core[key], key).toBeUndefined();
   });
 
   test('every top-level group is one of the agreed features', () => {

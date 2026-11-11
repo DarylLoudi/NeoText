@@ -13,3 +13,8 @@
 .done {
   margin-bottom: calc(-1 * var(--space-3));
 }
+
+.elapsed {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}

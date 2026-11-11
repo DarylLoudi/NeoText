@@ -479,6 +479,9 @@ test('approval endpoint resolves a waiting call and remember saves the policy', 
       expect.objectContaining({ name: 'fetch_url', source: 'app', defaultPolicy: 'auto' }),
       expect.objectContaining({ name: 'delegate_tasks', source: 'app', defaultPolicy: 'auto' }),
       expect.objectContaining({ name: 'search_knowledge', source: 'app', defaultPolicy: 'auto' }),
+      ...['write_file', 'edit_file', 'delete_file', 'read_file'].map((name) =>
+        expect.objectContaining({ name, source: 'app', defaultPolicy: 'auto' }),
+      ),
       {
         name: 'echo',
         description: 'Echo the input.',

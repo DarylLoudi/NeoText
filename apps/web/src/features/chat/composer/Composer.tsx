@@ -29,8 +29,9 @@ import { AttachmentDropZone } from './AttachmentDropZone';
 import { useAttachments } from './attachments';
 import styles from './Composer.module.css';
 import { ComposerToolbar } from './ComposerToolbar';
+import { loadDraftAgent, saveDraftAgent } from './draft-agent';
 import { QuotaNotice } from './QuotaNotice';
-import { type EffortChoice, effortFor } from './ReasoningSelect';
+import { type EffortChoice, effortFor } from './reasoning-effort';
 import { SnippetMenu } from './SnippetMenu';
 import { useWebSearchAvailable } from './use-web-search';
 import { warmProvider } from './warm';
@@ -102,12 +103,20 @@ export function Composer({ conversationId, model, stream, preset = null }: Compo
     () => (agentsQuery.data ?? []).filter((a) => a.data.enabled),
     [agentsQuery.data],
   );
-  /** The agent that answers the next message only. */
-  const [agent, setAgent] = useState<AgentPublic | null>(null);
+  /** The agent that answers the next message only; kept with the draft over a reload. */
+  const [agentId, setAgentId] = useState<string | null>(null);
+  const agent = useMemo(() => agents.find((a) => a.id === agentId) ?? null, [agents, agentId]);
+  const setAgent = useCallback(
+    (picked: AgentPublic | null) => {
+      setAgentId(picked?.id ?? null);
+      saveDraftAgent(draftKey, picked?.id ?? null);
+    },
+    [draftKey],
+  );
 
   useEffect(() => {
     touched.current = false;
-    setAgent(null);
+    setAgentId(loadDraftAgent(draftKey));
     let current = true;
     void loadDraft(draftKey).then((draft) => {
       if (current && !touched.current && draft !== '') setText(draft);
@@ -199,6 +208,7 @@ export function Composer({ conversationId, model, stream, preset = null }: Compo
     clearAttachments,
     preset,
     agent,
+    setAgent,
     qc,
     stream,
     draftKey,

@@ -1,5 +1,5 @@
 import type { Source } from '@neotext/shared';
-import { Popover as P } from 'radix-ui';
+import * as P from 'radix-ui/popover';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import styles from './CitationCard.module.css';
 import { sourceForCitation } from './citations';

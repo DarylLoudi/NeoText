@@ -10,9 +10,10 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { Button, Dialog, IconButton, Menu, type MenuItem, Spinner } from '../../ui';
-import { InlineRename, moveMenuItems } from './ConversationItem';
+import { moveMenuItems } from './ConversationItem';
 import { ConversationList } from './ConversationList';
 import styles from './FolderTree.module.css';
+import { InlineRename } from './InlineRename';
 import { stepPosition } from './reorder';
 import { SortableList, useFolderSort } from './sidebar-dnd';
 import {

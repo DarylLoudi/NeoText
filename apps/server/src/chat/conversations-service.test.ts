@@ -276,7 +276,7 @@ test('empty trash affects only this user', async () => {
   const theirs = t.c.conversations.create(other, { title: 'theirs' }).id;
   t.c.conversations.remove(other, theirs);
 
-  expect(t.c.conversations.emptyTrash(auth)).toEqual({ purged: 1 });
+  expect(t.c.conversations.emptyTrash(auth)).toEqual({ purged: 1, ids: [mine] });
   expect(t.c.conversations.list(auth, { scope: 'trash', limit: 50 }).items).toEqual([]);
   expect(ids(t.c.conversations.list(auth, { scope: 'all', limit: 50 }))).toEqual([keep]);
   expect(ids(t.c.conversations.list(other, { scope: 'trash', limit: 50 }))).toEqual([theirs]);

@@ -1,7 +1,8 @@
 import type { JsonObject } from '@neotext/shared';
 import { useT } from '../../../lib/i18n';
 import { updateSettings, useSettings } from '../../../state/settings';
-import { Select, Switch } from '../../../ui';
+import { Select } from '../../../ui/Select/Select';
+import { Switch } from '../../../ui/Switch/Switch';
 import { ChoiceGroup } from '../../sidebar/ChoiceGroup';
 import { DraftTextArea } from '../DraftTextArea';
 import { ModelChoice } from '../ModelChoice';

@@ -1,4 +1,5 @@
 import { createRoute, lazyRouteComponent, redirect } from '@tanstack/react-router';
+import { ensurePageStrings } from '../../lib/i18n';
 import { rootRoute } from './root';
 
 export const settingsIndexRoute = createRoute({
@@ -13,6 +14,8 @@ export const settingsIndexRoute = createRoute({
 export const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings/$section',
+  // The page's own strings load beside its code (see ensurePageStrings).
+  loader: () => ensurePageStrings(),
   component: lazyRouteComponent(
     () => import('../../features/settings/SettingsPage'),
     'SettingsPage',

@@ -1,9 +1,10 @@
 import type { MessagePublic, Source } from '@neotext/shared';
-import { memo, useMemo, useRef } from 'react';
+import { lazy, memo, Suspense, useMemo, useRef } from 'react';
 import { formatCost, formatDuration, formatTime } from '../../lib/format';
 import { getLocale, useT } from '../../lib/i18n';
 import { useGenerations } from '../../state/generations';
 import { Button } from '../../ui';
+import { useProjectVersion } from '../project/project-versions';
 import { ActivityRow } from './ActivityRow';
 import styles from './AssistantMessage.module.css';
 import { Caret } from './Caret';
@@ -14,6 +15,11 @@ import { PartRenderer } from './PartRenderer';
 import { CitationCard, useCitationCard } from './sources/CitationCard';
 import { citationLinks } from './sources/citations';
 import { sameItem, shortModelName, type ThreadItem } from './thread';
+
+// Loaded with the project replay, only in chats whose answers changed a project.
+const ProjectChangeRow = lazy(() =>
+  import('../project/ProjectChangeRow').then((m) => ({ default: m.ProjectChangeRow })),
+);
 
 export interface AssistantMessageProps {
   item: ThreadItem;
@@ -106,6 +112,7 @@ export const AssistantMessage = memo(
     const bodyRef = useRef<HTMLDivElement>(null);
     const { message } = item;
     const streaming = message.status === 'streaming' && !lost;
+    const version = useProjectVersion(message.id);
     const parentId = message.parentId;
     const retry = parentId ? () => void regenerate(parentId) : undefined;
 
@@ -134,7 +141,8 @@ export const AssistantMessage = memo(
     const activityAt = last?.type === 'sources' ? message.parts.length - 1 : message.parts.length;
     const activityRow = (
       <ActivityRow
-        key="activity"
+        // A new activity remounts the row, so its time counts from its own start.
+        key={`activity:${activity}`}
         activity={activity}
         streaming={streaming}
         searches={message.usage?.webSearchRequests ?? 0}
@@ -188,6 +196,15 @@ export const AssistantMessage = memo(
               </Button>
             ) : null}
           </div>
+        ) : null}
+        {version && !streaming ? (
+          <Suspense fallback={null}>
+            <ProjectChangeRow
+              conversationId={message.conversationId}
+              messageId={message.id}
+              version={version}
+            />
+          </Suspense>
         ) : null}
         {note ? <p className={styles.note}>{t(note)}</p> : null}
         {streaming ? null : <MessageActions item={item} />}

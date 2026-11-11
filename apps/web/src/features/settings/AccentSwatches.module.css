@@ -58,10 +58,15 @@
 .input:hover ~ .text {
   color: var(--ink);
 }
-/* The chosen swatch gets an ink frame and its name turns to ink; nothing relies on color alone. */
+/*
+ * The chosen swatch gets a single ink frame (its own edge, thickened) and its name turns to ink;
+ * nothing relies on color alone.
+ */
 .input:checked ~ .chip {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
+  border-color: var(--ink);
+  box-shadow:
+    0 0 0 1px var(--ink),
+    inset 0 0 0 2px var(--paper);
 }
 .input:checked ~ .text {
   color: var(--ink);

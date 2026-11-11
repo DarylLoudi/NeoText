@@ -18,6 +18,8 @@ export interface MarkdownProps {
    * (`.md-cite`). One delegated listener on the root; the blocks never re-render for it.
    */
   onCitation?: (cite: HTMLElement | null, via: 'hover' | 'focus') => void;
+  /** Opens the chat's project preview; HTML page blocks get a Preview button when set. */
+  onPreview?: () => void;
 }
 
 const CITE = '.md-cite';
@@ -175,6 +177,7 @@ function RichMarkdown({
   linkClass,
   codeTheme = 'auto',
   onCitation,
+  onPreview,
 }: MarkdownProps & { engine: MarkdownEngine }) {
   const { t } = useTranslation();
   const [mathReady, setMathReady] = useState(isMathReady);
@@ -190,8 +193,9 @@ function RichMarkdown({
       loadImageLabel: (host) => t('chat.markdown.loadImage', { host }),
       citationLabel: (n, text) => t('chat.markdown.citation', { n, text }),
       linkClass,
+      ...(onPreview ? { previewLabel: t('chat.project.previewCode') } : {}),
     }),
-    [t, linkClass],
+    [t, linkClass, onPreview],
   );
 
   useEffect(() => {
@@ -225,6 +229,11 @@ function RichMarkdown({
   const onClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!(event.target instanceof Element)) return;
+
+      if (onPreview && event.target.closest('[data-preview]')) {
+        onPreview();
+        return;
+      }
 
       const copy = event.target.closest<HTMLElement>('[data-copy]');
       if (copy) {
@@ -263,7 +272,7 @@ function RichMarkdown({
         load.replaceWith(img);
       }
     },
-    [t, opts],
+    [t, opts, onPreview],
   );
 
   // Moving within one chip (onto its text node's parent, say) is not leaving it.

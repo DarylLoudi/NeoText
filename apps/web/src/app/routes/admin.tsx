@@ -1,4 +1,5 @@
 import { createRoute, lazyRouteComponent, redirect } from '@tanstack/react-router';
+import { ensurePageStrings } from '../../lib/i18n';
 import { rootRoute } from './root';
 
 export const adminIndexRoute = createRoute({
@@ -13,5 +14,7 @@ export const adminIndexRoute = createRoute({
 export const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/$section',
+  // The page's own strings load beside its code (see ensurePageStrings).
+  loader: () => ensurePageStrings(),
   component: lazyRouteComponent(() => import('../../features/admin/AdminPage'), 'AdminPage'),
 });

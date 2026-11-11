@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { expect, test } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
+import { expect, test, vi } from 'vitest';
 import { ActivityRow } from './ActivityRow';
 
 test('says what the answer is doing while it streams', () => {
@@ -22,4 +22,26 @@ test('after it finishes, one line counts the searches', () => {
   expect(screen.getByText('Searched the web once')).toBeInTheDocument();
   rerender(<ActivityRow activity="idle" streaming={false} searches={0} />);
   expect(container).toBeEmptyDOMElement();
+});
+
+test('counts the seconds while it works, from the start of each activity', () => {
+  vi.useFakeTimers();
+  try {
+    // The message keys the row by its activity, so a new one mounts afresh.
+    const row = (activity: 'processing' | 'searching') => (
+      <ActivityRow key={activity} activity={activity} streaming searches={0} />
+    );
+    const { rerender } = render(row('processing'));
+    // The first second shows no count.
+    expect(screen.getByRole('status')).toHaveTextContent(/^Working…$/);
+    act(() => vi.advanceTimersByTime(12_000));
+    // Shown, but kept from screen readers, which would read it out every second.
+    expect(screen.getByText('12 s')).toHaveAttribute('aria-hidden', 'true');
+    rerender(row('searching'));
+    expect(screen.queryByText('12 s')).not.toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(65_000));
+    expect(screen.getByText('1 min 5 s')).toBeInTheDocument();
+  } finally {
+    vi.useRealTimers();
+  }
 });

@@ -1,14 +1,23 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll } from 'vitest';
 import { ensureMarkdown } from '../features/chat/markdown/engine';
-import { initI18n, registerLocale } from '../lib/i18n';
+import { initI18n, registerLocale, registerPageStrings } from '../lib/i18n';
+import enPages from '../lib/i18n/locales/en.pages.json';
 import id from '../lib/i18n/locales/id.json';
+import idPages from '../lib/i18n/locales/id.pages.json';
 import { server } from './msw';
+
+// Pages and the sidebar arrive as lazy chunks; under a full parallel run their first import can
+// take longer than testing-library's one-second default wait.
+configure({ asyncUtilTimeout: 5000 });
 
 void initI18n('en');
 // Tests switch locale synchronously, so the Indonesian chunk is registered up front.
 registerLocale('id', id);
+// The Settings and Admin strings load with those routes in the app; tests have them from the start.
+registerPageStrings('en', enPages);
+registerPageStrings('id', idPages);
 
 // happy-dom mimics the browser by logging every failed fetch ("GET /x 401 (Unauthorized)") and
 // network error straight to stderr. API tests assert those failures on purpose, so drop only that.
