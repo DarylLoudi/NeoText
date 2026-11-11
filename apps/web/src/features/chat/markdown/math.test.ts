@@ -37,6 +37,22 @@ describe('math rendering', () => {
     expect(renderBlock(String.raw`\[y(t) = C_1 \cos(\beta t)\]`, opts)).toContain('katex-display');
   });
 
+  test('renders \\[…\\] in the middle of a sentence as display math', async () => {
+    await ensureMath();
+    const out = renderBlock(
+      String.raw`Hasilnya \[ \int_0^1 x^2\,dx = \frac{1}{3} \] jadi selesai.`,
+      opts,
+    );
+    expect(out).toContain('katex-display');
+    expect(out).toContain('jadi selesai.');
+    expect(out).not.toContain('\\frac');
+  });
+
+  test('an unclosed \\[ stays as text', async () => {
+    await ensureMath();
+    expect(renderBlock(String.raw`a \[ b`, opts)).not.toContain('katex');
+  });
+
   test('display math with blank lines stays one block and renders', async () => {
     await ensureMath();
     const doc = 'before\n\n$$\n\\frac{a}{b}\n\n+ c\n$$\n\nafter';

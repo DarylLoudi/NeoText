@@ -1,7 +1,9 @@
 import { useRouterState } from '@tanstack/react-router';
 import {
   type CSSProperties,
+  lazy,
   type ReactNode,
+  Suspense,
   useCallback,
   useEffect,
   useRef,
@@ -12,14 +14,19 @@ import { setLocale } from '../../lib/i18n';
 import { useMediaQuery } from '../../lib/use-media-query';
 import { updateSettings, useSettings } from '../../state/settings';
 import { useToolsFollowSettings } from '../settings/use-tools-follow-settings';
-import { Sidebar } from '../sidebar/Sidebar';
-import { SidebarCustomizer } from '../sidebar/SidebarCustomizer';
 import { SidebarResizer } from '../sidebar/SidebarResizer';
 import { useBudgetAlerts } from '../usage/use-budget-alerts';
 import styles from './AppShell.module.css';
 import { SectionSidebar, sectionArea } from './SectionSidebar';
 import { SettingsBanner } from './SettingsBanner';
 import { TopBar, TopBarSlotsProvider } from './TopBar';
+
+// The chat list (with drag and drop and the virtual list) loads beside the first page rather
+// than before it: it waits for its own data anyway, and on a phone it starts as a closed drawer.
+const Sidebar = lazy(() => import('../sidebar/Sidebar').then((m) => ({ default: m.Sidebar })));
+const SidebarCustomizer = lazy(() =>
+  import('../sidebar/SidebarCustomizer').then((m) => ({ default: m.SidebarCustomizer })),
+);
 
 /** Below this width the sidebar becomes a drawer over the page. */
 const NARROW = '(max-width: 767px)';
@@ -122,14 +129,16 @@ export function AppShell({ children, onSearch, onCustomize }: AppShellProps) {
         {area ? (
           <SectionSidebar area={area} />
         ) : (
-          <Sidebar
-            onSearch={onSearch}
-            onCustomize={() => {
-              setCustomizing(true);
-              onCustomize?.();
-            }}
-            onClose={narrow ? closeDrawer : undefined}
-          />
+          <Suspense fallback={null}>
+            <Sidebar
+              onSearch={onSearch}
+              onCustomize={() => {
+                setCustomizing(true);
+                onCustomize?.();
+              }}
+              onClose={narrow ? closeDrawer : undefined}
+            />
+          </Suspense>
         )}
         {narrow ? null : (
           <SidebarResizer
@@ -152,7 +161,11 @@ export function AppShell({ children, onSearch, onCustomize }: AppShellProps) {
           <div className={styles.content}>{children}</div>
         </div>
       </TopBarSlotsProvider>
-      <SidebarCustomizer open={customizing} onOpenChange={setCustomizing} />
+      {customizing ? (
+        <Suspense fallback={null}>
+          <SidebarCustomizer open onOpenChange={setCustomizing} />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

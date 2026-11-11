@@ -1,8 +1,9 @@
 import type { AgentPublic } from '@neotext/shared';
-import { Robot, X } from '@phosphor-icons/react';
+import { GearSix, Robot, X } from '@phosphor-icons/react';
+import { useNavigate } from '@tanstack/react-router';
 import { type RefObject, useEffect, useId, useRef, useState } from 'react';
 import { useT } from '../../../lib/i18n';
-import { IconButton, Menu } from '../../../ui';
+import { IconButton, Menu, type MenuItem } from '../../../ui';
 import styles from './AgentPicker.module.css';
 
 /** The word after an `@` that starts the message, up to the cursor; null when there is none. */
@@ -28,15 +29,25 @@ export interface AgentButtonProps {
 /** The toolbar's "Agent": a menu of the agents that can answer the next message. */
 export function AgentButton({ agents, onPick }: AgentButtonProps) {
   const t = useT();
-  const items =
-    agents.length > 0
+  const navigate = useNavigate();
+  const items: MenuItem[] = [
+    ...(agents.length > 0
       ? agents.map((a) => ({
           id: a.id,
           label: a.name,
+          hint: a.data.description || undefined,
           icon: <Robot aria-hidden />,
           onSelect: () => onPick(a),
         }))
-      : [{ id: 'none', label: t('chat.agents.none'), onSelect: () => {}, disabled: true }];
+      : [{ id: 'none', label: t('chat.agents.none'), onSelect: () => {}, disabled: true }]),
+    { separator: true },
+    {
+      id: 'manage',
+      label: t('chat.agents.manage'),
+      icon: <GearSix aria-hidden />,
+      onSelect: () => void navigate({ to: '/settings/$section', params: { section: 'agents' } }),
+    },
+  ];
   return (
     <Menu
       side="top"

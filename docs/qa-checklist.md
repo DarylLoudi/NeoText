@@ -129,4 +129,4 @@ Use NVDA on Windows, VoiceOver on macOS or iOS, or Orca on Linux.
 ## 12. Finish
 
 - [ ] Delete the test OpenRouter key from the provider settings, and revoke it on openrouter.ai.
-- [ ] Note every failure above with steps, and file it as an issue (not security problems; see SECURITY.md).
+- [ ] Note every failure above with steps, and file it as an issue (not security problems; see the Security section of the README).

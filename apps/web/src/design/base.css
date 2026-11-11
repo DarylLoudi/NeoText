@@ -32,6 +32,12 @@ select {
   font: inherit;
   color: inherit;
 }
+/* iOS zooms the page into any field set smaller than 16px; touch screens get 16px fields. */
+@media (pointer: coarse) {
+  :is(input:not([type="checkbox"], [type="radio"], [type="range"]), textarea, select) {
+    font-size: max(16px, 1em) !important;
+  }
+}
 button {
   cursor: pointer;
 }
@@ -107,28 +113,46 @@ input[type="checkbox"]:disabled {
   opacity: 0.5;
 }
 
-/* Sliders: a thin track and a round thumb in ink. */
+/* Sliders: a thin track and a round thumb in ink, inside a 24px tall area that is easy to grab. */
 input[type="range"] {
+  --thumb: 16px;
   appearance: none;
+  height: 24px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
   background: var(--rule);
-  cursor: pointer;
+}
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--rule);
 }
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: var(--thumb);
+  height: var(--thumb);
+  /* Centres the thumb on the 4px track. */
+  margin-top: calc((4px - var(--thumb)) / 2);
   border: 0;
   border-radius: 50%;
   background: var(--ink);
 }
 input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: var(--thumb);
+  height: var(--thumb);
   border: 0;
   border-radius: 50%;
   background: var(--ink);
+}
+@media (pointer: coarse) {
+  input[type="range"] {
+    --thumb: 22px;
+    height: 32px;
+  }
 }
 
 /* Disclosure rows without their own style get a small chevron instead of the browser's triangle. */
@@ -169,6 +193,15 @@ summary:not([class]):hover {
 :focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
+}
+/*
+ * Bordered fields draw the ring over their own edge instead of 2px outside it: one frame, not
+ * two, and nothing for a scrolling dialog body to clip.
+ */
+input:not([type="checkbox"], [type="radio"], [type="range"]):focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline-offset: -2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

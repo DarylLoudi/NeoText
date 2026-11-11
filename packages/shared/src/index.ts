@@ -15,6 +15,7 @@ export * from './chat';
 export * from './errors';
 export * from './ids';
 export * from './model-ref';
+export * from './project';
 export * from './providers';
 export * from './settings';
 export * from './sse';

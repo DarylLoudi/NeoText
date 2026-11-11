@@ -49,6 +49,7 @@ import { createSettingsRepo } from './settings/repo';
 import { createSettingsService, type SettingsService } from './settings/service';
 import { delegateListingSource } from './tools/builtin/delegate';
 import { fetchUrlSource } from './tools/builtin/fetch-url';
+import { projectListingSource } from './tools/builtin/project-files';
 import { knowledgeListingSource } from './tools/builtin/search-knowledge';
 import { createWebSearchSource } from './tools/builtin/web-search';
 import { createToolCatalog, type ToolCatalog } from './tools/registry';
@@ -287,6 +288,7 @@ export async function createContainer(
   tools.add(createWebSearchSource({ settings, providers }));
   tools.add(delegateListingSource);
   tools.add(knowledgeListingSource);
+  tools.add(projectListingSource);
   const mcp = createMcpManager({ repo: createMcpRepo(db, clock), http, clock, log });
   tools.add((auth) => mcp.toolsFor(auth));
   const chat = createChatService({

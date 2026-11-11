@@ -21,6 +21,7 @@ import { securityHeaders } from './http/security-headers';
 import { serveWeb } from './http/static';
 import { mcpRoutes } from './mcp/routes';
 import { presetRoutes } from './presets/routes';
+import { previewRoutes } from './preview/routes';
 import { providerRoutes } from './providers/routes';
 import { quotaRoutes } from './quotas/routes';
 import { searchConversationsRoutes } from './search-conversations/routes';
@@ -71,6 +72,7 @@ export function createApp(c: Container): Hono<AppEnv> {
   app.route('/api', usageRoutes(c));
   app.route('/api', quotaRoutes(c));
   app.route('/api', transferRoutes(c));
+  app.route('/', previewRoutes());
   if (c.config.webDistDir) serveWeb(app, c.config.webDistDir);
   app.notFound(notFoundHandler);
   app.onError(errorHandler(c));

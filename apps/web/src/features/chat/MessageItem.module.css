@@ -17,6 +17,11 @@
   min-width: 0;
 }
 
+/* The question's action row already leaves room, so its answer follows closer. */
+.item[data-role="user"] {
+  padding-bottom: var(--space-3);
+}
+
 .item[data-role="user"] .body {
   display: flex;
   flex-direction: column;

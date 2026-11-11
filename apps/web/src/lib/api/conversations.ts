@@ -54,8 +54,12 @@ export const conversationsApi = {
   /** Only works on a chat that is already in the trash. */
   deleteForever: (id: string): Promise<void> =>
     apiFetch(`/conversations/${enc(id)}?permanent=1`, { method: 'DELETE' }),
-  emptyTrash: (): Promise<{ purged: number }> =>
-    apiFetch('/trash', { method: 'DELETE', schema: z.object({ purged: z.number() }) }),
+  /** `ids` are the chats deleted, so the browser can drop what it kept of them. */
+  emptyTrash: (): Promise<{ purged: number; ids: string[] }> =>
+    apiFetch('/trash', {
+      method: 'DELETE',
+      schema: z.object({ purged: z.number(), ids: z.array(z.string()).default([]) }),
+    }),
   fork: (id: string, messageId: string): Promise<ConversationSummary> =>
     apiFetch(`/conversations/${enc(id)}/fork`, {
       method: 'POST',

@@ -60,7 +60,9 @@ function QuickActions({ onSearch }: { onSearch?: () => void }) {
               <span className={styles.shortcut}>
                 {keys.map((key, i) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length list rebuilt as a whole
-                  <Kbd key={`${i}:${key}`}>{key}</Kbd>
+                  <Kbd key={`${i}:${key}`} hint>
+                    {key}
+                  </Kbd>
                 ))}
               </span>
             </button>

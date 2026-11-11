@@ -12,8 +12,37 @@ export interface CompareState {
   chosen: ReadonlySet<string>;
 }
 
-/** Kept for this browser session only: a reload starts with compare off. */
-let state: CompareState = { enabled: false, targets: [], chosen: new Set() };
+const CHOSEN_KEY = 'neotext:compare-chosen';
+/** Only the newest picks are kept, so the stored list stays small. */
+const CHOSEN_KEPT = 500;
+
+/** Ids of turns the user settled, read back after a reload; message ids hold no content. */
+function loadChosen(): Set<string> {
+  try {
+    const raw = localStorage.getItem(CHOSEN_KEY);
+    const list: unknown = raw ? JSON.parse(raw) : [];
+    return new Set(
+      Array.isArray(list) ? list.filter((v): v is string => typeof v === 'string') : [],
+    );
+  } catch {
+    return new Set();
+  }
+}
+
+function saveChosen(chosen: ReadonlySet<string>): void {
+  try {
+    localStorage.setItem(CHOSEN_KEY, JSON.stringify([...chosen].slice(-CHOSEN_KEPT)));
+  } catch {
+    // Storage unavailable: the pick still holds until the page reloads.
+  }
+}
+
+/**
+ * Compare on/off and its models last for this browser session only: a reload starts with compare
+ * off. Which answers were picked is remembered across reloads (`neotext:compare-chosen`), because
+ * a pick is a decision about a finished turn, not a setting for the next one.
+ */
+let state: CompareState = { enabled: false, targets: [], chosen: loadChosen() };
 const listeners = new Set<() => void>();
 
 function commit(next: Partial<CompareState>): void {
@@ -64,7 +93,9 @@ export function setCompareTargets(refs: readonly ModelRef[]): void {
 /** The answers to this user message are settled: the thread shows the chosen one normally. */
 export function chooseAnswer(userMessageId: string): void {
   if (state.chosen.has(userMessageId)) return;
-  commit({ chosen: new Set([...state.chosen, userMessageId]) });
+  const chosen = new Set([...state.chosen, userMessageId]);
+  saveChosen(chosen);
+  commit({ chosen });
 }
 
 /** Brings the side-by-side columns back for this user message. */
@@ -72,6 +103,7 @@ export function showComparison(userMessageId: string): void {
   if (!state.chosen.has(userMessageId)) return;
   const chosen = new Set(state.chosen);
   chosen.delete(userMessageId);
+  saveChosen(chosen);
   commit({ chosen });
 }
 
@@ -106,5 +138,6 @@ export function useCompareState() {
 /** For tests: compare off, nothing chosen. */
 export function resetCompare(): void {
   state = { enabled: false, targets: [], chosen: new Set() };
+  saveChosen(state.chosen);
   for (const fn of listeners) fn();
 }

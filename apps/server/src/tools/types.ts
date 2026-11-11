@@ -33,6 +33,11 @@ export interface ToolDefinition {
   mcp?: { server: string; tool: string };
   defaultPolicy: ToolPolicy;
   timeoutMs?: number;
+  /**
+   * Calls of ordered tools in one step run one after another in call order, each after the
+   * earlier ones settle (an approval answered later than a following one still runs first).
+   */
+  ordered?: boolean;
   /** Returns the result as untrusted text; may throw, which becomes an error result. */
   execute(args: unknown, ctx: ToolContext): Promise<ToolResult>;
 }

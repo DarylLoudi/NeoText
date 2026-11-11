@@ -45,7 +45,7 @@ export function createQuotaService(deps: QuotaServiceDeps): QuotaService {
   const cache = new Map<string, Spent>();
   /**
    * Spend comes from `usage_events.shared`, written with each row, so a shared provider that
-   * was deleted since still counts. Unknown costs (NULL) add nothing, as in the Plan 05 budget.
+   * was deleted since still counts. Unknown costs (NULL) add nothing.
    */
   const sum = db.raw.prepare(
     'SELECT COALESCE(SUM(cost_usd), 0) AS total FROM usage_events WHERE user_id = ? AND shared = 1 AND created_at >= ? AND created_at < ?',

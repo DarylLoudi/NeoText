@@ -44,12 +44,25 @@ async function sentBody(text: string, options: Record<string, unknown> = {}) {
   return sent?.body as { tools?: { function: { name: string } }[] };
 }
 
-test('plain messages send only delegate_tasks; links offer fetch_url', async () => {
+test('plain messages send delegate_tasks and the project tools; links add fetch_url', async () => {
   const names = (b: Awaited<ReturnType<typeof sentBody>>) => b.tools?.map((x) => x.function.name);
-  expect(names(await sentBody('halo'))).toEqual(['delegate_tasks']);
+  expect(names(await sentBody('halo'))).toEqual([
+    'delegate_tasks',
+    'write_file',
+    'edit_file',
+    'delete_file',
+    'read_file',
+  ]);
   mock.reset();
   const withLink = await sentBody('baca https://x.org');
-  expect(names(withLink)).toEqual(['fetch_url', 'delegate_tasks']);
+  expect(names(withLink)).toEqual([
+    'fetch_url',
+    'delegate_tasks',
+    'write_file',
+    'edit_file',
+    'delete_file',
+    'read_file',
+  ]);
 });
 
 test('web search alone offers fetch_url', async () => {

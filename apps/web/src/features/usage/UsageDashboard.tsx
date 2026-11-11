@@ -120,7 +120,11 @@ export function UsageDashboard() {
             <h2 id={chartTitle} className={styles.sectionTitle}>
               {t('settings.usage.chartTitle')}
             </h2>
-            <UsageChart days={days} labelledBy={chartTitle} locale={locale} />
+            {days.some((d) => d.costUsd > 0) ? (
+              <UsageChart days={days} labelledBy={chartTitle} locale={locale} />
+            ) : (
+              <p className={styles.muted}>{t('settings.usage.chartEmpty')}</p>
+            )}
             <details className={styles.details}>
               <summary>{t('settings.usage.dailyTable')}</summary>
               <table className={styles.table}>

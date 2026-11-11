@@ -4,7 +4,54 @@ All notable changes to NeoText are written here. The format follows [Keep a Chan
 
 ## Unreleased
 
-Nothing yet.
+### Added
+
+- **Project preview.** A chat can hold a small web project.
+  - The model creates and edits its HTML, CSS and JavaScript files through tools. Models without tools use code blocks named after the file.
+  - Every change becomes a numbered version you can compare with the one before.
+  - A panel beside the chat runs the page in your browser, offline and isolated from NeoText. A full HTML page in a code block opens there too.
+  - Data the page saves stays with the chat until you reset it, and the project downloads as one `.html` file.
+
+### Changed
+
+- **Time so far.** "Working…", "Searching the web…" and a tool call still running show how long they have taken, counting up every second, so a long step no longer looks stuck.
+- **Agent menu.** Each agent shows its "When to use it" line, and the menu ends with "Manage agents".
+- **New chat page.** Model facts the provider does not list are left out instead of reading "Not listed".
+- **Usage.** A range with no recorded cost shows a short note instead of an empty chart.
+- **Sidebar.** The search shortcut appears only when the row is pointed at or focused.
+- **Chat.** An answer now sits closer to its question.
+- **Faster first load.** The JavaScript loaded before the first page is 288 KiB gzip, down from 335 KiB. The rest now loads beside the page:
+  - the sidebar (with drag and drop);
+  - the reasoning effort menu;
+  - the sign-up page;
+  - the select and switch controls;
+  - the Settings and Admin text.
+
+  The build ceiling is lowered to 290 KiB.
+
+### Fixed
+
+- **Project preview.**
+  - A page that moves itself with `location.href` to another page of the project opens that page; one the project lacks is named under "Missing from the project:" and the page stays.
+  - Pressing Escape twice inside the page, when the page does not take it, moves focus back to the panel; one more Escape closes it. A single Escape stays with the page.
+  - CSS containing `</style` and scripts containing `<!--` no longer break the page.
+  - File changes the model asks for run in the order it asked, even when you approve them out of order, so the next turn sees the same files.
+  - Deleting a chat for good from the trash in this browser also deletes what its preview saved here.
+  - The panel no longer rebuilds the project while only text streams in, and the download link is freed after the download starts.
+- **Fields and choices.** A focused text field, select or dialog field shows one ring on its own edge instead of a doubled white frame, which scrolling dialogs also cut off. The chosen option in a row of choices sits inside the frame with a gap instead of merging with its edge, and the chosen accent swatch has a single frame.
+- **Compare.** While one model is still thinking, its caret and Stop button stay under its own text instead of sinking to the bottom of the tallest column.
+- **Math.** `\[ … \]` written in the middle of a sentence now renders as display math; before, it showed as raw text with its backslashes lost.
+- **Compare.** A picked "Continue with this answer" now stays picked after a reload, in that browser. Regenerating or editing follows the version on screen, so regenerating a picked answer goes to its own model.
+- **Drafts.** An unsent message comes back after a reload (the composer used to read it before the browser storage was open), together with the agent chosen for it.
+- **Sub-agent card.** Rows no longer overflow the card on a phone.
+- **Phones and small windows.**
+  - Tables in answers scroll sideways instead of splitting numbers and words letter by letter.
+  - The Admin → Users page no longer makes the whole page scroll sideways.
+  - On Android the keyboard shrinks the page, so the message box stays above it.
+  - Fields are 16px on touch screens, so iPhones no longer zoom in when one is tapped.
+  - Sliders have a bigger touch area.
+  - Keyboard hints like "Ctrl Shift F" are hidden on touch screens.
+  - Settings, Usage and Admin pages have a single main heading.
 
 ## 0.3.0
 
@@ -76,7 +123,7 @@ The first release.
 
 ### Data and safety
 
-- Chats, titles, settings, attachments and provider keys are encrypted at rest with a key that your password (or recovery key) unlocks. See `SECURITY.md`.
+- Chats, titles, settings, attachments and provider keys are encrypted at rest with a key that your password (or recovery key) unlocks. See the Security section of the README.
 - Trash with restore (30 days), automatic database backups, and a backup before every database upgrade.
 - Import from ChatGPT and Claude exports and from NeoText files. Export your data as an encrypted NeoText file, Markdown or JSON.
 - Sessions list with sign-out for other devices, and an audit log of account events.
@@ -102,7 +149,7 @@ These are known and honest limits of 0.1.0. None of them loses data silently.
 - **Attached files are not included in NeoText exports.** Chats, folders, presets and settings are. The export dialog says how many files were left out, and you can still download each file from its chat.
 - **Provider ids are not remapped on import.** Imported chats remember which model they used, but not which of your providers. After an import you choose a model for them again.
 - **There is no account deletion yet.** You can delete chats and export your data. An operator can remove a user's data by deleting the database.
-- **The model provider sees your prompts.** This is by design (the model has to read them) and is stated in `SECURITY.md`. Encryption at rest protects the stored copy, not what you send.
+- **The model provider sees your prompts.** This is by design (the model has to read them) and is stated in the README. Encryption at rest protects the stored copy, not what you send.
 - **Only OpenRouter and OpenAI-compatible endpoints** are supported directly. Native adapters for APIs that are not OpenAI-compatible (for example Anthropic's or Gemini's own) are not included, though both are reachable through OpenRouter.
 - **The Docker image is built only in CI.** It was not built on the maintainer's machine for this release, because Docker was not installed there.
 - **Installing with plain `npm ci` can fail on a machine with no C++ build tools**, because npm tries to compile better-sqlite3 although it ships binaries. Use `npm ci --ignore-scripts`, as the README says.

@@ -175,9 +175,13 @@ async function execute(
   }
 }
 
-async function runOne(call: ToolCallRequest, input: RunToolCallsInput): Promise<ToolMessage> {
+async function runOne(
+  call: ToolCallRequest,
+  input: RunToolCallsInput,
+  after: Promise<unknown>,
+): Promise<ToolMessage> {
   try {
-    return await runGuarded(call, input);
+    return await runGuarded(call, input, after);
   } catch (err) {
     // Last line of defence: the call still answers, and the part does not stay pending.
     input.ctx.log.error({ err, generationId: input.generation.id }, 'tool call handling failed');
@@ -195,7 +199,11 @@ async function runOne(call: ToolCallRequest, input: RunToolCallsInput): Promise<
   }
 }
 
-async function runGuarded(call: ToolCallRequest, input: RunToolCallsInput): Promise<ToolMessage> {
+async function runGuarded(
+  call: ToolCallRequest,
+  input: RunToolCallsInput,
+  after: Promise<unknown>,
+): Promise<ToolMessage> {
   const { tools, acc, clock, emit, generation } = input;
   const send = (payloads: StreamEventPayload[]) => {
     for (const p of payloads) emit(p);
@@ -240,6 +248,8 @@ async function runGuarded(call: ToolCallRequest, input: RunToolCallsInput): Prom
       if (decision === 'timeout') return { status: 'no_answer', text: NO_ANSWER };
       send(acc.updateToolCall(call.id, { status: 'running', startedAt: answeredAt }));
     }
+    await after;
+    if (generation.signal.aborted) return { status: 'error', text: STOPPED };
     const outcome = await execute(def, args.value, input, progress);
     if (outcome.sources) send(acc.addSources(outcome.sources));
     return { status: outcome.status, text: outcome.text };
@@ -289,15 +299,22 @@ function skip(call: ToolCallRequest, input: RunToolCallsInput): ToolMessage {
 }
 
 /**
- * Runs one step's tool calls in parallel and returns the tool messages in call order. Call ids
+ * Runs one step's tool calls in parallel (ordered tools one after another, in call order) and
+ * returns the tool messages in call order. Call ids
  * must be unique (see `uniqueCallIds`). Only the first `MAX_TOOL_CALLS_PER_STEP` calls run.
  * Never rejects: unknown tools, bad arguments, denials, timeouts and failures become results
  * the model can read. Results are untrusted text and are only ever passed on as text.
  */
 export function runToolCalls(input: RunToolCallsInput): Promise<ToolMessage[]> {
+  const none = Promise.resolve();
+  let previous: Promise<unknown> = none;
   return Promise.all(
-    input.calls.map((call, i) =>
-      i < MAX_TOOL_CALLS_PER_STEP ? runOne(call, input) : Promise.resolve(skip(call, input)),
-    ),
+    input.calls.map((call, i) => {
+      if (i >= MAX_TOOL_CALLS_PER_STEP) return Promise.resolve(skip(call, input));
+      if (!input.tools.get(call.name)?.ordered) return runOne(call, input, none);
+      const settled = runOne(call, input, previous);
+      previous = settled;
+      return settled;
+    }),
   );
 }

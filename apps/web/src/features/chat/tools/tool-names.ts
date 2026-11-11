@@ -5,7 +5,16 @@ import { translate } from '../../../lib/i18n';
 import { qk } from '../../../lib/query';
 
 /** The app's own tools, which have names in every language; other tools show their own name. */
-export const APP_TOOLS = ['fetch_url', 'web_search', 'delegate_tasks', 'search_knowledge'] as const;
+export const APP_TOOLS = [
+  'fetch_url',
+  'web_search',
+  'delegate_tasks',
+  'search_knowledge',
+  'write_file',
+  'edit_file',
+  'delete_file',
+  'read_file',
+] as const;
 type AppTool = (typeof APP_TOOLS)[number];
 
 const isAppTool = (name: string): name is AppTool =>

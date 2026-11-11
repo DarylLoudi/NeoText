@@ -94,6 +94,6 @@ test('permanent delete and empty trash over HTTP', async () => {
   expect((await api(`/api/conversations/${a}?permanent=1`, { method: 'DELETE' })).status).toBe(204);
   const emptied = await api('/api/trash', { method: 'DELETE' });
   expect(emptied.status).toBe(200);
-  expect(await emptied.json()).toEqual({ purged: 1 });
+  expect(await emptied.json()).toEqual({ purged: 1, ids: [b] });
   expect((await t.app.request('/api/trash', { method: 'DELETE' })).status).toBe(401);
 });

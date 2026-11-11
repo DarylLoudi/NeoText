@@ -34,7 +34,7 @@ export interface ConversationsService {
   /** Permanently deletes a chat that is already in the trash. */
   deleteForever(auth: AuthContext, id: string): void;
   /** Permanently deletes everything in this user's trash. */
-  emptyTrash(auth: AuthContext): { purged: number };
+  emptyTrash(auth: AuthContext): { purged: number; ids: string[] };
   /** Copies the path root to `messageId` into a new chat. */
   fork(auth: AuthContext, id: string, messageId: string): Promise<ConversationSummary>;
   listFolders(auth: AuthContext): Folder[];
@@ -188,7 +188,7 @@ export function createConversationsService(deps: {
     emptyTrash: (auth) => {
       const ids = conversations.purge(auth.userId, null);
       if (ids.length > 0) onPurged(ids);
-      return { purged: ids.length };
+      return { purged: ids.length, ids };
     },
 
     fork: (auth, id, messageId) =>

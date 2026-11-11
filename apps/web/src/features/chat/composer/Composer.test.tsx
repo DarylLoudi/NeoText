@@ -377,7 +377,8 @@ test('the reasoning choice is hidden for a model without reasoning and sent for 
     </Providers>,
   );
   const user = userEvent.setup();
-  const select = screen.getByRole('combobox', { name: 'Reasoning' });
+  // The effort menu is its own chunk, so it appears a moment after the composer.
+  const select = await screen.findByRole('combobox', { name: 'Reasoning' });
   expect(select).toHaveTextContent('Auto');
   await user.click(select);
   await user.click(await screen.findByRole('option', { name: 'High' }));
@@ -385,14 +386,14 @@ test('the reasoning choice is hidden for a model without reasoning and sent for 
   expect(s.send).toHaveBeenCalledWith('x', expect.objectContaining({ reasoningEffort: 'high' }));
 });
 
-test('the default effort from settings is used when the model offers it', () => {
+test('the default effort from settings is used when the model offers it', async () => {
   setFakeSettings({ settings: { chat: { reasoningEffort: 'low' } } });
   render(
     <Providers>
       <Composer conversationId={null} model={deepseek} stream={stream()} />
     </Providers>,
   );
-  expect(screen.getByRole('combobox', { name: 'Reasoning' })).toHaveTextContent('Low');
+  expect(await screen.findByRole('combobox', { name: 'Reasoning' })).toHaveTextContent('Low');
 });
 
 test('the placeholder names the model', () => {

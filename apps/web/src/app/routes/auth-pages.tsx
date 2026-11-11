@@ -4,6 +4,7 @@ import { useNavigate, useRouter, useSearch } from '@tanstack/react-router';
 import { AuthLayout } from '../../features/auth/AuthLayout';
 import { LoginForm } from '../../features/auth/LoginForm';
 import { RecoverForm } from '../../features/auth/RecoverForm';
+import { RegisterForm } from '../../features/auth/RegisterForm';
 import { SetupWizard } from '../../features/auth/SetupWizard';
 import { useInstance } from '../../state/session';
 import { beginSession, setSignedIn } from '../session-flow';
@@ -49,6 +50,25 @@ export function RecoverPage() {
   return (
     <AuthLayout>
       <RecoverForm
+        onDone={(user) => {
+          setSignedIn(queryClient, user);
+          void navigate({ to: '/' });
+        }}
+      />
+    </AuthLayout>
+  );
+}
+
+export function RegisterPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const instance = useInstance();
+  // The route guard already sent closed instances to sign-in, so this is `invite` or `open`.
+  const registration = instance.data?.registration === 'open' ? 'open' : 'invite';
+  return (
+    <AuthLayout>
+      <RegisterForm
+        registration={registration}
         onDone={(user) => {
           setSignedIn(queryClient, user);
           void navigate({ to: '/' });

@@ -63,5 +63,20 @@ export function applyMath(md: MarkdownIt): boolean {
       maxExpand: 1000,
     },
   });
+  // texmath reads `\[…\]` only at the start of a block; models also write it mid-sentence.
+  // Render that like an inline `$$…$$`, as display math.
+  md.inline.ruler.before('escape', 'math_inline_bracket', (state, silent) => {
+    const start = state.pos;
+    if (!state.src.startsWith('\\[', start)) return false;
+    const end = state.src.indexOf('\\]', start + 2);
+    if (end < 0 || !state.src.slice(start + 2, end).trim()) return false;
+    if (!silent) {
+      const token = state.push('math_inline_double', 'math', 0);
+      token.content = state.src.slice(start + 2, end);
+      token.markup = '\\[';
+    }
+    state.pos = end + 2;
+    return true;
+  });
   return true;
 }

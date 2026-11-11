@@ -27,7 +27,10 @@ export function securityHeaders(opts: { hsts: boolean }): MiddlewareHandler<AppE
     c.header('Referrer-Policy', 'no-referrer');
     c.header('Cross-Origin-Opener-Policy', 'same-origin');
     c.header('Cross-Origin-Resource-Policy', 'same-origin');
-    c.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    // The preview shell sets a stricter list of its own.
+    if (!c.res.headers.has('Permissions-Policy')) {
+      c.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    }
     if (opts.hsts) c.header('Strict-Transport-Security', 'max-age=31536000');
   };
 }

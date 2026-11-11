@@ -2,7 +2,7 @@ import type { SearchResult } from '@neotext/shared';
 import { MagnifyingGlass } from '@phosphor-icons/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { Dialog as D } from 'radix-ui';
+import * as D from 'radix-ui/dialog';
 import { Fragment, type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { searchApi } from '../../lib/api/search';
 import { useT } from '../../lib/i18n';
@@ -125,7 +125,7 @@ function SearchBody({ close }: { close: () => void }) {
           // biome-ignore lint/a11y/noAutofocus: the dialog exists to be typed into
           autoFocus
         />
-        <Kbd>Esc</Kbd>
+        <Kbd hint>Esc</Kbd>
       </div>
       <ul
         className={styles.list}

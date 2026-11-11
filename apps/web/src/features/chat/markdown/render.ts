@@ -10,10 +10,12 @@ export interface LinkMark {
 export interface RenderOptions {
   copyLabel: string;
   loadImageLabel: (host: string) => string;
-  /** Lets a caller mark some links, for example Plan 04 citations. Return null to leave it. */
+  /** Lets a caller mark some links, for example citations. Return null to leave it. */
   linkClass?: (href: string) => LinkMark | null;
   /** The accessible name of a citation chip, whose number is drawn by CSS only. */
   citationLabel?: (n: string, text: string) => string;
+  /** Set when the answer can open its project: HTML pages get a button with this name. */
+  previewLabel?: string;
 }
 
 interface RenderEnv extends Env {
@@ -88,6 +90,14 @@ function languageOf(info: string): string {
   return /^[\w+#.-]{1,32}$/.test(word) ? word : '';
 }
 
+/** A full HTML document, or a block named as an .html file, can open in the preview. */
+function previewable(lang: string, info: string, content: string): boolean {
+  if (lang !== 'html' && lang !== 'htm') return false;
+  return (
+    /<!doctype\s+html|<html[\s>]/i.test(content) || /\S\.html?\b/i.test(info.slice(lang.length))
+  );
+}
+
 md.renderer.rules.fence = (tokens, idx, _options, env) => {
   const token = tokens[idx];
   if (!token) return '';
@@ -95,8 +105,12 @@ md.renderer.rules.fence = (tokens, idx, _options, env) => {
   const lang = languageOf(token.info);
   const label = escapeHtml(lang);
   const cls = lang ? ` class="language-${label}"` : '';
+  const preview =
+    opts.previewLabel && previewable(lang, token.info, token.content)
+      ? `<button type="button" class="md-preview" data-preview>${escapeHtml(opts.previewLabel)}</button>`
+      : '';
   return (
-    `<div class="md-code" dir="auto" data-lang="${label}"><div class="md-code-bar"><span>${label}</span>` +
+    `<div class="md-code" dir="auto" data-lang="${label}"><div class="md-code-bar"><span>${label}</span>${preview}` +
     // An icon button: the icon is drawn in CSS, the hidden text names it and says when it copied.
     `<button type="button" data-copy title="${escapeHtml(opts.copyLabel)}">` +
     `<span class="md-sr" aria-live="polite">${escapeHtml(opts.copyLabel)}</span></button></div>` +

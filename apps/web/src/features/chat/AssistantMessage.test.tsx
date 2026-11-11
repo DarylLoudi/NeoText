@@ -3,12 +3,14 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
-import { expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { setLocale } from '../../lib/i18n';
 import { createQueryClient } from '../../lib/query';
 import { msg } from '../../test/chat-fixtures';
 import { server } from '../../test/msw';
 import { TooltipProvider } from '../../ui';
+import { chatProject } from '../project/project-compute';
+import { ProjectContext } from '../project/project-versions';
 import { AssistantMessage } from './AssistantMessage';
 import { type ChatActions, ChatActionsContext } from './MessageActions';
 
@@ -222,4 +224,85 @@ test('an agent answer is named while it still streams', () => {
     }),
   );
   expect(screen.getByText('Agent-Frontend')).toBeInTheDocument();
+});
+
+describe('project changes', () => {
+  const call = (id: string, name: string, args: object, status: 'ok' | 'error' = 'ok') => ({
+    type: 'tool_call' as const,
+    id,
+    name,
+    source: 'app' as const,
+    args: JSON.stringify(args),
+    status,
+    result: status === 'error' ? 'The text to replace was not found in a.css.' : 'Created.',
+    startedAt: 1,
+    finishedAt: 2,
+  });
+
+  function withProject(message: MessagePublic) {
+    const project = chatProject([msg({ id: 'u1', role: 'user', parts: [] }), message]);
+    return render(
+      <QueryClientProvider client={createQueryClient()}>
+        <TooltipProvider>
+          <ProjectContext.Provider value={project}>
+            <AssistantMessage
+              item={{ message, siblingIndex: 0, siblingCount: 1, siblingIds: [message.id] }}
+              showCost={false}
+              reconnecting={false}
+              lost={false}
+            />
+          </ProjectContext.Provider>
+        </TooltipProvider>
+      </QueryClientProvider>,
+    );
+  }
+
+  test('finished file calls fold into one row; a failed one still shows', async () => {
+    withProject(
+      answer({
+        parts: [
+          call('c1', 'write_file', { path: 'index.html', content: '<p>a</p>' }),
+          call('c2', 'write_file', { path: 'style.css', content: 'p{}' }),
+          call('c3', 'edit_file', { path: 'a.css', old_text: 'x', new_text: 'y' }, 'error'),
+          { type: 'text', text: 'Done.' },
+        ],
+      }),
+    );
+    expect(
+      await screen.findByText('v1 · created index.html, created style.css'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open preview' })).toBeInTheDocument();
+    expect(screen.queryByText('Wrote a project file')).not.toBeInTheDocument();
+    expect(screen.getByText(/Edit project file|Edited a project file/)).toBeInTheDocument();
+  });
+
+  test('an answer without file changes has no row', () => {
+    withProject(answer());
+    expect(screen.queryByRole('button', { name: 'Open preview' })).not.toBeInTheDocument();
+  });
+});
+
+describe('file calls without a preview row', () => {
+  const ok = (id: string, path: string) => ({
+    type: 'tool_call' as const,
+    id,
+    name: 'write_file',
+    source: 'app' as const,
+    args: JSON.stringify({ path, content: '1' }),
+    status: 'ok' as const,
+    result: 'Created.',
+    startedAt: 1,
+    finishedAt: 2,
+  });
+
+  test('a script-only project keeps its tool rows and offers no preview', () => {
+    setup(answer({ parts: [ok('c1', 'app.js'), { type: 'text', text: 'Done.' }] }));
+    expect(screen.getByText('Wrote a project file')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Open preview' })).not.toBeInTheDocument();
+  });
+
+  test('an answer outside the visible branch (a compare column) keeps its tool rows', () => {
+    setup(answer({ parts: [ok('c1', 'index.html'), { type: 'text', text: 'Done.' }] }));
+    expect(screen.getByText('Wrote a project file')).toBeInTheDocument();
+  });
 });

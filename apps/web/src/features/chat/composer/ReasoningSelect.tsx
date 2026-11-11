@@ -1,21 +1,14 @@
-import type { ModelInfo, ReasoningEffort } from '@neotext/shared';
+import type { ModelInfo } from '@neotext/shared';
 import { useT } from '../../../lib/i18n';
-import { Select } from '../../../ui';
+import { Select } from '../../../ui/Select/Select';
 import styles from './ComposerToolbar.module.css';
-
-/** `auto` leaves the choice to the model; anything else is sent as the effort. */
-export type EffortChoice = 'auto' | ReasoningEffort;
+import { type EffortChoice, effortFor } from './reasoning-effort';
 
 export interface ReasoningSelectProps {
   /** Null when the model cannot reason: nothing is shown. */
   reasoning: ModelInfo['reasoning'];
   value: EffortChoice;
   onChange: (value: EffortChoice) => void;
-}
-
-/** The choice to use for a model: `wanted` if the model offers it, else `auto`. */
-export function effortFor(reasoning: ModelInfo['reasoning'], wanted: EffortChoice): EffortChoice {
-  return reasoning && wanted !== 'auto' && reasoning.efforts.includes(wanted) ? wanted : 'auto';
 }
 
 export function ReasoningSelect({ reasoning, value, onChange }: ReasoningSelectProps) {

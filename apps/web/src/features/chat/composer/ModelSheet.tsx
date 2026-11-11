@@ -13,7 +13,7 @@ export interface ModelSheetProps {
   /** False when no provider is connected at all. */
   hasProvider: boolean;
   loading: boolean;
-  /** Starting points from the user's presets (Plan 05 fills this). */
+  /** Starting points from the user's presets. */
   presets?: ReactNode;
 }
 
@@ -65,12 +65,9 @@ export function ModelSheet({
   }
 
   const locale = getLocale();
-  const price = (perM: number | null) => {
-    if (perM === null) return t('chat.sheet.unknown');
-    return perM === 0
-      ? formatPricePerM(0)
-      : t('chat.sheet.priceValue', { price: formatPricePerM(perM) });
-  };
+  const price = (perM: number) =>
+    perM === 0 ? formatPricePerM(0) : t('chat.sheet.priceValue', { price: formatPricePerM(perM) });
+  const { promptPerM, completionPerM } = model.pricing;
   const supports = [
     t('chat.sheet.text'),
     ...(model.inputModalities.includes('image') ? [t('chat.sheet.images')] : []),
@@ -89,13 +86,18 @@ export function ModelSheet({
           {providerName ? <span className={styles.provider}> · {providerName}</span> : null}
         </h2>
         <dl className={styles.list}>
-          <Row term={t('chat.sheet.contextWindow')}>
-            {model.contextLength === null
-              ? t('chat.sheet.unknown')
-              : t('chat.sheet.contextValue', { size: formatContext(model.contextLength) })}
-          </Row>
-          <Row term={t('chat.sheet.inputPrice')}>{price(model.pricing.promptPerM)}</Row>
-          <Row term={t('chat.sheet.outputPrice')}>{price(model.pricing.completionPerM)}</Row>
+          {/* Facts the provider does not list are left out rather than shown as "not listed". */}
+          {model.contextLength === null ? null : (
+            <Row term={t('chat.sheet.contextWindow')}>
+              {t('chat.sheet.contextValue', { size: formatContext(model.contextLength) })}
+            </Row>
+          )}
+          {promptPerM === null ? null : (
+            <Row term={t('chat.sheet.inputPrice')}>{price(promptPerM)}</Row>
+          )}
+          {completionPerM === null ? null : (
+            <Row term={t('chat.sheet.outputPrice')}>{price(completionPerM)}</Row>
+          )}
           {model.knowledgeCutoff ? (
             <Row term={t('chat.sheet.knowledgeCutoff')}>
               {cutoff(model.knowledgeCutoff, locale)}

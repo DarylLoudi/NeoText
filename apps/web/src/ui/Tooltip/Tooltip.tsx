@@ -1,4 +1,4 @@
-import { Tooltip as T } from 'radix-ui';
+import * as T from 'radix-ui/tooltip';
 import type { ReactNode } from 'react';
 import styles from './Tooltip.module.css';
 

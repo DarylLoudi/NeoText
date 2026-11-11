@@ -8,7 +8,8 @@ import { type FormEvent, useId, useState } from 'react';
 import { ApiError } from '../../../lib/api/client';
 import { downloadExport } from '../../../lib/api/transfer';
 import { useT } from '../../../lib/i18n';
-import { Button, Switch, TextField, toast } from '../../../ui';
+import { Button, TextField, toast } from '../../../ui';
+import { Switch } from '../../../ui/Switch/Switch';
 import styles from './ExportPanel.module.css';
 
 const FORMATS: ExportFormat[] = ['neotext', 'markdown', 'json'];

@@ -90,3 +90,13 @@ test('a debounced draft lands in the store of the user who typed it', async () =
   await openUserPersistence('u1');
   expect(await loadDraft('new')).toBe('typed by u1');
 });
+
+test('a draft read before the store opens waits for it, as on a reload', async () => {
+  saveDraft('c4', 'kept over a reload');
+  await flushDrafts();
+  closeUserPersistence();
+  // The composer asks first; the session opens the store a moment later.
+  const read = loadDraft('c4');
+  await openUserPersistence('u1');
+  expect(await read).toBe('kept over a reload');
+});

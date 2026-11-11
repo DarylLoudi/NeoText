@@ -309,13 +309,14 @@ export function useChatStream(conversationId: string | null) {
     [qc, navigate],
   );
 
-  const messages = useCallback(
-    () =>
+  /** The cached messages and the leaf the chat shows, read when a turn starts. */
+  const cached = useCallback(() => {
+    const d =
       conversationId === null
-        ? []
-        : (qc.getQueryData<ConversationDetail>(qk.conversation(conversationId))?.messages ?? []),
-    [qc, conversationId],
-  );
+        ? undefined
+        : qc.getQueryData<ConversationDetail>(qk.conversation(conversationId));
+    return { all: d?.messages ?? [], leaf: d?.conversation.activeLeafId ?? null };
+  }, [qc, conversationId]);
 
   /** A new chat, or one whose messages are loaded: only then is it known where a send goes. */
   const ready = conversationId === null || detail.data !== undefined;
@@ -342,8 +343,9 @@ export function useChatStream(conversationId: string | null) {
 
   const regenerate = useCallback(
     (userMessageId: string, target?: ModelRef) => {
-      const all = messages();
-      const model = target ?? modelFor(all, userMessageId) ?? detail.data?.conversation.modelRef;
+      const { all, leaf } = cached();
+      const model =
+        target ?? modelFor(all, userMessageId, leaf) ?? detail.data?.conversation.modelRef;
       if (!model || conversationId === null) return Promise.resolve(false);
       return run({
         conversationId,
@@ -352,17 +354,17 @@ export function useChatStream(conversationId: string | null) {
         targets: [model],
         options: requestOptions({
           webSearch: true,
-          agentId: agentFor(all, userMessageId, qc.getQueryData<AgentPublic[]>(qk.agents)),
+          agentId: agentFor(all, userMessageId, qc.getQueryData<AgentPublic[]>(qk.agents), leaf),
         }),
       });
     },
-    [run, qc, messages, conversationId, detail.data],
+    [run, qc, cached, conversationId, detail.data],
   );
 
   const editAndResend = useCallback(
     (message: MessagePublic, text: string) => {
-      const all = messages();
-      const model = modelFor(all, message.id) ?? detail.data?.conversation.modelRef;
+      const { all, leaf } = cached();
+      const model = modelFor(all, message.id, leaf) ?? detail.data?.conversation.modelRef;
       if (!model || conversationId === null) return Promise.resolve(false);
       return run({
         conversationId,
@@ -372,11 +374,11 @@ export function useChatStream(conversationId: string | null) {
         targets: [model],
         options: requestOptions({
           webSearch: true,
-          agentId: agentFor(all, message.id, qc.getQueryData<AgentPublic[]>(qk.agents)),
+          agentId: agentFor(all, message.id, qc.getQueryData<AgentPublic[]>(qk.agents), leaf),
         }),
       });
     },
-    [run, qc, messages, conversationId, detail.data],
+    [run, qc, cached, conversationId, detail.data],
   );
 
   const stop = useCallback(() => {

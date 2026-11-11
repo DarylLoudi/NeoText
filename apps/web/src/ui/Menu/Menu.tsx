@@ -1,6 +1,6 @@
 import { CaretRight } from '@phosphor-icons/react';
-import { DropdownMenu as M } from 'radix-ui';
-import type { ReactNode } from 'react';
+import * as M from 'radix-ui/dropdown-menu';
+import { type ReactNode, useId } from 'react';
 import styles from './Menu.module.css';
 
 export type MenuItem =
@@ -8,6 +8,8 @@ export type MenuItem =
       /** Defaults to `label`; set it when two items may share a label. */
       id?: string;
       label: string;
+      /** A second, quieter line under the label. */
+      hint?: string;
       icon?: ReactNode;
       onSelect: () => void;
       danger?: boolean;
@@ -27,6 +29,34 @@ export type MenuProps = {
 
 function itemClass(danger?: boolean): string {
   return [styles.item, danger ? styles.danger : ''].filter(Boolean).join(' ');
+}
+
+type ActionMenuItem = Extract<MenuItem, { onSelect: () => void }>;
+
+/** One action; a hint is a quieter second line that describes the item rather than naming it. */
+function ActionItem({ item, icon }: { item: ActionMenuItem; icon: ReactNode }) {
+  const id = useId();
+  return (
+    <M.Item
+      className={itemClass(item.danger)}
+      disabled={item.disabled}
+      onSelect={item.onSelect}
+      aria-labelledby={item.hint ? `${id}-label` : undefined}
+      aria-describedby={item.hint ? `${id}-hint` : undefined}
+    >
+      {icon}
+      {item.hint ? (
+        <span className={styles.text}>
+          <span id={`${id}-label`}>{item.label}</span>
+          <span id={`${id}-hint`} className={styles.hint} dir="auto">
+            {item.hint}
+          </span>
+        </span>
+      ) : (
+        item.label
+      )}
+    </M.Item>
+  );
 }
 
 function Items({ items }: { items: MenuItem[] }) {
@@ -52,17 +82,7 @@ function Items({ items }: { items: MenuItem[] }) {
         </M.Sub>
       );
     }
-    return (
-      <M.Item
-        key={item.id ?? item.label}
-        className={itemClass(item.danger)}
-        disabled={item.disabled}
-        onSelect={item.onSelect}
-      >
-        {icon}
-        {item.label}
-      </M.Item>
-    );
+    return <ActionItem key={item.id ?? item.label} item={item} icon={icon} />;
   });
 }
 

@@ -70,4 +70,43 @@ test('two models side by side, continue with one', async ({ page, request }) => 
   };
   const leaf = detail.messages.find((m) => m.id === detail.conversation.activeLeafId);
   expect(leaf?.parts.map((p) => p.text ?? '').join('')).toContain('beta8');
+
+  // A reload keeps the choice: the thread shows the chosen answer, not the columns again.
+  await page.reload();
+  await expect(thread.getByText(beta.join('').trim())).toBeVisible();
+  await expect(columns).toHaveCount(0);
+  await expect(thread.getByText(alpha.join('').trim())).toHaveCount(0);
+  await expect(thread.getByRole('button', { name: 'Show comparison' })).toBeVisible();
+});
+
+test('a column still thinking keeps its Stop under its own text', async ({ page, request }) => {
+  const long = Array.from({ length: 40 }, (_, i) => `Line ${i + 1} of a long answer.\n\n`);
+  await enqueue(
+    request,
+    { model: 'mock/alpha', chunks: long },
+    { model: 'mock/beta', chunks: [], hang: true },
+  );
+  await page.goto('/');
+  await page
+    .getByRole('banner')
+    .getByRole('button', { name: /mock\/alpha|mock\/beta|Choose a model/ })
+    .click();
+  await page.getByRole('option', { name: 'mock/alpha' }).click();
+  await page.getByRole('button', { name: 'Compare', exact: true }).click();
+  await page.getByRole('button', { name: 'Add a model' }).click();
+  const picker = page.getByRole('dialog', { name: 'Models to compare' });
+  await picker.getByRole('option', { name: 'mock/beta' }).click();
+  await page.keyboard.press('Escape');
+  await message(page).fill('Write a lot');
+  await message(page).press('Enter');
+
+  const columns = page.getByRole('group', { name: '2 answers side by side' });
+  await expect(columns.getByText('Line 40 of a long answer.')).toBeVisible();
+  const beta = columns.getByRole('region', { name: 'beta', exact: true });
+  const stop = beta.getByRole('button', { name: 'Stop this answer' });
+  await expect(stop).toBeVisible();
+  const [column, button] = [await beta.boundingBox(), await stop.boundingBox()];
+  // Near the top of its own column, not at the bottom of the tall one beside it.
+  expect((button?.y ?? 0) - (column?.y ?? 0)).toBeLessThan(200);
+  await stop.click();
 });

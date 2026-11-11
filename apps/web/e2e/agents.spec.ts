@@ -42,6 +42,32 @@ test('an agent called from the composer answers with its own instructions', asyn
   }
 });
 
+test('an unsent message keeps its text and its agent over a reload', async ({ page, request }) => {
+  const id = await createAgent(request, 'Agent-Reload', 'You review CSS. SAY HELLO.');
+  try {
+    await enqueue(request, { chunks: ['Reviewed after the reload.'] });
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Agent', exact: true }).click();
+    await page.getByRole('menuitem', { name: /Agent-Reload/ }).click();
+    await message(page).fill('Check my stylesheet');
+    // The draft is saved a moment after typing stops.
+    await page.waitForTimeout(600);
+
+    await page.reload();
+    await expect(message(page)).toHaveValue('Check my stylesheet');
+    await expect(page.getByTitle('Answering as Agent-Reload')).toBeVisible();
+    await message(page).press('Enter');
+
+    const thread = page.getByRole('main');
+    await expect(thread.getByText('Reviewed after the reload.')).toBeVisible();
+    await expect(thread.getByText('Agent-Reload', { exact: true })).toBeVisible();
+    const system = (await chatRequestBodies(request)).at(-1)?.messages[0];
+    expect(String(system?.content)).toContain('You review CSS. SAY HELLO.');
+  } finally {
+    await request.delete(`/api/agents/${id}`);
+  }
+});
+
 test('delegate_tasks runs sub-agents and the card ends collapsed', async ({ page, request }) => {
   const tasks = [
     { title: 'Prices of laptop A', instructions: 'Find the price of laptop A.' },
@@ -127,5 +153,40 @@ test('an agent with a knowledge file gets the search tool and shows the lookup',
     expect(JSON.stringify(bodies[1])).toContain('r^2 = -k/m');
   } finally {
     await request.delete(`/api/agents/${id}`);
+  }
+});
+
+test('a sub-agent row keeps its time inside the card on a phone', async ({ page, request }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const tasks = [
+    { title: 'Prices of laptop A in several stores across the country', instructions: 'A' },
+    { title: 'Prices of laptop B', instructions: 'B' },
+  ];
+  await enqueue(
+    request,
+    {
+      chunks: [],
+      toolCalls: [{ id: 'call_d', name: 'delegate_tasks', arguments: JSON.stringify({ tasks }) }],
+    },
+    { chunks: ['Laptop A is $900.'] },
+    { chunks: ['Laptop B is $1,100.'] },
+    { chunks: ['A is cheaper.'] },
+  );
+  await page.goto('/');
+  await message(page).fill('Compare laptop A and B');
+  await message(page).press('Enter');
+  const thread = page.getByRole('main');
+  await expect(thread.getByText('A is cheaper.')).toBeVisible();
+  await thread.getByText('2 sub-agents finished').click();
+
+  const card = thread.locator('[data-finished]');
+  const cardBox = await card.boundingBox();
+  const rows = card.getByRole('listitem');
+  await expect(rows).toHaveCount(2);
+  for (const row of await rows.all()) {
+    const button = await row.getByRole('button').boundingBox();
+    expect(button && cardBox && button.x + button.width).toBeLessThanOrEqual(
+      (cardBox?.x ?? 0) + (cardBox?.width ?? 0),
+    );
   }
 });

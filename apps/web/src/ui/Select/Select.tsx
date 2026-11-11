@@ -1,5 +1,5 @@
 import { CaretDown, Check } from '@phosphor-icons/react';
-import { Select as S } from 'radix-ui';
+import * as S from 'radix-ui/select';
 import { useId } from 'react';
 import styles from './Select.module.css';
 

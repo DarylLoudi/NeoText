@@ -61,9 +61,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Keeps room for the caret when nothing has arrived yet. */
+/*
+ * Keeps room for the caret when nothing has arrived yet. The body is only as tall as its text,
+ * so the caret and Stop follow each answer instead of sinking to the longest column's bottom.
+ */
 .body {
-  flex: 1;
   min-height: calc(var(--text-md) * 1.6);
 }
 

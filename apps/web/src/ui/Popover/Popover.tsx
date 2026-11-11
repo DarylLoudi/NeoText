@@ -1,4 +1,4 @@
-import { Popover as P } from 'radix-ui';
+import * as P from 'radix-ui/popover';
 import type { ReactNode } from 'react';
 import styles from './Popover.module.css';
 

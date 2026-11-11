@@ -25,4 +25,4 @@ labels: bug
 
 <!-- Remove anything private first. Never paste API keys, passwords, recovery keys or chat contents. -->
 
-<!-- Found a security problem? Do not open an issue. See SECURITY.md. -->
+<!-- Found a security problem? Do not open an issue. See the Security section of the README. -->

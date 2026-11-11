@@ -73,6 +73,7 @@
   padding-bottom: var(--space-3);
 }
 .details summary {
+  min-height: 32px;
   color: var(--ink-muted);
   font-size: var(--text-sm);
   cursor: pointer;

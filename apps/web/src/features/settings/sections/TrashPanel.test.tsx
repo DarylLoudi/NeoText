@@ -7,6 +7,9 @@ import { renderWithClient } from '../../../test/renderWithClient';
 import { conv } from '../../../test/sidebar-backend';
 import { TrashPanel } from './TrashPanel';
 
+const forget = vi.hoisted(() => vi.fn(async (_ids: string[]) => {}));
+vi.mock('../../project/preview-storage', () => ({ forgetPreviewStorage: forget }));
+
 const DAY = 86_400_000;
 const NOW = new Date(2026, 10, 3, 12, 0).getTime();
 
@@ -17,6 +20,7 @@ let nextCursor: string | null;
 beforeEach(() => {
   vi.setSystemTime?.(NOW);
   calls = [];
+  forget.mockClear();
   nextCursor = null;
   items = [
     conv(NOW - 10 * DAY, { title: 'Thesis plan', deletedAt: NOW - 10 * DAY }),
@@ -42,9 +46,9 @@ beforeEach(() => {
     }),
     http.delete('/api/trash', () => {
       calls.push('empty');
-      const purged = items.length;
+      const ids = items.map((i) => i.id);
       items = [];
-      return HttpResponse.json({ purged });
+      return HttpResponse.json({ purged: ids.length, ids });
     }),
   );
 });
@@ -79,10 +83,13 @@ test('restore and delete forever with confirmation', async () => {
   const again = await screen.findByRole('dialog', { name: 'Delete this chat forever?' });
   await user.click(within(again).getByRole('button', { name: 'Delete forever' }));
   await waitFor(() => expect(calls).toEqual([`restore ${first?.id}`, `delete ${second?.id} 1`]));
+  // What the chat's preview kept in this browser goes with it; a restored chat keeps it.
+  await waitFor(() => expect(forget.mock.calls).toEqual([[[second?.id]]]));
   expect(await screen.findByText('Your trash is empty.')).toBeInTheDocument();
 });
 
 test('empty trash states the count and asks first', async () => {
+  const items0 = [...items];
   const { user } = renderWithClient(<TrashPanel now={() => NOW} />);
   await screen.findAllByRole('listitem');
   await user.click(screen.getByRole('button', { name: 'Empty trash' }));
@@ -91,6 +98,7 @@ test('empty trash states the count and asks first', async () => {
   expect(calls).toEqual([]);
   await user.click(within(dialog).getByRole('button', { name: 'Empty trash' }));
   await waitFor(() => expect(calls).toEqual(['empty']));
+  await waitFor(() => expect(forget.mock.calls).toEqual([[items0.map((i) => i.id)]]));
   expect(await screen.findByText('Your trash is empty.')).toBeInTheDocument();
 });
 

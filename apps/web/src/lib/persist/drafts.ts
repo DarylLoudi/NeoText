@@ -1,4 +1,10 @@
-import { activePersistence, activeUserId, openPersistence, type Persistence } from './db';
+import {
+  activePersistence,
+  activeUserId,
+  openPersistence,
+  type Persistence,
+  whenUserPersistence,
+} from './db';
 
 export const DRAFT_SAVE_DELAY_MS = 300;
 
@@ -40,7 +46,9 @@ function write(userId: string | null, key: string, text: string): void {
   void p.finally(() => writes.delete(p));
 }
 
+/** Waits for the signed-in user's store: after a reload the composer asks before it opens. */
 export async function loadDraft(key: string): Promise<string> {
+  await whenUserPersistence();
   const pending = unsaved.get(slot(activeUserId(), key));
   if (pending) return pending.text;
   try {

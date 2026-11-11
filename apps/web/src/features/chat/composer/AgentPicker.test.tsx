@@ -51,6 +51,7 @@ const AGENTS = [
 
 beforeEach(async () => {
   globalThis.indexedDB = new IDBFactory();
+  localStorage.clear();
   await openUserPersistence('u1');
   resetFakeSettings();
   resetCompare();
@@ -73,7 +74,7 @@ function setup() {
     generating: false,
     ready: true,
   };
-  render(
+  const view = render(
     <QueryClientProvider client={createQueryClient()}>
       <TooltipProvider>
         <Composer conversationId={null} model={deepseekFlash} stream={s} />
@@ -81,7 +82,7 @@ function setup() {
     </QueryClientProvider>,
   );
   const box = () => screen.getByRole('textbox', { name: 'Message' });
-  return { s, box, user: userEvent.setup() };
+  return { s, box, user: userEvent.setup(), unmount: view.unmount };
 }
 
 test('mentionQuery reads an @word only at the very start', () => {
@@ -97,6 +98,11 @@ test('the agent menu lists only enabled agents, and the chosen one gets the mess
   expect(await screen.findByRole('menuitem', { name: 'Agent-Frontend' })).toBeInTheDocument();
   expect(screen.getByRole('menuitem', { name: 'Agent-Backend' })).toBeInTheDocument();
   expect(screen.queryByRole('menuitem', { name: 'Agent-Retired' })).not.toBeInTheDocument();
+  // Each agent shows when to use it, and the menu ends with a way to manage them.
+  expect(screen.getByRole('menuitem', { name: 'Agent-Frontend' })).toHaveAccessibleDescription(
+    'Agent-Frontend helps.',
+  );
+  expect(screen.getByRole('menuitem', { name: 'Manage agents' })).toBeInTheDocument();
   await user.click(screen.getByRole('menuitem', { name: 'Agent-Frontend' }));
 
   expect(await screen.findByRole('button', { name: 'Remove Agent-Frontend' })).toBeInTheDocument();
@@ -151,4 +157,29 @@ test('compare is off and cannot be turned on while an agent is chosen', async ()
 
   await user.click(screen.getByRole('button', { name: 'Remove Agent-Frontend' }));
   expect(compare()).not.toHaveAttribute('aria-disabled');
+});
+
+test('the chosen agent stays with the unsent message over a reload', async () => {
+  const first = setup();
+  await first.user.click(await screen.findByRole('button', { name: 'Agent' }));
+  await first.user.click(await screen.findByRole('menuitem', { name: 'Agent-Backend' }));
+  expect(await screen.findByRole('button', { name: 'Remove Agent-Backend' })).toBeInTheDocument();
+  first.unmount();
+
+  // The page loads again: the chip comes back, and the message still goes to the agent.
+  const { s, box, user, unmount } = setup();
+  expect(await screen.findByRole('button', { name: 'Remove Agent-Backend' })).toBeInTheDocument();
+  await user.type(box(), 'Check the API');
+  await user.click(screen.getByRole('button', { name: 'Send message' }));
+  await waitFor(() => expect(s.send).toHaveBeenCalledTimes(1));
+  expect(s.send).toHaveBeenCalledWith(
+    'Check the API',
+    expect.objectContaining({ agentId: 'agt_2' }),
+  );
+  unmount();
+
+  // Sent: the next load starts without it.
+  setup();
+  await screen.findByRole('button', { name: 'Agent' });
+  expect(screen.queryByRole('button', { name: 'Remove Agent-Backend' })).not.toBeInTheDocument();
 });

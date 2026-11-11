@@ -20,7 +20,8 @@ import { ArrowDown, ArrowUp, DotsSixVertical, Plus, Trash } from '@phosphor-icon
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useT } from '../../lib/i18n';
 import { updateSettings, useSettings } from '../../state/settings';
-import { Button, Dialog, IconButton, Switch } from '../../ui';
+import { Button, Dialog, IconButton } from '../../ui';
+import { Switch } from '../../ui/Switch/Switch';
 import { ChoiceGroup } from './ChoiceGroup';
 import styles from './SidebarCustomizer.module.css';
 import { AddSmartSectionDialog, ResetSidebarDialog } from './SidebarDialogs';

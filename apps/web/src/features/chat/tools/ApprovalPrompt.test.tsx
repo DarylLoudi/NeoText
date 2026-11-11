@@ -120,7 +120,7 @@ test('the prompt comes back after a resume, from the generation snapshot', async
   const { user } = renderWithClient(
     <PartRenderer part={part} message={live} live={false} codeTheme="auto" />,
   );
-  expect(screen.getByText('Web page reader wants to run')).toBeInTheDocument();
+  expect(await screen.findByText('Web page reader wants to run')).toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: 'Allow' }));
   await waitFor(() => expect(bodies).toEqual([expect.objectContaining({ id: 'gen_2' })]));
 });

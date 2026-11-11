@@ -1,5 +1,5 @@
 import type { ToolCallPart } from '@neotext/shared';
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import { HttpResponse, http } from 'msw';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { qk } from '../../../lib/query';
@@ -248,4 +248,19 @@ test('a tool name longer than the limit is cut, whatever sent it', async () => {
   const label = await screen.findByText(/^Used x: Safe to allow/);
   expect(label.textContent?.length).toBeLessThan(80);
   expect(label.textContent).toMatch(/\u2026$/u);
+});
+
+test('a running call counts up the time it has taken so far', () => {
+  vi.useFakeTimers();
+  try {
+    vi.setSystemTime(100_000);
+    renderWithClient(
+      <ToolCallBlock part={call({ status: 'running', startedAt: 92_000, finishedAt: null })} />,
+    );
+    expect(screen.getByText('8 s')).toHaveAttribute('aria-hidden', 'true');
+    act(() => vi.advanceTimersByTime(3_000));
+    expect(screen.getByText('11 s')).toBeInTheDocument();
+  } finally {
+    vi.useRealTimers();
+  }
 });

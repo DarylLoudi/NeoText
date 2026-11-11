@@ -5,7 +5,6 @@
 **/data
 **/.env*
 .git
-.superpowers
 **/*.log
 **/coverage
 **/playwright-report

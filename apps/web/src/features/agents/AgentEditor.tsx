@@ -6,7 +6,8 @@ import {
 } from '@neotext/shared';
 import { type ChangeEvent, type FormEvent, useRef, useState } from 'react';
 import { useT } from '../../lib/i18n';
-import { Button, Dialog, Switch, TextArea, TextField } from '../../ui';
+import { Button, Dialog, TextArea, TextField } from '../../ui';
+import { Switch } from '../../ui/Switch/Switch';
 import { ModelChoice } from '../settings/ModelChoice';
 import styles from './AgentEditor.module.css';
 import { KnowledgeSection } from './KnowledgeSection';

@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { Tooltip } from '../Tooltip/Tooltip';
 import styles from './IconButton.module.css';
 
@@ -8,6 +8,7 @@ export type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'chi
   icon: ReactNode;
   size?: 'sm' | 'md';
   pressed?: boolean;
+  ref?: Ref<HTMLButtonElement>;
 };
 
 export function IconButton({

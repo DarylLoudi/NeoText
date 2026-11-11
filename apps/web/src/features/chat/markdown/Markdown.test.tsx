@@ -67,6 +67,27 @@ describe('code blocks', () => {
     expect(button).not.toHaveTextContent('Copied');
   });
 
+  test('a full HTML page or a named .html block gets a Preview button that opens the preview', async () => {
+    const user = userEvent.setup();
+    const onPreview = vi.fn();
+    const page = '```html\n<!doctype html>\n<p>a</p>\n```\n\n```html about.html\n<p>b</p>\n```\n';
+    render(
+      <Markdown
+        text={`${page}\n\`\`\`css\np{}\n\`\`\`\n\n\`\`\`html\n<p>c</p>\n\`\`\`\n`}
+        onPreview={onPreview}
+      />,
+    );
+    const buttons = screen.getAllByRole('button', { name: 'Preview' });
+    expect(buttons).toHaveLength(2);
+    await user.click(buttons[0] as HTMLElement);
+    expect(onPreview).toHaveBeenCalledTimes(1);
+  });
+
+  test('without a preview handler there is no Preview button', () => {
+    render(<Markdown text={'```html\n<!doctype html>\n<p>a</p>\n```\n'} />);
+    expect(screen.queryByRole('button', { name: 'Preview' })).not.toBeInTheDocument();
+  });
+
   test('completed code blocks are highlighted once, after idle', async () => {
     render(<Markdown text={fence} />);
     await waitFor(() => expect(document.querySelector('pre.shiki')).not.toBeNull());

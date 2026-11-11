@@ -83,6 +83,12 @@
   display: inline-flex;
   gap: var(--space-1);
   margin-inline-start: auto;
+  /* The reminder appears when the row is pointed at or focused, so the sidebar stays quiet. */
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+:where(button:hover, button:focus-visible) > .shortcut {
+  opacity: 1;
 }
 .scroll {
   flex: 1;

@@ -1,4 +1,4 @@
-// Takes the screenshots used in README.md, at 1440x900, into docs/images.
+// Takes the screenshots used in README.md, at 1440x900, into assets/screenshots.
 //
 // It starts the same server the browser tests use (apps/web/e2e/support/e2e-server.ts: the real
 // app on port 3421 with mock model providers, so nothing leaves this machine and no key is
@@ -12,9 +12,10 @@ import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { chromium } from '@playwright/test';
+import { TIMER_CSS, TIMER_HTML, TIMER_JS } from './screenshot-timer.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
-const OUT = join(ROOT, 'docs', 'images');
+const OUT = join(ROOT, 'assets', 'screenshots');
 const APP = 'http://localhost:3421';
 const CONTROL = 'http://127.0.0.1:3422';
 const ACCOUNT = { username: 'ada', password: 'correct horse battery staple' };
@@ -96,6 +97,8 @@ const THESIS_ANSWER = [
   'Start with the background section. Everything else builds on how you define a *hit*.',
 ];
 
+const call = (id, name, args) => ({ id, name, arguments: JSON.stringify(args) });
+
 async function main() {
   const harness = await startHarness();
   const browser = await chromium.launch();
@@ -165,7 +168,7 @@ async function main() {
     const shot = async (name) => {
       await settle();
       await page.screenshot({ path: join(OUT, name), type: 'png' });
-      console.log(`wrote docs/images/${name}`);
+      console.log(`wrote assets/screenshots/${name}`);
     };
 
     // 1. A chat in light and dark.
@@ -176,7 +179,7 @@ async function main() {
     });
     await page.goto('/');
     await box.fill('Can you outline chapter 2 of my thesis on web caching?');
-    await box.press('Enter');
+    await page.getByRole('button', { name: 'Send message' }).click();
     const thread = page.getByRole('main');
     await thread.getByText('Start with the background section').waitFor();
     await page.getByRole('button', { name: 'Send message' }).waitFor();
@@ -206,7 +209,7 @@ async function main() {
     });
     await page.goto('/');
     await box.fill('What is the bitcoin price today?');
-    await box.press('Enter');
+    await page.getByRole('button', { name: 'Send message' }).click();
     await thread.getByText('Bitcoin is about $78,188 today').waitFor();
     await thread.getByRole('region', { name: 'Sources' }).waitFor();
     await page.getByRole('button', { name: 'Send message' }).waitFor();
@@ -252,7 +255,7 @@ async function main() {
     await picker.getByRole('option', { name: /Claude Haiku 5\.5/ }).click();
     await page.keyboard.press('Escape');
     await box.fill('Which storage layout should I pick for my small key-value store?');
-    await box.press('Enter');
+    await page.getByRole('button', { name: 'Send message' }).click();
     const columns = page.getByRole('group', { name: '2 answers side by side' });
     await columns.getByText('Move to a log-structured design only if').waitFor();
     await columns.getByText('recovery is just a replay of the log').waitFor();
@@ -271,7 +274,64 @@ async function main() {
     await sidebar.getByRole('link', { name: 'Key-value store design' }).waitFor();
     await shot('compare.png');
 
-    // 4. A sidebar arranged by its owner: on the right, mint accent, a smart section.
+    // 4. A small web project the model wrote, running in the preview panel.
+    await control('/enqueue', {
+      provider: 'openrouter',
+      scripts: [
+        {
+          chunks: [],
+          toolCalls: [
+            call('w1', 'write_file', { path: 'index.html', content: TIMER_HTML }),
+            call('w2', 'write_file', { path: 'style.css', content: TIMER_CSS }),
+            call('w3', 'write_file', { path: 'app.js', content: TIMER_JS }),
+          ],
+        },
+        {
+          chunkDelayMs: 120,
+          chunks: [
+            'Your study timer is ready. It counts down **25 minutes** of focus; ',
+            'press **Start** to begin and **Reset** to start over.\n\n',
+            'Finished sessions are listed under *Today* and saved with this chat, ',
+            'so they are still there next time you open the preview.',
+          ],
+        },
+      ],
+    });
+    await page.goto('/');
+    await box.fill('Make me a pomodoro study timer as a small web page');
+    await page.getByRole('button', { name: 'Send message' }).click();
+    await thread.getByText('Your study timer is ready').waitFor();
+    await page.getByRole('button', { name: 'Send message' }).waitFor();
+    await send('PATCH', `/api/conversations/${new URL(page.url()).pathname.split('/').at(-1)}`, {
+      title: 'Pomodoro study timer',
+    });
+    await page.reload();
+    await thread.getByText('Your study timer is ready').waitFor();
+    // The page's own script runs: the timer is started and its console line is shown.
+    const runPreview = async () => {
+      const panel = page.getByRole('complementary', { name: 'Preview' });
+      if (!(await panel.isVisible())) {
+        await thread.getByRole('button', { name: 'Open preview' }).click();
+      }
+      const frame = page.frameLocator('iframe[title="Preview of index.html"]');
+      await frame.getByText('Focus, 25 min').first().waitFor();
+      await frame.getByRole('button', { name: 'Start' }).click();
+      await page.waitForTimeout(3200);
+      await panel.getByText('Console').click();
+      await panel.getByText('Timer ready with 3 sessions today').waitFor();
+    };
+    await runPreview();
+    await shot('project-preview.png');
+    await settings({ appearance: { theme: 'dark' } });
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.reload();
+    await thread.getByText('Your study timer is ready').waitFor();
+    await runPreview();
+    await shot('project-preview-dark.png');
+    await page.emulateMedia({ colorScheme: 'light' });
+    await settings({ appearance: { theme: 'light' } });
+
+    // 5. A sidebar arranged by its owner: on the right, mint accent, a smart section.
     await settings({
       appearance: { accent: 'mint', density: 'compact' },
       sidebar: {
@@ -301,6 +361,13 @@ async function main() {
       .getByRole('button', { name: 'Thesis', exact: true })
       .click();
     await shot('sidebar-custom.png');
+  } catch (err) {
+    // A picture of what was on screen when a step failed, when asked for.
+    if (process.env.SHOT_DEBUG) {
+      for (const p of browser.contexts().flatMap((c) => c.pages()))
+        await p.screenshot({ path: process.env.SHOT_DEBUG }).catch(() => {});
+    }
+    throw err;
   } finally {
     await browser.close();
     await stopHarness(harness);

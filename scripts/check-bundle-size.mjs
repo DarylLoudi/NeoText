@@ -1,4 +1,4 @@
-// Fails when the JavaScript the web app loads before first render is over budget (spec §4:
+// Fails when the JavaScript the web app loads before first render is over budget (the goal is
 // 180 KB gzip). "Before first render" is the entry chunk plus everything it imports statically,
 // read from Vite's manifest, plus any script index.html loads outside the bundle (theme-boot.js).
 // Dynamic imports (settings, Shiki, KaTeX, markdown, drag and drop, ...) are listed, not counted.
@@ -8,13 +8,13 @@ import { gzipSync } from 'node:zlib';
 
 const DIST = join('apps', 'web', 'dist');
 const MANIFEST = join(DIST, '.vite', 'manifest.json');
-// The spec target is 180 KiB. The entry is at ~319 KiB (framework floor ~165 KiB plus the chat route),
+// The spec target is 180 KiB. The entry is at ~288 KiB (framework floor ~165 KiB plus the chat route),
 // so until it is cut further CI enforces a CEILING that stops it growing. Lower CEILING_KIB whenever the
 // measured size drops; reaching TARGET_KIB is tracked in CHANGELOG.md under known gaps.
 const TARGET_KIB = 180;
-// Raised from 330 in 0.2.0: agents, sub-agents and their English strings (the en locale ships with the
-// first page) added about 2 KiB after the agent UI and sub-agent card moved to lazy chunks.
-const CEILING_KIB = 335;
+// Lowered from 335 after 0.3.0: the sidebar, the effort menu, the register page, Select and Switch,
+// and the Settings and Admin strings moved to lazy chunks (334.6 -> 288.1 KiB).
+const CEILING_KIB = 290;
 const KIB = 1024;
 
 /** Manifest keys reachable from `start` through static imports, `start` included. */

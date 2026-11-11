@@ -1,6 +1,6 @@
 import { expect, type Page, test } from '@playwright/test';
 import { resetState } from './support/api';
-import { chatRequestCount, enqueue } from './support/control';
+import { chatRequestBodies, chatRequestCount, enqueue } from './support/control';
 
 test.beforeEach(async ({ request }) => {
   await resetState(request);
@@ -43,6 +43,40 @@ test('regenerate creates a branch switcher', async ({ page, request }) => {
   await thread.getByRole('button', { name: 'Previous version' }).click();
   await expect(thread.getByText('1 / 2')).toBeVisible();
   await expect(thread.getByText('First answer')).toBeVisible();
+});
+
+test('regenerating an older version asks its own model again', async ({ page, request }) => {
+  await enqueue(
+    request,
+    { chunks: ['First by alpha'] },
+    { model: 'mock/beta', chunks: ['Second by beta'] },
+    { model: 'mock/alpha', chunks: ['Third by alpha'] },
+  );
+  await page.goto('/');
+  await page
+    .getByRole('banner')
+    .getByRole('button', { name: /mock\/alpha|mock\/beta|Choose a model/ })
+    .click();
+  await page.getByRole('option', { name: 'mock/alpha' }).click();
+  await message(page).fill('Hello');
+  await message(page).press('Enter');
+  const thread = page.getByRole('main');
+  await expect(thread.getByText('First by alpha')).toBeVisible();
+  await thread.getByRole('button', { name: 'Regenerate with another model' }).click();
+  await page.getByRole('option', { name: 'mock/beta' }).click();
+  await expect(thread.getByText('Second by beta')).toBeVisible();
+
+  // Back to the first version, after a reload, and regenerate it: alpha writes it again.
+  await thread.getByRole('button', { name: 'Previous version' }).click();
+  await page.reload();
+  await expect(thread.getByText('First by alpha')).toBeVisible();
+  await thread.getByRole('button', { name: 'Regenerate', exact: true }).click();
+  await expect(thread.getByText('Third by alpha')).toBeVisible();
+  expect((await chatRequestBodies(request)).map((b) => b.model)).toEqual([
+    'mock/alpha',
+    'mock/beta',
+    'mock/alpha',
+  ]);
 });
 
 test('stop keeps partial text', async ({ page, request }) => {

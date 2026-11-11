@@ -1,4 +1,4 @@
-// Measures the server's own share of chat latency against the spec §4 budgets, on the real
+// Measures the server's own share of chat latency against its budgets, on the real
 // server (a child process, production settings and Argon2 parameters) and a mock provider in
 // this process, so both ends of every measurement read the same clock:
 //   sendToUpstreamMs  POST /api/chat sent here → the mock receives the provider request (≤ 15 ms p95)
@@ -269,7 +269,7 @@ async function main() {
       );
     }
     if (failed) {
-      console.error('\nA latency budget was missed (spec §4).');
+      console.error('\nA latency budget was missed.');
       process.exitCode = 1;
     }
   } finally {

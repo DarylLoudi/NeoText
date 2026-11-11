@@ -1,5 +1,5 @@
 import { X } from '@phosphor-icons/react';
-import { Dialog as D } from 'radix-ui';
+import * as D from 'radix-ui/dialog';
 import type { ReactNode, RefObject } from 'react';
 import { useT } from '../../lib/i18n';
 import styles from './Dialog.module.css';

@@ -1,7 +1,9 @@
-import type { MessagePart, MessagePublic } from '@neotext/shared';
-import { type ComponentType, lazy, memo, Suspense } from 'react';
+import { type MessagePart, type MessagePublic, PROJECT_TOOLS } from '@neotext/shared';
+import { type ComponentType, lazy, memo, Suspense, useCallback } from 'react';
 import { useT } from '../../lib/i18n';
 import { Button } from '../../ui';
+import { openProjectPanel } from '../project/project-panel-state';
+import { useProjectVersion } from '../project/project-versions';
 import { AttachmentView } from './AttachmentView';
 import type { CodeTheme } from './markdown/highlight';
 import { Markdown } from './markdown/Markdown';
@@ -14,6 +16,9 @@ import { ToolCallBlock } from './tools/ToolCallBlock';
 import { useCallLife } from './tools/use-call-life';
 
 type PartType = MessagePart['type'];
+
+const PROJECT_FILE_CALLS: ReadonlySet<string> = new Set(Object.values(PROJECT_TOOLS));
+const isProjectFileCall = (name: string) => PROJECT_FILE_CALLS.has(name);
 
 export interface PartProps<T extends PartType = PartType> {
   part: Extract<MessagePart, { type: T }>;
@@ -28,7 +33,10 @@ export interface PartProps<T extends PartType = PartType> {
   onCitation?: CitationHandler;
 }
 
-function TextPart({ part, live, codeTheme, linkClass, onCitation }: PartProps<'text'>) {
+function TextPart({ part, message, live, codeTheme, linkClass, onCitation }: PartProps<'text'>) {
+  const { conversationId, id, role } = message;
+  // Stable per message, so the rendered blocks are not rebuilt on every frame.
+  const onPreview = useCallback(() => openProjectPanel(conversationId, id), [conversationId, id]);
   return (
     <Markdown
       text={part.text}
@@ -36,6 +44,7 @@ function TextPart({ part, live, codeTheme, linkClass, onCitation }: PartProps<'t
       codeTheme={codeTheme}
       linkClass={linkClass}
       onCitation={onCitation}
+      {...(role === 'assistant' ? { onPreview } : {})}
     />
   );
 }
@@ -60,6 +69,16 @@ const SubagentCard = lazy(() =>
 /** The generation id comes from the live store, so a prompt can answer after a resume too. */
 function ToolPart({ part, message }: PartProps<'tool_call'>) {
   const { generationId, ended, stuck, retry } = useCallLife(part, message);
+  // A finished answer whose changes have a project row shows that row instead (AssistantMessage).
+  const folded = useProjectVersion(message.id) !== undefined;
+  if (
+    folded &&
+    isProjectFileCall(part.name) &&
+    part.status === 'ok' &&
+    message.status !== 'streaming'
+  ) {
+    return null;
+  }
   // Delegated work gets its own card; without runs to show, the generic row stands in.
   if (part.name === 'delegate_tasks') {
     // A refused second delegation has no runs and nothing worth showing.

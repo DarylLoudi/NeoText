@@ -1,11 +1,16 @@
 import type { ModelInfo } from '@neotext/shared';
 import { ArrowUp, Stop } from '@phosphor-icons/react';
-import type { ReactNode } from 'react';
+import { lazy, type ReactNode, Suspense } from 'react';
 import { useT } from '../../../lib/i18n';
 import { IconButton } from '../../../ui';
 import { CompareToggle } from '../../compare/CompareToggle';
 import styles from './ComposerToolbar.module.css';
-import { type EffortChoice, ReasoningSelect } from './ReasoningSelect';
+import type { EffortChoice } from './reasoning-effort';
+
+// The effort menu needs the select widget, which nothing else on the first page uses.
+const ReasoningSelect = lazy(() =>
+  import('./ReasoningSelect').then((m) => ({ default: m.ReasoningSelect })),
+);
 
 export interface ComposerToolbarProps {
   model: ModelInfo | null;
@@ -50,7 +55,11 @@ export function ComposerToolbar({
       {attach}
       {agent}
       <CompareToggle on={compare} onToggle={onCompare} blockedBy={compareBlockedBy} />
-      <ReasoningSelect reasoning={model?.reasoning ?? null} value={effort} onChange={onEffort} />
+      {model?.reasoning && model.reasoning.efforts.length > 0 ? (
+        <Suspense fallback={null}>
+          <ReasoningSelect reasoning={model.reasoning} value={effort} onChange={onEffort} />
+        </Suspense>
+      ) : null}
       {generating ? (
         <IconButton
           className={styles.action}

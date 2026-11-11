@@ -1,10 +1,10 @@
 import type { ToolCallPart } from '@neotext/shared';
 import { BookOpenText, CaretRight, FileText, Globe, Wrench } from '@phosphor-icons/react';
-import { useMemo } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 import { formatDuration } from '../../../lib/format';
 import { useT } from '../../../lib/i18n';
 import { Spinner } from '../../../ui';
-import { ApprovalPrompt } from './ApprovalPrompt';
+import { Elapsed } from '../Elapsed';
 import { ReconnectNotice } from './ReconnectNotice';
 import styles from './ToolCallBlock.module.css';
 import { ARGS_SHOWN_MAX, callDetail, callLabel, shownArgs, useCallName } from './tool-names';
@@ -28,6 +28,11 @@ function ToolIcon({ name }: { name: string }) {
   return <Wrench aria-hidden className={styles.icon} />;
 }
 
+// Loaded the first time a call waits for approval: only tools set to "Ask" need it.
+const ApprovalPrompt = lazy(() =>
+  import('./ApprovalPrompt').then((m) => ({ default: m.ApprovalPrompt })),
+);
+
 /**
  * One quiet row per tool call: what it did, how it ended and how long it took. Opening it shows
  * the arguments and the result. Both come from the model, web pages or tool servers, so they are
@@ -50,7 +55,9 @@ export function ToolCallBlock({
   );
   if (part.status === 'awaiting_approval' && !ended) {
     return (
-      <ApprovalPrompt call={part} generationId={generationId} stuck={stuck} onRetry={onRetry} />
+      <Suspense fallback={null}>
+        <ApprovalPrompt call={part} generationId={generationId} stuck={stuck} onRetry={onRetry} />
+      </Suspense>
     );
   }
   const unfinished = part.status === 'running' || part.status === 'awaiting_approval';
@@ -90,6 +97,9 @@ export function ToolCallBlock({
         ) : null}
         {outcome ? <span className={styles.outcome}>{outcome}</span> : null}
         {duration ? <span className={styles.duration}>{duration}</span> : null}
+        {running && part.status === 'running' ? (
+          <Elapsed since={part.startedAt} className={styles.duration} />
+        ) : null}
         <CaretRight aria-hidden className={styles.chevron} />
       </summary>
       <div className={styles.body}>
