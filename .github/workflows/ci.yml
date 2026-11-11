@@ -23,7 +23,7 @@ jobs:
       # Biome expects LF. Windows runners would otherwise check files out with CRLF.
       - name: Keep line endings as committed
         run: git config --global core.autocrlf false
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -41,7 +41,7 @@ jobs:
       # The runners are slower than a laptop, so the latency budgets in the performance spec are doubled.
       PERF_SLACK: 2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -64,7 +64,7 @@ jobs:
     name: Bundle size budget
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -78,5 +78,5 @@ jobs:
     name: Docker image builds
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build .
