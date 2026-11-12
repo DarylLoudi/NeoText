@@ -7,6 +7,8 @@ COPY package.json package-lock.json tsconfig.base.json ./
 COPY packages/shared packages/shared
 COPY apps/server apps/server
 COPY apps/web apps/web
+# The web build ends by precompressing its files with this script.
+COPY scripts/precompress.mjs scripts/precompress.mjs
 # --ignore-scripts: better-sqlite3 ships prebuilt binaries, but npm would otherwise try to compile
 # it from source, which needs a compiler that node:24-slim does not have.
 RUN npm ci --ignore-scripts

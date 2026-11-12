@@ -31,6 +31,7 @@ All notable changes to NeoText are written here. The format follows [Keep a Chan
 
 ### Fixed
 
+- **Docker.** The image builds again: the build now copies the script that precompresses the web files.
 - **Project preview.**
   - A page that moves itself with `location.href` to another page of the project opens that page; one the project lacks is named under "Missing from the project:" and the page stays.
   - Pressing Escape twice inside the page, when the page does not take it, moves focus back to the panel; one more Escape closes it. A single Escape stays with the page.
